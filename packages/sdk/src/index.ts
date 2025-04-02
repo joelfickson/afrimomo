@@ -1,11 +1,40 @@
 /**
  * Afromomo SDK - A unified interface for African payment providers
- * @module afromomo
+ * @module afrimomo
  */
 
 // Export the main SDK class and its configuration
-export { AfromomoSDK } from "@afrimomo-sdk/sdk";
-export type { SDKConfig } from "@afrimomo-sdk/sdk";
+export { AfromomoSDK } from "./sdk";
+export type { SDKConfig } from "./sdk";
+
+// Export payment service types
+export type {
+	PaymentDataInfo,
+	PayChanguInitialPayment,
+} from "./services/paychangu/types/payment";
+export type { AccountInfo } from "./services/paychangu/types/account";
+
+export type {
+	PaymentData as PawapayPaymentData,
+	InitiatePaymentResponse as PawapayInitiatePaymentResponse,
+} from "./services/pawapay/types/payment";
+
+// Export response types
+export type {
+	PayChanguPaymentResponse,
+	PayChanguRedirectAPIResponse,
+	PayChanguErrorResponse,
+} from "./services/paychangu/types/response";
+
+// Export environment constants
+export { Environment, ENVIRONMENTS, URLS } from "./config/constants";
+export type { ApiUrl } from "./config/constants";
+
+// Export config types
+export type { EnvConfig, EnvLoadOptions } from "./config/env";
+
+// Export shared types
+export type { NetworkResponse } from "./types/shared";
 
 // Export services
 export { PawaPay } from "./services/pawapay";
@@ -15,11 +44,7 @@ export { PayChangu } from "./services/paychangu";
 export type {
 	MoMoCurrency,
 	Correspondent,
-	NetworkResponse,
 } from "@afrimomo-sdk/types";
-
-// Export environment constants
-export { Environment } from "@afrimomo-sdk/config/constants";
 
 // Export SDK
 export * from "@afrimomo-sdk/sdk";
@@ -28,6 +53,6 @@ export * from "@afrimomo-sdk/sdk";
 export * from "@afrimomo-sdk/config/constants";
 
 // Export utilities
-export * from "@afrimomo-sdk/utils/network";
-export * from "@afrimomo-sdk/utils/baseService";
-export { logger } from "@afrimomo-sdk/utils/logger";
+export { NetworkManager } from "./utils/network";
+export { BaseService } from "./utils/baseService";
+export { logger } from "./utils/logger";

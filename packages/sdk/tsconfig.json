@@ -15,11 +15,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@afrimomo-sdk/*": ["src/*"],
-      "@afrimomo-sdk/config/*": ["src/config/*"],
-      "@afrimomo-sdk/services/*": ["src/services/*"],
-      "@afrimomo-sdk/types/*": ["src/types/*"],
-      "@afrimomo-sdk/utils/*": ["src/utils/*"]
+      "@afrimomo-sdk/*": ["./src/*"]
     },
     "lib": ["ES2022"],
     "rootDir": "src"

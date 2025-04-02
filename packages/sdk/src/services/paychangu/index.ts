@@ -1,8 +1,8 @@
-import { BaseService } from "@afrimomo-sdk/utils/baseService";
-import { logger } from "@afrimomo-sdk/utils/logger";
-import { PayChanguNetworkManager } from "@afrimomo-sdk/services/paychangu/network";
-import type { AccountInfo } from "@afrimomo-sdk/services/paychangu/types/account";
-import type { PaymentDataInfo, PayChanguInitialPayment } from "@afrimomo-sdk/services/paychangu/types/payment";
+import { BaseService } from "../../utils/baseService";
+import { logger } from "../../utils/logger";
+import { PayChanguNetworkManager } from "./network";
+import type { AccountInfo } from "./types/account";
+import type { PaymentDataInfo, PayChanguInitialPayment } from "./types/payment";
 import type {
 	PayChanguPaymentResponse,
 	PayChanguTransactionResponse,
