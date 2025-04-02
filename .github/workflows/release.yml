@@ -57,23 +57,33 @@ jobs:
         run: |
           cd packages/sdk
           RELEASE_TYPE="${{ github.event.inputs.release_type }}"
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          CURRENT_VERSION=$(npm view afrimomo-sdk version || echo "0.0.0")
           
           if [[ "$RELEASE_TYPE" == "beta" ]]; then
             echo "IS_BETA=true" >> $GITHUB_OUTPUT
             echo "TAG_NAME=beta" >> $GITHUB_OUTPUT
             echo "::set-output name=release_command::release:beta"
-            # For beta, append -beta.X to current version
-            NEXT_VERSION="${CURRENT_VERSION}-beta.1"
+            
+            # Extract base version and beta number if exists
+            if [[ $CURRENT_VERSION == *"-beta."* ]]; then
+              BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'-' -f1)
+              BETA_NUM=$(echo $CURRENT_VERSION | cut -d'.' -f4)
+              NEXT_BETA=$((BETA_NUM + 1))
+              NEXT_VERSION="${BASE_VERSION}-beta.${NEXT_BETA}"
+            else
+              # If not a beta version, increment patch and start beta.1
+              BASE_VERSION=$(node -p "require('semver').inc('${CURRENT_VERSION}', 'patch')")
+              NEXT_VERSION="${BASE_VERSION}-beta.1"
+            fi
           else
             echo "IS_BETA=false" >> $GITHUB_OUTPUT
             echo "TAG_NAME=latest" >> $GITHUB_OUTPUT
             echo "::set-output name=release_command::release:${RELEASE_TYPE}"
-            # Use semver.inc to calculate next version
             NEXT_VERSION=$(node -p "require('semver').inc('${CURRENT_VERSION}', '${RELEASE_TYPE}')")
           fi
           
           echo "VERSION=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "Incrementing from $CURRENT_VERSION to $NEXT_VERSION"
 
       - name: Update Package Version
         run: |
