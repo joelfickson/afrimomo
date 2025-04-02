@@ -1,7 +1,7 @@
 import { NetworkManager } from "../../../utils/network";
 import { logger } from "../../../utils/logger";
 import { PaymentData, InitiatePaymentResponse } from "../types";
-import { NetworkResponse } from "../../../types";
+import { NetworkResponse } from "../../../types/shared";
 
 export class PawapayPayments {
   private readonly baseEndpoint = "v1/widget/sessions";

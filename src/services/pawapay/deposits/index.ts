@@ -7,7 +7,7 @@ import {
   PawaPayPayoutTransaction,
   ResendCallbackResponse
 } from "../types";
-import { NetworkResponse } from "../../../types";
+import { NetworkResponse } from "../../../types/shared";
 
 export class PawapayDeposits extends BaseService {
   private readonly baseEndpoint = "/deposits";

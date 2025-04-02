@@ -1,7 +1,7 @@
-import { PayChangu } from "./services/paychangu";
-import { PawaPay } from "./services/pawapay";
-import { Environment } from "./config/constants";
-import { EnvConfig, loadEnvConfig, validatePSPConfig, loadEnvFile, EnvLoadOptions } from './config/env';
+import { PayChangu } from "@afrimomo/services/paychangu";
+import { PawaPay } from "@afrimomo/services/pawapay";
+import { Environment } from "@afrimomo/config/constants";
+import { EnvConfig, loadEnvConfig, validatePSPConfig, loadEnvFile, EnvLoadOptions } from '@afrimomo/config/env';
 
 /**
  * Configuration interface for the Afromomo SDK
