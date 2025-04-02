@@ -57,44 +57,65 @@ jobs:
         run: |
           cd packages/sdk
           RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          
+          # Get all published versions from npm
+          ALL_VERSIONS=$(npm view afrimomo-sdk versions --json || echo "[]")
           CURRENT_VERSION=$(node -p "require('./package.json').version")
+          
+          echo "Current version from package.json: $CURRENT_VERSION"
+          echo "All published versions: $ALL_VERSIONS"
           
           if [[ "$RELEASE_TYPE" == "beta" ]]; then
             echo "IS_BETA=true" >> $GITHUB_OUTPUT
             echo "TAG_NAME=beta" >> $GITHUB_OUTPUT
-            echo "::set-output name=release_command::release:beta"
             
-            # Extract base version and beta number if exists
-            if [[ $CURRENT_VERSION == *"-beta."* ]]; then
-              BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'-' -f1)
-              BETA_NUM=$(echo $CURRENT_VERSION | cut -d'.' -f4)
+            # Find latest beta version
+            LATEST_BETA=$(echo "$ALL_VERSIONS" | node -e "
+              const versions = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+              const betas = versions.filter(v => v.includes('-beta.'));
+              console.log(betas.length > 0 ? betas[betas.length - 1] : '');
+            ")
+            
+            echo "Latest published beta: $LATEST_BETA"
+            
+            if [[ -n "$LATEST_BETA" ]]; then
+              # Extract base version and beta number
+              BASE_VERSION=$(echo $LATEST_BETA | cut -d'-' -f1)
+              BETA_NUM=$(echo $LATEST_BETA | cut -d'.' -f4)
               NEXT_BETA=$((BETA_NUM + 1))
-              
-              # Keep incrementing beta until we find an unused version
-              while npm view afrimomo-sdk@${BASE_VERSION}-beta.${NEXT_BETA} version &>/dev/null; do
-                NEXT_BETA=$((NEXT_BETA + 1))
-              done
-              
               NEXT_VERSION="${BASE_VERSION}-beta.${NEXT_BETA}"
             else
-              # If not a beta version, increment patch and start beta.1
-              BASE_VERSION=$(node -p "require('semver').inc('${CURRENT_VERSION}', 'patch')")
+              # No existing beta, start from current version
+              if [[ $CURRENT_VERSION == *"-beta."* ]]; then
+                BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'-' -f1)
+              else
+                BASE_VERSION=$(node -p "require('semver').inc('${CURRENT_VERSION}', 'patch')")
+              fi
               NEXT_VERSION="${BASE_VERSION}-beta.1"
             fi
           else
             echo "IS_BETA=false" >> $GITHUB_OUTPUT
             echo "TAG_NAME=latest" >> $GITHUB_OUTPUT
-            echo "::set-output name=release_command::release:${RELEASE_TYPE}"
             
-            # Keep incrementing version until we find an unused one
-            NEXT_VERSION=$(node -p "require('semver').inc('${CURRENT_VERSION}', '${RELEASE_TYPE}')")
-            while npm view afrimomo-sdk@${NEXT_VERSION} version &>/dev/null; do
-              NEXT_VERSION=$(node -p "require('semver').inc('${NEXT_VERSION}', '${RELEASE_TYPE}')")
-            done
+            # Find latest non-beta version
+            LATEST_VERSION=$(echo "$ALL_VERSIONS" | node -e "
+              const versions = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+              const releases = versions.filter(v => !v.includes('-beta.'));
+              console.log(releases.length > 0 ? releases[releases.length - 1] : '');
+            ")
+            
+            echo "Latest published version: $LATEST_VERSION"
+            
+            if [[ -n "$LATEST_VERSION" ]]; then
+              NEXT_VERSION=$(node -p "require('semver').inc('${LATEST_VERSION}', '${RELEASE_TYPE}')")
+            else
+              # No existing version, use current version as base
+              NEXT_VERSION=$(node -p "require('semver').inc('${CURRENT_VERSION}', '${RELEASE_TYPE}')")
+            fi
           fi
           
+          echo "Will publish version: $NEXT_VERSION"
           echo "VERSION=$NEXT_VERSION" >> $GITHUB_OUTPUT
-          echo "Incrementing from $CURRENT_VERSION to $NEXT_VERSION"
           
           # Update package.json with new version
           npm version $NEXT_VERSION --no-git-tag-version --allow-same-version

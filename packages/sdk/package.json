@@ -62,10 +62,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/afrimomo.git"
+    "url": "https://github.com/joelfickson/afrimomo.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/afrimomo/issues"
+    "url": "https://github.com/joelfickson/afrimomo/issues"
   },
-  "homepage": "https://github.com/yourusername/afrimomo#readme"
+  "homepage": "https://github.com/joelfickson/afrimomo#readme"
 }
