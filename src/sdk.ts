@@ -1,175 +1,189 @@
 import { PayChangu } from "@afrimomo/services/paychangu";
 import { PawaPay } from "@afrimomo/services/pawapay";
 import { Environment } from "@afrimomo/config/constants";
-import { EnvConfig, loadEnvConfig, validatePSPConfig, loadEnvFile, EnvLoadOptions } from '@afrimomo/config/env';
+import {
+	EnvConfig,
+	loadEnvConfig,
+	validatePSPConfig,
+	loadEnvFile,
+	EnvLoadOptions,
+} from "@afrimomo/config/env";
 
 /**
  * Configuration interface for the Afromomo SDK
  */
 export interface SDKConfig {
-  /**
-   * Environment configuration options
-   */
-  env?: EnvLoadOptions;
+	/**
+	 * Environment configuration options
+	 */
+	env?: EnvLoadOptions;
 
-  /**
-   * PayChangu configuration (overrides environment variables)
-   */
-  paychangu?: {
-    /** PayChangu secret key for authentication */
-    secretKey: string;
-    /** Optional return URL */
-    returnUrl?: string;
-    /** Optional environment setting (defaults to DEVELOPMENT) */
-    environment?: Environment;
-  };
+	/**
+	 * PayChangu configuration (overrides environment variables)
+	 */
+	paychangu?: {
+		/** PayChangu secret key for authentication */
+		secretKey: string;
+		/** Optional return URL */
+		returnUrl?: string;
+		/** Optional environment setting (defaults to DEVELOPMENT) */
+		environment?: Environment;
+	};
 
-  /**
-   * PawaPay configuration (overrides environment variables)
-   */
-  pawapay?: {
-    /** PawaPay JWT token for authentication */
-    jwt: string;
-    /** Optional environment setting (defaults to DEVELOPMENT) */
-    environment?: Environment;
-  };
+	/**
+	 * PawaPay configuration (overrides environment variables)
+	 */
+	pawapay?: {
+		/** PawaPay JWT token for authentication */
+		jwt: string;
+		/** Optional environment setting (defaults to DEVELOPMENT) */
+		environment?: Environment;
+	};
 }
 
 /**
  * Main SDK class for interacting with African payment providers
  */
 export class AfromomoSDK {
-  private static _instance?: AfromomoSDK;
-  private _paychangu?: PayChangu;
-  private _pawapay?: PawaPay;
-  private readonly envConfig?: EnvConfig;
+	private static _instance?: AfromomoSDK;
+	private _paychangu?: PayChangu;
+	private _pawapay?: PawaPay;
+	private readonly envConfig?: EnvConfig;
 
-  private constructor(private readonly config: SDKConfig = {}) {
-    // Private constructor to enforce singleton pattern
-    if (config.env) {
-      loadEnvFile(config.env);
-    } else {
-      loadEnvFile();
-    }
-    this.envConfig = loadEnvConfig();
-    this.initializeServices();
-  }
+	private constructor(private readonly config: SDKConfig = {}) {
+		// Private constructor to enforce singleton pattern
+		if (config.env) {
+			loadEnvFile(config.env);
+		} else {
+			loadEnvFile();
+		}
+		this.envConfig = loadEnvConfig();
+		this.initializeServices();
+	}
 
-  /**
-   * Initialize the SDK with configuration
-   * @param config - SDK configuration options
-   * @returns The SDK instance
-   */
-  public static initialize(config: SDKConfig = {}): AfromomoSDK {
-    if (!this._instance) {
-      this._instance = new AfromomoSDK(config);
-      
-      // Log initialization status
-      const services = this._instance.getConfiguredServices();
-      if (services.length === 0) {
-        console.warn('⚠️ No payment services were configured');
-        console.log('Available services:');
-        console.log('- PayChangu (requires PAYCHANGU_SECRET_KEY)');
-        console.log('- PawaPay (requires PAWAPAY_JWT)');
-      } else {
-        console.log('✓ Initialized Afromomo SDK with services:');
-        services.forEach(service => {
-          console.log(`- ${service.charAt(0).toUpperCase() + service.slice(1)}`);
-        });
-      }
-    }
-    return this._instance;
-  }
+	/**
+	 * Initialize the SDK with configuration
+	 * @param config - SDK configuration options
+	 * @returns The SDK instance
+	 */
+	public static initialize(config: SDKConfig = {}): AfromomoSDK {
+		if (!this._instance) {
+			this._instance = new AfromomoSDK(config);
 
-  /**
-   * Get the SDK instance
-   * @throws Error if SDK is not initialized
-   */
-  public static getInstance(): AfromomoSDK {
-    if (!this._instance) {
-      throw new Error('SDK not initialized. Call AfromomoSDK.initialize() first');
-    }
-    return this._instance;
-  }
+			// Log initialization status
+			const services = this._instance.getConfiguredServices();
+			if (services.length === 0) {
+				console.warn("⚠️ No payment services were configured");
+				console.log("Available services:");
+				console.log("- PayChangu (requires PAYCHANGU_SECRET_KEY)");
+				console.log("- PawaPay (requires PAWAPAY_JWT)");
+			} else {
+				console.log("✓ Initialized Afromomo SDK with services:");
+				services.forEach((service) => {
+					console.log(
+						`- ${service.charAt(0).toUpperCase() + service.slice(1)}`,
+					);
+				});
+			}
+		}
+		return this._instance;
+	}
 
-  /**
-   * Access the PayChangu payment service
-   * @throws Error if PayChangu is not configured
-   */
-  get paychangu(): PayChangu {
-    if (!this._paychangu) {
-      throw new Error("PayChangu service is not configured. Please provide PayChangu credentials in the SDK config or environment variables.");
-    }
-    return this._paychangu;
-  }
+	/**
+	 * Get the SDK instance
+	 * @throws Error if SDK is not initialized
+	 */
+	public static getInstance(): AfromomoSDK {
+		if (!this._instance) {
+			throw new Error(
+				"SDK not initialized. Call AfromomoSDK.initialize() first",
+			);
+		}
+		return this._instance;
+	}
 
-  /**
-   * Access the PawaPay payment service
-   * @throws Error if PawaPay is not configured
-   */
-  get pawapay(): PawaPay {
-    if (!this._pawapay) {
-      throw new Error("PawaPay service is not configured. Please provide PawaPay credentials in the SDK config or environment variables.");
-    }
-    return this._pawapay;
-  }
+	/**
+	 * Access the PayChangu payment service
+	 * @throws Error if PayChangu is not configured
+	 */
+	get paychangu(): PayChangu {
+		if (!this._paychangu) {
+			throw new Error(
+				"PayChangu service is not configured. Please provide PayChangu credentials in the SDK config or environment variables.",
+			);
+		}
+		return this._paychangu;
+	}
 
-  /**
-   * Checks if a specific payment service is configured
-   * @param service - The name of the service to check
-   * @returns boolean indicating if the service is configured
-   */
-  isServiceConfigured(service: 'paychangu' | 'pawapay'): boolean {
-    switch (service) {
-      case 'paychangu':
-        return !!this._paychangu;
-      case 'pawapay':
-        return !!this._pawapay;
-      default:
-        return false;
-    }
-  }
+	/**
+	 * Access the PawaPay payment service
+	 * @throws Error if PawaPay is not configured
+	 */
+	get pawapay(): PawaPay {
+		if (!this._pawapay) {
+			throw new Error(
+				"PawaPay service is not configured. Please provide PawaPay credentials in the SDK config or environment variables.",
+			);
+		}
+		return this._pawapay;
+	}
 
-  /**
-   * Gets a list of configured payment services
-   * @returns Array of configured service names
-   */
-  getConfiguredServices(): ('paychangu' | 'pawapay')[] {
-    const services: ('paychangu' | 'pawapay')[] = [];
-    if (this._paychangu) services.push('paychangu');
-    if (this._pawapay) services.push('pawapay');
-    return services;
-  }
+	/**
+	 * Checks if a specific payment service is configured
+	 * @param service - The name of the service to check
+	 * @returns boolean indicating if the service is configured
+	 */
+	isServiceConfigured(service: "paychangu" | "pawapay"): boolean {
+		switch (service) {
+			case "paychangu":
+				return !!this._paychangu;
+			case "pawapay":
+				return !!this._pawapay;
+			default:
+				return false;
+		}
+	}
 
-  private initializeServices(): void {
-    this.initializeFromEnv();
-    this.initializeFromConfig();
-  }
+	/**
+	 * Gets a list of configured payment services
+	 * @returns Array of configured service names
+	 */
+	getConfiguredServices(): ("paychangu" | "pawapay")[] {
+		const services: ("paychangu" | "pawapay")[] = [];
+		if (this._paychangu) services.push("paychangu");
+		if (this._pawapay) services.push("pawapay");
+		return services;
+	}
 
-  private initializeFromEnv(): void {
-    if (!this.envConfig) return;
+	private initializeServices(): void {
+		this.initializeFromEnv();
+		this.initializeFromConfig();
+	}
 
-    // Initialize PayChangu if configured
-    const paychanguValidation = validatePSPConfig(this.envConfig, 'paychangu');
-    if (paychanguValidation.isValid) {
-      this._paychangu = new PayChangu(this.envConfig.PAYCHANGU_SECRET_KEY);
-    }
+	private initializeFromEnv(): void {
+		if (!this.envConfig) return;
 
-    // Initialize PawaPay if configured
-    const pawapayValidation = validatePSPConfig(this.envConfig, 'pawapay');
-    if (pawapayValidation.isValid) {
-      this._pawapay = new PawaPay(this.envConfig.PAWAPAY_JWT);
-    }
-  }
+		// Initialize PayChangu if configured
+		const paychanguValidation = validatePSPConfig(this.envConfig, "paychangu");
+		if (paychanguValidation.isValid) {
+			this._paychangu = new PayChangu(this.envConfig.PAYCHANGU_SECRET_KEY);
+		}
 
-  private initializeFromConfig(): void {
-    // Override with direct configuration if provided
-    if (this.config.paychangu?.secretKey) {
-      this._paychangu = new PayChangu(this.config.paychangu.secretKey);
-    }
+		// Initialize PawaPay if configured
+		const pawapayValidation = validatePSPConfig(this.envConfig, "pawapay");
+		if (pawapayValidation.isValid) {
+			this._pawapay = new PawaPay(this.envConfig.PAWAPAY_JWT);
+		}
+	}
 
-    if (this.config.pawapay?.jwt) {
-      this._pawapay = new PawaPay(this.config.pawapay.jwt);
-    }
-  }
+	private initializeFromConfig(): void {
+		// Override with direct configuration if provided
+		if (this.config.paychangu?.secretKey) {
+			this._paychangu = new PayChangu(this.config.paychangu.secretKey);
+		}
+
+		if (this.config.pawapay?.jwt) {
+			this._pawapay = new PawaPay(this.config.pawapay.jwt);
+		}
+	}
 }

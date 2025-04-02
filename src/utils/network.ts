@@ -4,66 +4,68 @@ import { NetworkResponse } from "../types";
 import { logger } from "./logger";
 
 export class NetworkManager {
-  private readonly axiosInstance: AxiosInstance;
+	private readonly axiosInstance: AxiosInstance;
 
-  constructor(jwt: string, environment: Environment = "DEVELOPMENT") {
-    const baseURL = environment === ENVIRONMENTS.PRODUCTION
-      ? URLS.PRODUCTION
-      : URLS.SANDBOX;
+	constructor(jwt: string, environment: Environment = "DEVELOPMENT") {
+		const baseURL =
+			environment === ENVIRONMENTS.PRODUCTION ? URLS.PRODUCTION : URLS.SANDBOX;
 
-    logger.info("Initializing NetworkManager", {
-      environment,
-      baseURL
-    });
+		logger.info("Initializing NetworkManager", {
+			environment,
+			baseURL,
+		});
 
-    const headers = {} as AxiosRequestHeaders;
+		const headers = {} as AxiosRequestHeaders;
 
-    if (jwt) {
-      headers.Authorization = `Bearer ${jwt}`;
-    }
+		if (jwt) {
+			headers.Authorization = `Bearer ${jwt}`;
+		}
 
-    this.axiosInstance = axios.create({
-      baseURL,
-      headers
-    });
+		this.axiosInstance = axios.create({
+			baseURL,
+			headers,
+		});
 
-    this.setupInterceptors();
-  }
+		this.setupInterceptors();
+	}
 
-  public getInstance(): AxiosInstance {
-    return this.axiosInstance;
-  }
+	public getInstance(): AxiosInstance {
+		return this.axiosInstance;
+	}
 
-  public handleErrors(error: unknown): NetworkResponse {
-    logger.error("Error occurred", error);
+	public handleErrors(error: unknown): NetworkResponse {
+		logger.error("Error occurred", error);
 
-    let errorMessage = "An unknown error occurred";
-    let statusCode = 500;
-    let errorObject = "{}";
+		let errorMessage = "An unknown error occurred";
+		let statusCode = 500;
+		let errorObject = "{}";
 
-    if (axios.isAxiosError(error) && error.response) {
-      statusCode = error.response.status;
+		if (axios.isAxiosError(error) && error.response) {
+			statusCode = error.response.status;
 
-      try {
-        const data = error.response.data as { message?: string; error?: string; };
-        errorMessage = data.message || data.error || errorMessage;
-        errorObject = JSON.stringify(data);
-      } catch {
-        errorMessage = "Failed to parse error response";
-      }
-    }
+			try {
+				const data = error.response.data as {
+					message?: string;
+					error?: string;
+				};
+				errorMessage = data.message || data.error || errorMessage;
+				errorObject = JSON.stringify(data);
+			} catch {
+				errorMessage = "Failed to parse error response";
+			}
+		}
 
-    return {
-      errorMessage,
-      statusCode,
-      errorObject
-    };
-  }
+		return {
+			errorMessage,
+			statusCode,
+			errorObject,
+		};
+	}
 
-  private setupInterceptors(): void {
-    this.axiosInstance.interceptors.response.use(
-      (response) => response,
-      (error) => Promise.reject(error)
-    );
-  }
-} 
+	private setupInterceptors(): void {
+		this.axiosInstance.interceptors.response.use(
+			(response) => response,
+			(error) => Promise.reject(error),
+		);
+	}
+}

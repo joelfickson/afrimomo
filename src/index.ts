@@ -18,8 +18,8 @@ export * from "@afrimomo/types";
 export { Environment } from "@afrimomo/config/constants";
 
 // Export SDK
-export * from './sdk';
-export * from './types';
+export * from "./sdk";
+export * from "./types";
 
 // Export config
 export * from "./config/constants";
