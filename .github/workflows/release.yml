@@ -65,11 +65,9 @@ jobs:
           
           echo "VERSION=$NEXT_VERSION" >> $GITHUB_OUTPUT
 
-      # Create npm organization if it doesn't exist
-      - name: Create npm Organization
+      - name: Setup npm
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          npm org ls afrimomo || npm org create afrimomo "Afrimomo SDK" --public || true
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
