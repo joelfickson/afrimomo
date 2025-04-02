@@ -57,7 +57,7 @@ jobs:
         run: |
           cd packages/sdk
           RELEASE_TYPE="${{ github.event.inputs.release_type }}"
-          CURRENT_VERSION=$(npm view afrimomo-sdk version || echo "0.0.0")
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
           
           if [[ "$RELEASE_TYPE" == "beta" ]]; then
             echo "IS_BETA=true" >> $GITHUB_OUTPUT
