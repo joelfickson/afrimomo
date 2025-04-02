@@ -4,12 +4,25 @@
     "private": true,
     "scripts": {
         "start": "ts-node src/index.ts",
-        "dev": "ts-node-dev --respawn src/index.ts"
+        "dev": "ts-node-dev --respawn src/index.ts",
+        "build": "tsc",
+        "lint": "biome check .",
+        "format": "biome format --write ."
     },
     "dependencies": {
-        "@afrimomo/sdk": "workspace:*"
+        "@afrimomo/sdk": "workspace:*",
+        "express": "^4.18.2",
+        "cors": "^2.8.5",
+        "helmet": "^7.1.0",
+        "dotenv": "^16.4.5",
+        "morgan": "^1.10.0"
     },
     "devDependencies": {
+        "@biomejs/biome": "1.5.3",
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.21",
+        "@types/morgan": "^1.9.9",
+        "@types/node": "^20.11.24",
         "ts-node": "^10.9.2",
         "ts-node-dev": "^2.0.0",
         "typescript": "^5.3.3"
