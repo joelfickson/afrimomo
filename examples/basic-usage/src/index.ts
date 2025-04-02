@@ -1,4 +1,4 @@
-import { AfromomoSDK, Environment } from '@afrimomo/sdk';
+import { AfromomoSDK, type Environment } from '@afrimomo/sdk';
 
 async function main() {
   // Initialize the SDK
@@ -9,8 +9,8 @@ async function main() {
     pawapay: {
       jwt: process.env.PAWAPAY_JWT || 'your-jwt',
     },
-    environment: Environment.DEVELOPMENT
-    
+    environment: "DEVELOPMENT" as Environment
+
   });
 
   try {
