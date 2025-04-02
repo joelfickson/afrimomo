@@ -1,5 +1,5 @@
 {
-    "name": "@afrimomo/example-basic",
+    "name": "afrimomo-example-basic",
     "version": "1.0.0",
     "private": true,
     "scripts": {
@@ -10,7 +10,7 @@
         "format": "biome format --write ."
     },
     "dependencies": {
-        "@afrimomo/sdk": "workspace:*",
+        "afrimomo-sdk": "workspace:*",
         "express": "^4.18.2",
         "cors": "^2.8.5",
         "helmet": "^7.1.0",

@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { paychanguRouter } from './routes/paychangu';
 import { errorHandler } from './middleware/error';
-import { AfromomoSDK } from '@afrimomo/sdk';
+import { AfromomoSDK } from 'afrimomo-sdk';
 import { pawapayRouter } from './routes/pawapay';
 
 // Initialize the SDK
