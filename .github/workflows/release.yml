@@ -39,9 +39,10 @@ jobs:
         run: |
           cd packages/sdk
           pnpm install
-          git add -f packages/sdk/pnpm-lock.yaml
+          git add -f pnpm-lock.yaml
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
+          cd ../..
           git commit -m "chore: add sdk pnpm-lock.yaml" || true
 
       - name: Setup Release Environment
