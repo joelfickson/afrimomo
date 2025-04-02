@@ -3,15 +3,26 @@
   "version": "0.0.1",
   "description": "A unified SDK for African payment providers",
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf dist && tsc",
     "dev": "tsc --watch",
     "clean": "rimraf dist",
     "format": "biome format --write .",
     "lint": "biome check .",
     "lint:fix": "biome check --apply .",
-    "test": "jest"
+    "test": "jest",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "payment",
@@ -42,6 +53,7 @@
   },
   "files": [
     "dist",
+    "dist/**/*.d.ts",
     "LICENSE",
     "README.md"
   ],
