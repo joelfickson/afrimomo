@@ -21,22 +21,16 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      packages: write
     steps:
-      - name: Checkout
+      - name: Checkout Repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version: 18
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install pnpm
@@ -45,51 +39,40 @@ jobs:
           version: 8
           run_install: false
 
-      - name: Get pnpm store directory
-        shell: bash
+      - name: Install Dependencies
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          pnpm install
+          git add pnpm-lock.yaml
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git commit -m "chore: add pnpm-lock.yaml" || true
 
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Set release type
-        id: release_type
+      - name: Setup Release Environment
+        id: setup
         run: |
-          if [[ ${{ github.ref }} =~ ^refs/heads/beta/ ]]; then
-            echo "type=beta" >> $GITHUB_OUTPUT
-            echo "tag=beta" >> $GITHUB_OUTPUT
-          elif [[ ${{ github.ref }} =~ ^refs/heads/release/ ]]; then
-            echo "type=release" >> $GITHUB_OUTPUT
-            echo "tag=latest" >> $GITHUB_OUTPUT
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          VERSION="${{ github.event.inputs.version }}"
+          
+          if [[ "$RELEASE_TYPE" == "beta" ]]; then
+            echo "IS_BETA=true" >> $GITHUB_OUTPUT
+            echo "TAG_NAME=beta" >> $GITHUB_OUTPUT
+            echo "::set-output name=release_command::release:beta"
           else
-            echo "type=development" >> $GITHUB_OUTPUT
-            echo "tag=dev" >> $GITHUB_OUTPUT
+            echo "IS_BETA=false" >> $GITHUB_OUTPUT
+            echo "TAG_NAME=latest" >> $GITHUB_OUTPUT
+            echo "::set-output name=release_command::release:${RELEASE_TYPE}"
           fi
+          
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm release
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
-          version: |
-            if [ "${{ steps.release_type.outputs.type }}" = "beta" ]; then
-              pnpm changeset pre enter beta
-              pnpm changeset version
-              pnpm changeset pre exit
-            else
-              pnpm changeset version
-            fi
+          version: pnpm run ${{ steps.setup.outputs.release_command }}
+          commit: "chore: release ${{ steps.setup.outputs.VERSION }}"
+          title: "chore: release ${{ steps.setup.outputs.VERSION }}"
+          publish: pnpm run publish:${{ steps.setup.outputs.IS_BETA == 'true' && 'beta' || 'release' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -97,29 +80,18 @@ jobs:
       - name: Tag and Release
         if: steps.changesets.outputs.published == 'true'
         run: |
-          VERSION=$(node -p "require('./packages/sdk/package.json').version")
-          RELEASE_TYPE=${{ steps.release_type.outputs.type }}
-          TAG_NAME="v${VERSION}"
+          git tag v${{ steps.setup.outputs.VERSION }}
+          git push origin v${{ steps.setup.outputs.VERSION }}
           
-          if [ "$RELEASE_TYPE" = "beta" ]; then
-            TAG_NAME="v${VERSION}-beta"
-          fi
-          
-          git tag -a $TAG_NAME -m "Release $TAG_NAME"
-          git push origin $TAG_NAME
-          
-          if [ "$RELEASE_TYPE" = "release" ]; then
-            gh release create $TAG_NAME \
-              --title "Release $TAG_NAME" \
-              --notes-file CHANGELOG.md \
-              --draft=false \
-              --prerelease=false
-          elif [ "$RELEASE_TYPE" = "beta" ]; then
-            gh release create $TAG_NAME \
-              --title "Beta Release $TAG_NAME" \
-              --notes-file CHANGELOG.md \
-              --draft=false \
-              --prerelease=true
+          if [[ "${{ steps.setup.outputs.IS_BETA }}" == "true" ]]; then
+            gh release create v${{ steps.setup.outputs.VERSION }} \
+              --prerelease \
+              --title "Release v${{ steps.setup.outputs.VERSION }}" \
+              --notes "Beta release v${{ steps.setup.outputs.VERSION }}"
+          else
+            gh release create v${{ steps.setup.outputs.VERSION }} \
+              --title "Release v${{ steps.setup.outputs.VERSION }}" \
+              --generate-notes
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
