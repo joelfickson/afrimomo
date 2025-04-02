@@ -69,6 +69,12 @@ jobs:
               BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'-' -f1)
               BETA_NUM=$(echo $CURRENT_VERSION | cut -d'.' -f4)
               NEXT_BETA=$((BETA_NUM + 1))
+              
+              # Keep incrementing beta until we find an unused version
+              while npm view afrimomo-sdk@${BASE_VERSION}-beta.${NEXT_BETA} version &>/dev/null; do
+                NEXT_BETA=$((NEXT_BETA + 1))
+              done
+              
               NEXT_VERSION="${BASE_VERSION}-beta.${NEXT_BETA}"
             else
               # If not a beta version, increment patch and start beta.1
@@ -79,18 +85,21 @@ jobs:
             echo "IS_BETA=false" >> $GITHUB_OUTPUT
             echo "TAG_NAME=latest" >> $GITHUB_OUTPUT
             echo "::set-output name=release_command::release:${RELEASE_TYPE}"
+            
+            # Keep incrementing version until we find an unused one
             NEXT_VERSION=$(node -p "require('semver').inc('${CURRENT_VERSION}', '${RELEASE_TYPE}')")
+            while npm view afrimomo-sdk@${NEXT_VERSION} version &>/dev/null; do
+              NEXT_VERSION=$(node -p "require('semver').inc('${NEXT_VERSION}', '${RELEASE_TYPE}')")
+            done
           fi
           
           echo "VERSION=$NEXT_VERSION" >> $GITHUB_OUTPUT
           echo "Incrementing from $CURRENT_VERSION to $NEXT_VERSION"
-
-      - name: Update Package Version
-        run: |
-          cd packages/sdk
-          npm version ${{ steps.setup.outputs.VERSION }} --no-git-tag-version
+          
+          # Update package.json with new version
+          npm version $NEXT_VERSION --no-git-tag-version --allow-same-version
           git add package.json
-          git commit -m "chore: bump version to ${{ steps.setup.outputs.VERSION }}" || true
+          git commit -m "chore: bump version to $NEXT_VERSION" || true
 
       - name: Build SDK
         run: |
