@@ -1,4 +1,4 @@
-import type { MoMoCurrency, Correspondent } from "../../../types";
+import type { MoMoCurrency, Correspondent } from "@afrimomo-sdk/types";
 
 export interface PaymentData {
 	deposit_id: string;

@@ -3,7 +3,7 @@ export interface PayChanguRedirectAPIResponse {
 	message: string;
 	data: {
 		redirectUrl: string;
-		[key: string]: string | number | boolean | null; // More specific than any
+		[key: string]: string | number | boolean | null; 
 	};
 }
 
@@ -20,7 +20,7 @@ export interface PayChanguVerificationResponse {
 		amount: string;
 		currency: string;
 		tx_ref: string;
-		[key: string]: string | number | boolean | null; // More specific than any
+		[key: string]: string | number | boolean | null;
 	};
 }
 
@@ -33,7 +33,7 @@ export interface PayChanguPaymentResponse {
 	type: "success" | "error";
 	payload: {
 		InitialPaymentData?: import("./payment").PaymentDataInfo;
-		SpecialPaymentData?: Record<string, unknown>; // More specific than any
+		SpecialPaymentData?: Record<string, unknown>; 
 		HasError: boolean;
 		StackTraceError?: unknown;
 	};

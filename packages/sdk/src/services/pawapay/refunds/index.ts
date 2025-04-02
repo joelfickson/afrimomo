@@ -1,8 +1,8 @@
-import type { NetworkManager } from "../../../utils/network";
-import { BaseService } from "../../../utils/baseService";
-import { logger } from "../../../utils/logger";
-import type { NetworkResponse } from "../../../types";
-import type { RefundResponse, RefundTransaction } from "../types/refund";
+import type { NetworkManager } from "@afrimomo-sdk/utils/network";
+import { BaseService } from "@afrimomo-sdk/utils/baseService";
+import { logger } from "@afrimomo-sdk/utils/logger";
+import type { NetworkResponse } from "@afrimomo-sdk/types";
+import type { RefundResponse, RefundTransaction } from "@afrimomo-sdk/services/pawapay/types/refund";
 
 export class PawapayRefunds extends BaseService {
 	private readonly baseEndpoint = "/refunds";

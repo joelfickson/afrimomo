@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestHeaders } from "axios";
-import { URLS, type Environment, ENVIRONMENTS } from "../config/constants";
-import type { NetworkResponse } from "../types";
-import { logger } from "./logger";
+import { URLS, type Environment, ENVIRONMENTS } from "@afrimomo-sdk/config/constants";
+import type { NetworkResponse } from "@afrimomo-sdk/types";
+import { logger } from "@afrimomo-sdk/utils/logger";
 
 export class NetworkManager {
 	private readonly axiosInstance: AxiosInstance;

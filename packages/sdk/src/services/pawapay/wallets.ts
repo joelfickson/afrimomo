@@ -1,5 +1,5 @@
-import type { WalletBalancesResponse } from "./types/wallet";
-import type { PawapayNetwork } from "./network";
+import type { WalletBalancesResponse } from "@afrimomo-sdk/services/pawapay/types/wallet";
+import type { PawapayNetwork } from "@afrimomo-sdk/services/pawapay/network";
 
 /**
  * Service for managing PawaPay wallet operations

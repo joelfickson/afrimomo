@@ -15,11 +15,11 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@afrimomo/*": ["src/*"],
-      "@afrimomo/config/*": ["src/config/*"],
-      "@afrimomo/services/*": ["src/services/*"],
-      "@afrimomo/types/*": ["src/types/*"],
-      "@afrimomo/utils/*": ["src/utils/*"]
+      "@afrimomo-sdk/*": ["src/*"],
+      "@afrimomo-sdk/config/*": ["src/config/*"],
+      "@afrimomo-sdk/services/*": ["src/services/*"],
+      "@afrimomo-sdk/types/*": ["src/types/*"],
+      "@afrimomo-sdk/utils/*": ["src/utils/*"]
     },
     "lib": ["ES2022"],
     "rootDir": "src"

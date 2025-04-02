@@ -1,5 +1,5 @@
-import type { Environment } from "../../config/constants";
-import { NetworkManager } from "../../utils/network";
+import type { Environment } from "@afrimomo-sdk/config/constants";
+import { NetworkManager } from "@afrimomo-sdk/utils/network";
 
 /**
  * Network manager for PawaPay API calls

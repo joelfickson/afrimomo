@@ -1,10 +1,10 @@
-import { PawapayDeposits } from "./deposits";
-import { PawapayPayments } from "./payments";
-import { PawapayPayouts } from "./payouts";
-import { PawapayRefunds } from "./refunds";
-import { PawapayWallets } from "./wallets";
-import type { Environment } from "@afrimomo/config/constants";
-import { PawapayNetwork } from "./network";
+import { PawapayDeposits } from "@afrimomo-sdk/services/pawapay/deposits";
+import { PawapayPayments } from "@afrimomo-sdk/services/pawapay/payments";
+import { PawapayPayouts } from "@afrimomo-sdk/services/pawapay/payouts";
+import { PawapayRefunds } from "@afrimomo-sdk/services/pawapay/refunds";
+import { PawapayWallets } from "@afrimomo-sdk/services/pawapay/wallets";
+import type { Environment } from "@afrimomo-sdk/config/constants";
+import { PawapayNetwork } from "@afrimomo-sdk/services/pawapay/network";
 
 export * from "./types";
 

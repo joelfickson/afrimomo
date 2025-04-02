@@ -1,6 +1,6 @@
-import { PayChangu } from "@afrimomo/services/paychangu";
-import { PawaPay } from "@afrimomo/services/pawapay";
-import type { Environment } from "./config/constants";
+import { PayChangu } from "@afrimomo-sdk/services/paychangu";
+import { PawaPay } from "@afrimomo-sdk/services/pawapay";
+import type { Environment } from "@afrimomo-sdk/config/constants";
 import {
 	type EnvConfig,
 	loadEnvConfig,
