@@ -7,19 +7,22 @@
 export { AfromomoSDK } from "@afrimomo/sdk";
 export type { SDKConfig } from "@afrimomo/sdk";
 
-// Export provider-specific types
-export * from "@afrimomo/services/pawapay/types";
-export * from "@afrimomo/services/paychangu/types";
+// Export services
+export { PawaPay } from "./services/pawapay";
+export { PayChangu } from "./services/paychangu";
 
-// Export shared types
-export * from "@afrimomo/types";
+// Export primary types (these take precedence)
+export type {
+	MoMoCurrency,
+	Correspondent,
+	NetworkResponse,
+} from "./types";
 
 // Export environment constants
-export { Environment } from "@afrimomo/config/constants";
+export { Environment } from "./config/constants";
 
 // Export SDK
 export * from "./sdk";
-export * from "./types";
 
 // Export config
 export * from "./config/constants";
@@ -28,6 +31,3 @@ export * from "./config/constants";
 export * from "./utils/network";
 export * from "./utils/baseService";
 export { logger } from "./utils/logger";
-
-// Export services
-export * from "./services/pawapay";

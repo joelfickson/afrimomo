@@ -1,11 +1,11 @@
-import axios, { AxiosInstance, AxiosRequestHeaders } from "axios";
+import axios, { type AxiosInstance, type AxiosRequestHeaders } from "axios";
 import { logger } from "../../utils/logger";
-import {
-	PayChanguInitialPayment,
+import type { PayChanguInitialPayment } from "./types/payment";
+import type {
 	PayChanguRedirectAPIResponse,
 	PayChanguErrorResponse,
 	PayChanguVerificationResponse,
-} from "./types";
+} from "./types/response";
 
 export class PayChanguNetworkManager {
 	private readonly axiosInstance: AxiosInstance;

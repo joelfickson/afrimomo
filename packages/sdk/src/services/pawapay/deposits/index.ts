@@ -1,13 +1,13 @@
-import { NetworkManager } from "../../../utils/network";
 import { BaseService } from "../../../utils/baseService";
 import { logger } from "../../../utils/logger";
-import {
-	PayoutTransaction,
-	PaymentTransaction,
+import type { NetworkManager } from "../../../utils/network";
+import type { PaymentTransaction } from "../types/payment";
+import type {
 	PawaPayPayoutTransaction,
 	ResendCallbackResponse,
-} from "../types";
-import { NetworkResponse } from "../../../types/shared";
+	PayoutTransaction,
+} from "../types/payout";
+import type { NetworkResponse } from "../../../types";
 
 export class PawapayDeposits extends BaseService {
 	private readonly baseEndpoint = "/deposits";

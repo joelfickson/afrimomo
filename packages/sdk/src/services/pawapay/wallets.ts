@@ -1,5 +1,5 @@
-import { PawapayNetwork } from "./network";
-import { WalletBalancesResponse } from "./types";
+import type { WalletBalancesResponse } from "./types/wallet";
+import type { PawapayNetwork } from "./network";
 
 /**
  * Service for managing PawaPay wallet operations

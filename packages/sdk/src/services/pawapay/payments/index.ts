@@ -1,7 +1,7 @@
-import { NetworkManager } from "../../../utils/network";
+import type { NetworkManager } from "../../../utils/network";
 import { logger } from "../../../utils/logger";
-import { PaymentData, InitiatePaymentResponse } from "../types";
-import { NetworkResponse } from "../../../types/shared";
+import type { PaymentData, InitiatePaymentResponse } from "../types/payment";
+import type { NetworkResponse } from "../../../types";
 
 export class PawapayPayments {
 	private readonly baseEndpoint = "v1/widget/sessions";
@@ -40,7 +40,8 @@ export class PawapayPayments {
 			} as InitiatePaymentResponse;
 		} catch (error: unknown) {
 			logger.error("Payment initiation failed:", error);
-			return this.networkHandler.handleErrors(error);
+			const errorResponse = this.networkHandler.handleErrors(error);
+			return errorResponse;
 		}
 	}
 }

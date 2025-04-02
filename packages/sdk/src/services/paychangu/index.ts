@@ -1,13 +1,12 @@
 import { BaseService } from "../../utils/baseService";
 import { logger } from "../../utils/logger";
 import { PayChanguNetworkManager } from "./network";
-import {
-	PaymentDataInfo,
-	AccountInfo,
+import type { AccountInfo } from "./types/account";
+import type { PaymentDataInfo, PayChanguInitialPayment } from "./types/payment";
+import type {
 	PayChanguPaymentResponse,
 	PayChanguTransactionResponse,
-	PayChanguInitialPayment,
-} from "./types";
+} from "./types/response";
 
 export * from "./types";
 

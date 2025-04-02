@@ -1,8 +1,8 @@
-import { NetworkManager } from "../../../utils/network";
+import type { NetworkManager } from "../../../utils/network";
 import { BaseService } from "../../../utils/baseService";
 import { logger } from "../../../utils/logger";
-import { NetworkResponse } from "../../../types";
-import { RefundResponse, RefundTransaction } from "../types";
+import type { NetworkResponse } from "../../../types";
+import type { RefundResponse, RefundTransaction } from "../types/refund";
 
 export class PawapayRefunds extends BaseService {
 	private readonly baseEndpoint = "/refunds";

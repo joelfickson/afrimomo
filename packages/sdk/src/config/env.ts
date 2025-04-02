@@ -1,6 +1,5 @@
-import { Environment } from "./constants";
+import type { Environment } from "./constants";
 import * as dotenv from "dotenv";
-import { join } from "path";
 
 /**
  * Environment variable configuration interface

@@ -3,7 +3,7 @@ import { PawapayPayments } from "./payments";
 import { PawapayPayouts } from "./payouts";
 import { PawapayRefunds } from "./refunds";
 import { PawapayWallets } from "./wallets";
-import { Environment } from "../../config/constants";
+import type { Environment } from "@afrimomo/config/constants";
 import { PawapayNetwork } from "./network";
 
 export * from "./types";

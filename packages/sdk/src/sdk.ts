@@ -1,13 +1,13 @@
 import { PayChangu } from "@afrimomo/services/paychangu";
 import { PawaPay } from "@afrimomo/services/pawapay";
-import { Environment } from "@afrimomo/config/constants";
+import type { Environment } from "./config/constants";
 import {
-	EnvConfig,
+	type EnvConfig,
 	loadEnvConfig,
 	validatePSPConfig,
 	loadEnvFile,
-	EnvLoadOptions,
-} from "@afrimomo/config/env";
+	type EnvLoadOptions,
+} from "./config/env";
 
 /**
  * Configuration interface for the Afromomo SDK
@@ -45,7 +45,7 @@ export interface SDKConfig {
  * Main SDK class for interacting with African payment providers
  */
 export class AfromomoSDK {
-	private static _instance?: AfromomoSDK;
+	private static instance?: AfromomoSDK;
 	private _paychangu?: PayChangu;
 	private _pawapay?: PawaPay;
 	private readonly envConfig?: EnvConfig;
@@ -67,11 +67,11 @@ export class AfromomoSDK {
 	 * @returns The SDK instance
 	 */
 	public static initialize(config: SDKConfig = {}): AfromomoSDK {
-		if (!this._instance) {
-			this._instance = new AfromomoSDK(config);
+		if (!AfromomoSDK.instance) {
+			AfromomoSDK.instance = new AfromomoSDK(config);
 
 			// Log initialization status
-			const services = this._instance.getConfiguredServices();
+			const services = AfromomoSDK.instance.getConfiguredServices();
 			if (services.length === 0) {
 				console.warn("⚠️ No payment services were configured");
 				console.log("Available services:");
@@ -79,14 +79,14 @@ export class AfromomoSDK {
 				console.log("- PawaPay (requires PAWAPAY_JWT)");
 			} else {
 				console.log("✓ Initialized Afromomo SDK with services:");
-				services.forEach((service) => {
+				for (const service of services) {
 					console.log(
 						`- ${service.charAt(0).toUpperCase() + service.slice(1)}`,
 					);
-				});
+				}
 			}
 		}
-		return this._instance;
+		return AfromomoSDK.instance;
 	}
 
 	/**
@@ -94,12 +94,12 @@ export class AfromomoSDK {
 	 * @throws Error if SDK is not initialized
 	 */
 	public static getInstance(): AfromomoSDK {
-		if (!this._instance) {
+		if (!AfromomoSDK.instance) {
 			throw new Error(
 				"SDK not initialized. Call AfromomoSDK.initialize() first",
 			);
 		}
-		return this._instance;
+		return AfromomoSDK.instance;
 	}
 
 	/**

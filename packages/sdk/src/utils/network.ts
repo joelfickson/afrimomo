@@ -1,6 +1,6 @@
-import axios, { AxiosInstance, AxiosRequestHeaders } from "axios";
-import { URLS, Environment, ENVIRONMENTS } from "../config/constants";
-import { NetworkResponse } from "../types";
+import axios, { type AxiosInstance, type AxiosRequestHeaders } from "axios";
+import { URLS, type Environment, ENVIRONMENTS } from "../config/constants";
+import type { NetworkResponse } from "../types";
 import { logger } from "./logger";
 
 export class NetworkManager {
