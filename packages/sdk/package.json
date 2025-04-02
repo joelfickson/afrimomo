@@ -1,6 +1,6 @@
 {
   "name": "afrimomo-sdk",
-  "version": "0.0.1-beta.4",
+  "version": "0.0.1-beta.5",
   "description": "A unified SDK for African payment providers",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -62,10 +62,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/joelfickson/afrimomo.git"
+    "url": "https://github.com/yourusername/afrimomo.git"
   },
   "bugs": {
-    "url": "https://github.com/joelfickson/afrimomo/issues"
+    "url": "https://github.com/yourusername/afrimomo/issues"
   },
-  "homepage": "https://github.com/joelfickson/afrimomo#readme"
+  "homepage": "https://github.com/yourusername/afrimomo#readme"
 }
