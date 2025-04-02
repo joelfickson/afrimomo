@@ -1,0 +1,125 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/*'
+      - 'beta/*'
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Set release type
+        id: release_type
+        run: |
+          if [[ ${{ github.ref }} =~ ^refs/heads/beta/ ]]; then
+            echo "type=beta" >> $GITHUB_OUTPUT
+            echo "tag=beta" >> $GITHUB_OUTPUT
+          elif [[ ${{ github.ref }} =~ ^refs/heads/release/ ]]; then
+            echo "type=release" >> $GITHUB_OUTPUT
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          else
+            echo "type=development" >> $GITHUB_OUTPUT
+            echo "tag=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm release
+          commit: "chore(release): version packages"
+          title: "chore(release): version packages"
+          version: |
+            if [ "${{ steps.release_type.outputs.type }}" = "beta" ]; then
+              pnpm changeset pre enter beta
+              pnpm changeset version
+              pnpm changeset pre exit
+            else
+              pnpm changeset version
+            fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Tag and Release
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          VERSION=$(node -p "require('./packages/sdk/package.json').version")
+          RELEASE_TYPE=${{ steps.release_type.outputs.type }}
+          TAG_NAME="v${VERSION}"
+          
+          if [ "$RELEASE_TYPE" = "beta" ]; then
+            TAG_NAME="v${VERSION}-beta"
+          fi
+          
+          git tag -a $TAG_NAME -m "Release $TAG_NAME"
+          git push origin $TAG_NAME
+          
+          if [ "$RELEASE_TYPE" = "release" ]; then
+            gh release create $TAG_NAME \
+              --title "Release $TAG_NAME" \
+              --notes-file CHANGELOG.md \
+              --draft=false \
+              --prerelease=false
+          elif [ "$RELEASE_TYPE" = "beta" ]; then
+            gh release create $TAG_NAME \
+              --title "Beta Release $TAG_NAME" \
+              --notes-file CHANGELOG.md \
+              --draft=false \
+              --prerelease=true
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Changelog
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          pnpm dlx conventional-changelog-cli -p angular -i CHANGELOG.md -s
+          git add CHANGELOG.md
+          git commit -m "docs: update changelog"
+          git push origin ${{ github.ref_name }} 

@@ -6,9 +6,21 @@
     "dev": "pnpm -r dev",
     "test": "pnpm -r test",
     "format": "pnpm -r format",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build && changeset publish",
+    "release:beta": "changeset pre enter beta && pnpm version-packages && changeset pre exit",
+    "release:major": "changeset major",
+    "release:minor": "changeset minor",
+    "release:patch": "changeset patch",
+    "version:beta": "changeset version --snapshot beta",
+    "publish:beta": "pnpm build && changeset publish --tag beta",
+    "publish:release": "pnpm build && changeset publish --tag latest"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.5.3"
+    "@changesets/cli": "^2.27.1",
+    "@biomejs/biome": "1.5.3",
+    "conventional-changelog-cli": "^4.1.0"
   }
 }

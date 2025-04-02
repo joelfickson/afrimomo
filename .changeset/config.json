@@ -1,0 +1,26 @@
+{
+    "$schema": "https://unpkg.com/@changesets/config@2.3.1/schema.json",
+    "changelog": [
+        "@changesets/cli/changelog",
+        {
+            "repo": "yourusername/afrimomo"
+        }
+    ],
+    "commit": false,
+    "fixed": [],
+    "linked": [],
+    "access": "restricted",
+    "baseBranch": "main",
+    "updateInternalDependencies": "patch",
+    "ignore": [
+        "@afrimomo/example-*"
+    ],
+    "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+        "onlyUpdatePeerDependentsWhenOutOfRange": true,
+        "updateInternalDependents": "always"
+    },
+    "snapshot": {
+        "useCalculatedVersion": true,
+        "prereleaseTemplate": "{tag}-{commit}"
+    }
+}
