@@ -81,4 +81,24 @@ router.get('/refunds/:refundId', async (req: Request, res: Response, next: NextF
   }
 });
 
+// Get correspondent availability
+router.get('/availability', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const response = await sdk.pawapay.getAvailability();
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get active configuration
+router.get('/active-conf', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const response = await sdk.pawapay.getActiveConfiguration();
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export const pawapayRouter = router; 

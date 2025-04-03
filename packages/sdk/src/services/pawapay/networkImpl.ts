@@ -1,5 +1,9 @@
 import { ApiNetworkManager, ApiConfig, AuthConfig } from "../../utils/apiNetworkManager";
 import type { Environment } from "../../config/constants";
+import type { ActiveConfigResponse, AvailabilityResponse } from "./types/network";
+import type { PawapayNetwork } from "./network";
+import type { NetworkResponse } from "../../types";
+import { logger } from "../../utils/logger";
 
 /**
  * PawaPay Network implementation using the unified ApiNetworkManager
@@ -33,4 +37,61 @@ export class PawapayNetworkV2 extends ApiNetworkManager {
     // Initialize the parent class with our configuration
     super(apiConfig, authConfig);
   }
+}
+
+/**
+ * Service for managing PawaPay network operations
+ */
+export class PawapayNetworkService {
+	constructor(private readonly network: PawapayNetwork) {}
+
+	/**
+	 * Get the availability status of all correspondents
+	 * @returns Promise resolving to the availability status of all correspondents
+	 */
+	async getAvailability(): Promise<AvailabilityResponse | NetworkResponse> {
+		try {
+			logger.info("Getting PawaPay correspondent availability");
+			return await this.network.get<AvailabilityResponse>(
+				"/availability",
+				"retrieving correspondent availability"
+			);
+		} catch (error: unknown) {
+			// The error is already handled by the network layer and properly formatted
+			if ((error as NetworkResponse).errorMessage) {
+				return error as NetworkResponse;
+			}
+
+			// Fallback for unexpected errors
+			return this.network.handleApiError(
+				error,
+				"retrieving correspondent availability"
+			);
+		}
+	}
+
+	/**
+	 * Get the active configuration for the merchant
+	 * @returns Promise resolving to the active configuration
+	 */
+	async getActiveConfiguration(): Promise<ActiveConfigResponse | NetworkResponse> {
+		try {
+			logger.info("Getting PawaPay active configuration");
+			return await this.network.get<ActiveConfigResponse>(
+				"/active-conf",
+				"retrieving active configuration"
+			);
+		} catch (error: unknown) {
+			// The error is already handled by the network layer and properly formatted
+			if ((error as NetworkResponse).errorMessage) {
+				return error as NetworkResponse;
+			}
+
+			// Fallback for unexpected errors
+			return this.network.handleApiError(
+				error,
+				"retrieving active configuration"
+			);
+		}
+	}
 } 
