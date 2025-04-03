@@ -47,10 +47,10 @@ export type {
 } from "@afrimomo-sdk/types";
 
 // Export SDK
-export * from "@afrimomo-sdk/sdk";
+// export * from "@afrimomo-sdk/sdk";
 
 // Export config
-export * from "@afrimomo-sdk/config/constants";
+// export * from "@afrimomo-sdk/config/constants";
 
 // Export utilities
 export { NetworkManager } from "./utils/network";
