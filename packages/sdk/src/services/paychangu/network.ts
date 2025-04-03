@@ -1,3 +1,10 @@
+/**
+ * PayChangu Network Manager
+ * 
+ * Handles all API communication with the PayChangu payment gateway.
+ * Provides low-level methods that map directly to API endpoints.
+ */
+
 import axios, { type AxiosInstance, type AxiosRequestHeaders } from "axios";
 import { logger } from "../../utils/logger";
 import type { 
@@ -8,9 +15,7 @@ import type {
 	PayChanguDirectChargeBankTransfer
 } from "./types/payment";
 import type {
-	PayChanguRedirectAPIResponse,
 	PayChanguErrorResponse,
-	PayChanguVerificationResponse,
 	PayChanguDirectChargeResponse,
 	PayChanguDirectChargeErrorResponse,
 	PayChanguSingleTransactionResponse,
@@ -24,9 +29,20 @@ import type {
 	PayChanguDirectChargeBankTransferResponse,
 } from "./types/response";
 
+/**
+ * Manages network communication with the PayChangu API
+ * 
+ * This class handles direct API calls to PayChangu endpoints, providing
+ * a clean interface for the main service class to use.
+ */
 export class PayChanguNetworkManager {
 	private readonly axiosInstance: AxiosInstance;
 
+	/**
+	 * Creates a new instance of the PayChangu network manager
+	 * 
+	 * @param secretKey - The API secret key for authentication with PayChangu
+	 */
 	constructor(secretKey: string) {
 		const headers = {} as AxiosRequestHeaders;
 
@@ -42,9 +58,17 @@ export class PayChanguNetworkManager {
 		this.setupInterceptors();
 	}
 
+	// #region Direct Charge Methods
+
+	/**
+	 * Initiates a payment using the standard PayChangu flow
+	 * 
+	 * @param data - The payment data
+	 * @returns Promise resolving to the payment response
+	 */
 	public async initiatePayment(
 		data: PayChanguInitialPayment,
-	): Promise<PayChanguRedirectAPIResponse | PayChanguErrorResponse> {
+	): Promise<PayChanguDirectChargeResponse | PayChanguErrorResponse> {
 		try {
 			logger.info("Initiating PayChangu payment:", data);
 
@@ -74,6 +98,12 @@ export class PayChanguNetworkManager {
 		}
 	}
 
+	/**
+	 * Initializes a direct charge payment through bank transfer
+	 * 
+	 * @param data - The direct charge payment data
+	 * @returns Promise resolving to the direct charge response
+	 */
 	public async initializeDirectCharge(
 		data: PayChanguDirectChargePayment,
 	): Promise<PayChanguDirectChargeResponse | PayChanguDirectChargeErrorResponse | PayChanguErrorResponse> {
@@ -114,41 +144,12 @@ export class PayChanguNetworkManager {
 		}
 	}
 
-	public async verifyPayment(
-		txRef: string,
-	): Promise<PayChanguVerificationResponse | PayChanguErrorResponse> {
-		try {
-			logger.info("Verifying PayChangu payment:", txRef);
-
-			const response = await this.axiosInstance.get(
-				`/verify-payment/${txRef}`,
-				{
-					headers: {
-						Accept: "application/json",
-					},
-				},
-			);
-
-			return response.data;
-		} catch (error) {
-			logger.error("Error verifying PayChangu payment:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while verifying the payment",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
-		}
-	}
-
+	/**
+	 * Gets details for a specific direct charge transaction
+	 * 
+	 * @param chargeId - The charge ID to look up
+	 * @returns Promise resolving to the transaction details
+	 */
 	public async getTransactionDetails(
 		chargeId: string,
 	): Promise<PayChanguSingleTransactionResponse | PayChanguErrorResponse> {
@@ -184,6 +185,57 @@ export class PayChanguNetworkManager {
 		}
 	}
 
+	/**
+	 * Processes a bank transfer payment
+	 * 
+	 * @param data - The bank transfer data
+	 * @returns Promise resolving to the bank transfer response
+	 */
+	public async processBankTransfer(
+		data: PayChanguDirectChargeBankTransfer,
+	): Promise<PayChanguDirectChargeBankTransferResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Processing PayChangu bank transfer:", data);
+
+			const response = await this.axiosInstance.post(
+				"/direct-charge/payments/bank-transfer", 
+				data, 
+				{
+					headers: {
+						Accept: "application/json",
+					},
+				}
+			);
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error processing PayChangu bank transfer:", error);
+
+			if (axios.isAxiosError(error)) {
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while processing the bank transfer",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
+
+	// #endregion
+
+	// #region Mobile Money Methods
+
+	/**
+	 * Gets all supported mobile money operators
+	 * 
+	 * @returns Promise resolving to the list of operators
+	 */
 	public async getMobileMoneyOperators(): Promise<PayChanguMobileMoneyOperatorsResponse | PayChanguErrorResponse> {
 		try {
 			logger.info("Getting PayChangu mobile money operators");
@@ -217,6 +269,12 @@ export class PayChanguNetworkManager {
 		}
 	}
 
+	/**
+	 * Initializes a mobile money payout
+	 * 
+	 * @param data - The mobile money payout data
+	 * @returns Promise resolving to the payout response
+	 */
 	public async initializeMobileMoneyPayout(
 		data: PayChanguMobileMoneyPayout,
 	): Promise<PayChanguMobileMoneyPayoutResponse | PayChanguErrorResponse> {
@@ -253,6 +311,12 @@ export class PayChanguNetworkManager {
 		}
 	}
 
+	/**
+	 * Gets details of a specific mobile money payout
+	 * 
+	 * @param chargeId - The charge ID to look up
+	 * @returns Promise resolving to the payout details
+	 */
 	public async getPayoutDetails(
 		chargeId: string,
 	): Promise<PayChanguSinglePayoutResponse | PayChanguErrorResponse> {
@@ -288,6 +352,16 @@ export class PayChanguNetworkManager {
 		}
 	}
 
+	// #endregion
+
+	// #region Bank Methods
+
+	/**
+	 * Gets all supported banks for a specific currency
+	 * 
+	 * @param currency - The currency to filter banks by
+	 * @returns Promise resolving to the list of banks
+	 */
 	public async getSupportedBanks(
 		currency = "MWK",
 	): Promise<PayChanguSupportedBanksResponse | PayChanguErrorResponse> {
@@ -326,6 +400,12 @@ export class PayChanguNetworkManager {
 		}
 	}
 
+	/**
+	 * Initializes a bank payout
+	 * 
+	 * @param data - The bank payout data
+	 * @returns Promise resolving to the bank payout response
+	 */
 	public async initializeBankPayout(
 		data: PayChanguBankPayout,
 	): Promise<PayChanguBankPayoutResponse | PayChanguErrorResponse> {
@@ -362,6 +442,12 @@ export class PayChanguNetworkManager {
 		}
 	}
 
+	/**
+	 * Gets details of a specific bank payout
+	 * 
+	 * @param chargeId - The charge ID to look up
+	 * @returns Promise resolving to the bank payout details
+	 */
 	public async getBankPayoutDetails(
 		chargeId: string,
 	): Promise<PayChanguSingleBankPayoutResponse | PayChanguErrorResponse> {
@@ -397,6 +483,13 @@ export class PayChanguNetworkManager {
 		}
 	}
 
+	/**
+	 * Gets a paginated list of all bank payouts
+	 * 
+	 * @param page - The page number to fetch (optional)
+	 * @param perPage - The number of records per page (optional)
+	 * @returns Promise resolving to the bank payouts list
+	 */
 	public async getAllBankPayouts(
 		page?: number,
 		perPage?: number,
@@ -437,42 +530,12 @@ export class PayChanguNetworkManager {
 		}
 	}
 
-	public async processBankTransfer(
-		data: PayChanguDirectChargeBankTransfer,
-	): Promise<PayChanguDirectChargeBankTransferResponse | PayChanguErrorResponse> {
-		try {
-			logger.info("Processing PayChangu bank transfer:", data);
+	// #endregion
 
-			const response = await this.axiosInstance.post(
-				"/direct-charge/payments/bank-transfer", 
-				data, 
-				{
-					headers: {
-						Accept: "application/json",
-					},
-				}
-			);
-
-			return response.data;
-		} catch (error) {
-			logger.error("Error processing PayChangu bank transfer:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while processing the bank transfer",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
-		}
-	}
-
+	/**
+	 * Sets up the request/response interceptors for the Axios instance
+	 * @private
+	 */
 	private setupInterceptors(): void {
 		this.axiosInstance.interceptors.response.use(
 			(response) => response,

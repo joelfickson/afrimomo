@@ -10,7 +10,6 @@ export type { SDKConfig } from "./sdk";
 // Export payment service types
 export type {
 	PaymentDataInfo,
-	PayChanguInitialPayment,
 } from "./services/paychangu/types/payment";
 export type { AccountInfo } from "./services/paychangu/types/account";
 
@@ -21,8 +20,6 @@ export type {
 
 // Export response types
 export type {
-	PayChanguPaymentResponse,
-	PayChanguRedirectAPIResponse,
 	PayChanguErrorResponse,
 } from "./services/paychangu/types/response";
 
