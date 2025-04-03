@@ -1,4 +1,4 @@
-import type { Environment } from "@afrimomo-sdk/config/constants";
+import type { Environment } from "./constants";
 import * as dotenv from "dotenv";
 
 /**

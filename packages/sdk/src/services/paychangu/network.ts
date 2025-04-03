@@ -1,11 +1,11 @@
 import axios, { type AxiosInstance, type AxiosRequestHeaders } from "axios";
-import { logger } from "@afrimomo-sdk/utils/logger";
-import type { PayChanguInitialPayment } from "@afrimomo-sdk/services/paychangu/types/payment";
+import { logger } from "../../utils/logger";
+import type { PayChanguInitialPayment } from "./types/payment";
 import type {
 	PayChanguRedirectAPIResponse,
 	PayChanguErrorResponse,
 	PayChanguVerificationResponse,
-} from "@afrimomo-sdk/services/paychangu/types/response";
+} from "./types/response";
 
 export class PayChanguNetworkManager {
 	private readonly axiosInstance: AxiosInstance;

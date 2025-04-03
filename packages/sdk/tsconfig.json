@@ -14,9 +14,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "baseUrl": ".",
-    "paths": {
-      "@afrimomo-sdk/*": ["./src/*"]
-    },
     "lib": ["ES2022"],
     "rootDir": "src"
   },

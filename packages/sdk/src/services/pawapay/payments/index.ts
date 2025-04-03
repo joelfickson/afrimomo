@@ -1,7 +1,7 @@
-import type { NetworkManager } from "@afrimomo-sdk/utils/network";
-import { logger } from "@afrimomo-sdk/utils/logger";
-import type { PaymentData, InitiatePaymentResponse } from "@afrimomo-sdk/services/pawapay/types/payment";
-import type { NetworkResponse } from "@afrimomo-sdk/types";
+import type { NetworkManager } from "../../../utils/network";
+import { logger } from "../../../utils/logger";
+import type { PaymentData, InitiatePaymentResponse } from "../types/payment";
+import type { NetworkResponse } from "../../../types";
 
 export class PawapayPayments {
 	private readonly baseEndpoint = "v1/widget/sessions";

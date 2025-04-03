@@ -44,13 +44,7 @@ export { PayChangu } from "./services/paychangu";
 export type {
 	MoMoCurrency,
 	Correspondent,
-} from "@afrimomo-sdk/types";
-
-// Export SDK
-// export * from "@afrimomo-sdk/sdk";
-
-// Export config
-// export * from "@afrimomo-sdk/config/constants";
+} from "./types/shared";
 
 // Export utilities
 export { NetworkManager } from "./utils/network";

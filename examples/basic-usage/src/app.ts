@@ -2,13 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { paychanguRouter } from './routes/paychangu';
-import { errorHandler } from './middleware/error';
 import { AfromomoSDK } from 'afrimomo-sdk';
-import { pawapayRouter } from './routes/pawapay';
+import { errorHandler } from './middleware/error';
 
-// Initialize the SDK
+// Initialize the SDK first
 AfromomoSDK.initialize();
+
+// Import routes after SDK initialization
+import { paychanguRouter } from './routes/paychangu';
+import { pawapayRouter } from './routes/pawapay';
 
 const app = express();
 
@@ -20,8 +22,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api/paychangu', paychanguRouter);
-app.use('/api/pawapay', pawapayRouter);
+app.use('/paychangu', paychanguRouter);
+app.use('/pawapay', pawapayRouter);
+
+// New route to get all configured services
+app.get('/services', (req, res) => {
+  const sdk = AfromomoSDK.getInstance();
+  const services = sdk.getConfiguredServices();
+  res.json({
+    success: true,
+    services,
+    count: services.length
+  });
+});
 
 // Error handling
 app.use(errorHandler);

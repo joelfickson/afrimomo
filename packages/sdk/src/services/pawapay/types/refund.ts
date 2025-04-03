@@ -1,5 +1,5 @@
-import type { MoMoCurrency, Correspondent } from "@afrimomo-sdk/types";
-import type { Payer } from "@afrimomo-sdk/services/pawapay/types/payment";
+import type { MoMoCurrency, Correspondent } from "../../../types/shared";
+import type { Payer } from "./payment";
 
 export interface RefundResponse {
 	refundId: string;
