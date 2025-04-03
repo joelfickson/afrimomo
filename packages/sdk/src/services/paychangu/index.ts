@@ -7,12 +7,14 @@
  * @module PayChangu
  */
 
+import axios from "axios";
 import { BaseService } from "../../utils/baseService";
 import { logger } from "../../utils/logger";
-import { PayChanguNetworkManager } from "./network";
+import { PayChanguNetwork } from "./network";
 import type { AccountInfo } from "./types/account";
 import { PayChangu as PayChanguTypes } from "./types";
 import type { 
+	PayChanguInitialPayment,
 	PayChanguDirectChargePayment,
 	PayChanguMobileMoneyPayout,
 	PayChanguBankPayout,
@@ -29,6 +31,18 @@ import type {
 	PayChanguBankPayoutDetailsResponse,
 	PayChanguBankPayoutsListResponse,
 	PayChanguBankTransferPaymentResponse,
+	PayChanguErrorResponse,
+	PayChanguDirectChargeResponse,
+	PayChanguDirectChargeErrorResponse,
+	PayChanguSingleTransactionResponse,
+	PayChanguMobileMoneyOperatorsResponse,
+	PayChanguMobileMoneyPayoutResponse,
+	PayChanguSinglePayoutResponse,
+	PayChanguSupportedBanksResponse,
+	PayChanguBankPayoutResponse,
+	PayChanguSingleBankPayoutResponse,
+	PayChanguAllBankPayoutsResponse,
+	PayChanguDirectChargeBankTransferResponse,
 } from "./types/response";
 
 export * from "./types";
@@ -43,7 +57,7 @@ export * from "./types";
  * - Bank payouts
  */
 export class PayChangu extends BaseService {
-	private readonly networkManager: PayChanguNetworkManager;
+	private readonly network: PayChanguNetwork;
 
 	/**
 	 * Creates a new instance of the PayChangu service
@@ -52,10 +66,177 @@ export class PayChangu extends BaseService {
 	 */
 	constructor(secretKey: string) {
 		super();
-		this.networkManager = new PayChanguNetworkManager(secretKey);
+		this.network = new PayChanguNetwork(secretKey);
 	}
 
 	// #region Direct Charge Methods
+
+	/**
+	 * Initiates a payment using the standard PayChangu flow
+	 * 
+	 * @param data - The payment data
+	 * @returns Promise resolving to the payment response
+	 */
+	public async initiatePayment(
+		data: PayChanguInitialPayment,
+	): Promise<PayChanguDirectChargeResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Initiating PayChangu payment:", data);
+
+			const response = await this.network.axiosInstance.post("/payment", data, {
+				headers: {
+					Accept: "application/json",
+				},
+			});
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error initiating PayChangu payment:", error);
+
+			if (axios.isAxiosError(error)) {
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while processing the payment",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
+
+	/**
+	 * Initializes a direct charge payment through bank transfer
+	 * 
+	 * @param data - The direct charge payment data
+	 * @returns Promise resolving to the direct charge response
+	 */
+	private async initializeDirectCharge(
+		data: PayChanguDirectChargePayment,
+	): Promise<PayChanguDirectChargeResponse | PayChanguDirectChargeErrorResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Initializing PayChangu direct charge payment:", data);
+
+			const response = await this.network.axiosInstance.post(
+				"/direct-charge/payments/initialize", 
+				data, 
+				{
+					headers: {
+						Accept: "application/json",
+					},
+				}
+			);
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error initializing PayChangu direct charge payment:", error);
+
+			if (axios.isAxiosError(error)) {
+				if (error.response?.data?.status === "failed") {
+					return error.response.data as PayChanguDirectChargeErrorResponse;
+				}
+
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while processing the direct charge payment",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
+
+	/**
+	 * Gets details for a specific direct charge transaction
+	 * 
+	 * @param chargeId - The charge ID to look up
+	 * @returns Promise resolving to the transaction details
+	 */
+	private async getTransactionDetails(
+		chargeId: string,
+	): Promise<PayChanguSingleTransactionResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Getting PayChangu transaction details:", chargeId);
+
+			const response = await this.network.axiosInstance.get(
+				`/direct-charge/transactions/${chargeId}/details`,
+				{
+					headers: {
+						Accept: "application/json",
+					},
+				},
+			);
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error getting PayChangu transaction details:", error);
+
+			if (axios.isAxiosError(error)) {
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while retrieving transaction details",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
+
+	/**
+	 * Processes a bank transfer payment
+	 * 
+	 * @param data - The bank transfer data
+	 * @returns Promise resolving to the bank transfer response
+	 */
+	private async processBankTransferDirect(
+		data: PayChanguDirectChargeBankTransfer,
+	): Promise<PayChanguDirectChargeBankTransferResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Processing PayChangu bank transfer:", data);
+
+			const response = await this.network.axiosInstance.post(
+				"/direct-charge/payments/bank-transfer", 
+				data, 
+				{
+					headers: {
+						Accept: "application/json",
+					},
+				}
+			);
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error processing PayChangu bank transfer:", error);
+
+			if (axios.isAxiosError(error)) {
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while processing the bank transfer",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
 
 	/**
 	 * Initiates a direct charge payment via virtual account
@@ -87,7 +268,7 @@ export class PayChangu extends BaseService {
 
 			logger.info("PayChangu: initializing direct charge payment", { directChargeData });
 
-			const response = await this.networkManager.initializeDirectCharge(directChargeData);
+			const response = await this.initializeDirectCharge(directChargeData);
 
 			if (!response || response.status !== "success") {
 				return {
@@ -145,7 +326,7 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("PayChangu: getting direct charge transaction details", { chargeId });
 
-			const response = await this.networkManager.getTransactionDetails(chargeId);
+			const response = await this.getTransactionDetails(chargeId);
 
 			if (!response || response.status !== "success") {
 				return {
@@ -219,7 +400,7 @@ export class PayChangu extends BaseService {
 
 			logger.info("PayChangu: processing bank transfer", { bankTransferData });
 
-			const response = await this.networkManager.processBankTransfer(bankTransferData);
+			const response = await this.processBankTransferDirect(bankTransferData);
 
 			if (!response || response.status !== "success") {
 				return {
@@ -271,6 +452,127 @@ export class PayChangu extends BaseService {
 	// #region Mobile Money Methods
 
 	/**
+	 * Gets all supported mobile money operators directly
+	 * 
+	 * @returns Promise resolving to the list of operators
+	 */
+	private async getMobileMoneyOperatorsDirect(): Promise<PayChanguMobileMoneyOperatorsResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Getting PayChangu mobile money operators");
+
+			const response = await this.network.axiosInstance.get(
+				"/mobile-money",
+				{
+					headers: {
+						Accept: "application/json",
+					},
+				},
+			);
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error getting PayChangu mobile money operators:", error);
+
+			if (axios.isAxiosError(error)) {
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while retrieving mobile money operators",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
+
+	/**
+	 * Initializes a mobile money payout directly
+	 * 
+	 * @param data - The mobile money payout data
+	 * @returns Promise resolving to the payout response
+	 */
+	private async initializeMobileMoneyPayoutDirect(
+		data: PayChanguMobileMoneyPayout,
+	): Promise<PayChanguMobileMoneyPayoutResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Initializing PayChangu mobile money payout:", data);
+
+			const response = await this.network.axiosInstance.post(
+				"/mobile-money/payouts/initialize", 
+				data, 
+				{
+					headers: {
+						Accept: "application/json",
+					},
+				}
+			);
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error initializing PayChangu mobile money payout:", error);
+
+			if (axios.isAxiosError(error)) {
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while processing the mobile money payout",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
+
+	/**
+	 * Gets details of a specific mobile money payout directly
+	 * 
+	 * @param chargeId - The charge ID to look up
+	 * @returns Promise resolving to the payout details
+	 */
+	private async getPayoutDetailsDirect(
+		chargeId: string,
+	): Promise<PayChanguSinglePayoutResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Getting PayChangu payout details:", chargeId);
+
+			const response = await this.network.axiosInstance.get(
+				`/mobile-money/payments/${chargeId}/details`,
+				{
+					headers: {
+						Accept: "application/json",
+					},
+				},
+			);
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error getting PayChangu payout details:", error);
+
+			if (axios.isAxiosError(error)) {
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while retrieving payout details",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
+
+	/**
 	 * Gets all supported mobile money operators
 	 * 
 	 * @returns Promise resolving to the supported operators response
@@ -279,7 +581,7 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("PayChangu: getting mobile money operators");
 
-			const response = await this.networkManager.getMobileMoneyOperators();
+			const response = await this.getMobileMoneyOperatorsDirect();
 
 			if (!response || response.status !== "success") {
 				return {
@@ -348,7 +650,7 @@ export class PayChangu extends BaseService {
 
 			logger.info("PayChangu: initializing mobile money payout", { payoutData });
 
-			const response = await this.networkManager.initializeMobileMoneyPayout(payoutData);
+			const response = await this.initializeMobileMoneyPayoutDirect(payoutData);
 
 			if (!response || response.status !== "success") {
 				return {
@@ -407,7 +709,7 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("PayChangu: getting mobile money payout details", { chargeId });
 
-			const response = await this.networkManager.getPayoutDetails(chargeId);
+			const response = await this.getPayoutDetailsDirect(chargeId);
 
 			if (!response || response.status !== "success") {
 				return {
@@ -459,6 +761,180 @@ export class PayChangu extends BaseService {
 	// #region Bank Payout Methods
 
 	/**
+	 * Gets all supported banks for a specific currency directly
+	 * 
+	 * @param currency - The currency to filter banks by
+	 * @returns Promise resolving to the list of banks
+	 */
+	private async getSupportedBanksDirect(
+		currency = "MWK",
+	): Promise<PayChanguSupportedBanksResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Getting PayChangu supported banks for currency:", currency);
+
+			const response = await this.network.axiosInstance.get(
+				"/direct-charge/payouts/supported-banks",
+				{
+					headers: {
+						Accept: "application/json",
+					},
+					params: {
+						currency,
+					},
+				},
+			);
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error getting PayChangu supported banks:", error);
+
+			if (axios.isAxiosError(error)) {
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while retrieving supported banks",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
+
+	/**
+	 * Initializes a bank payout directly
+	 * 
+	 * @param data - The bank payout data
+	 * @returns Promise resolving to the bank payout response
+	 */
+	private async initializeBankPayoutDirect(
+		data: PayChanguBankPayout,
+	): Promise<PayChanguBankPayoutResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Initializing PayChangu bank payout:", data);
+
+			const response = await this.network.axiosInstance.post(
+				"/direct-charge/payouts/initialize", 
+				data, 
+				{
+					headers: {
+						Accept: "application/json",
+					},
+				}
+			);
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error initializing PayChangu bank payout:", error);
+
+			if (axios.isAxiosError(error)) {
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while processing the bank payout",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
+
+	/**
+	 * Gets details of a specific bank payout directly
+	 * 
+	 * @param chargeId - The charge ID to look up
+	 * @returns Promise resolving to the bank payout details
+	 */
+	private async getBankPayoutDetailsDirect(
+		chargeId: string,
+	): Promise<PayChanguSingleBankPayoutResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Getting PayChangu bank payout details:", chargeId);
+
+			const response = await this.network.axiosInstance.get(
+				`/direct-charge/payouts/${chargeId}/details`,
+				{
+					headers: {
+						Accept: "application/json",
+					},
+				},
+			);
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error getting PayChangu bank payout details:", error);
+
+			if (axios.isAxiosError(error)) {
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while retrieving bank payout details",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
+
+	/**
+	 * Gets a paginated list of all bank payouts directly
+	 * 
+	 * @param page - The page number to fetch (optional)
+	 * @param perPage - The number of records per page (optional)
+	 * @returns Promise resolving to the bank payouts list
+	 */
+	private async getAllBankPayoutsDirect(
+		page?: number,
+		perPage?: number,
+	): Promise<PayChanguAllBankPayoutsResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Getting all PayChangu bank payouts");
+
+			const response = await this.network.axiosInstance.get(
+				"/direct-charge/payouts",
+				{
+					headers: {
+						Accept: "application/json",
+					},
+					params: {
+						...(page && { page }),
+						...(perPage && { per_page: perPage }),
+					},
+				},
+			);
+
+			return response.data;
+		} catch (error) {
+			logger.error("Error getting all PayChangu bank payouts:", error);
+
+			if (axios.isAxiosError(error)) {
+				return {
+					message:
+						error.response?.data?.message ||
+						"An error occurred while retrieving bank payouts",
+					status: "error",
+				};
+			}
+
+			return {
+				message: "An unexpected error occurred",
+				status: "error",
+			};
+		}
+	}
+
+	/**
 	 * Gets all supported banks for direct charge payouts
 	 * 
 	 * @param currency - The currency to filter banks by (defaults to MWK)
@@ -470,7 +946,7 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("PayChangu: getting supported banks", { currency });
 
-			const response = await this.networkManager.getSupportedBanks(currency);
+			const response = await this.getSupportedBanksDirect(currency);
 
 			if (!response || response.status !== "success") {
 				return {
@@ -541,7 +1017,7 @@ export class PayChangu extends BaseService {
 
 			logger.info("PayChangu: initializing bank payout", { payoutData });
 
-			const response = await this.networkManager.initializeBankPayout(payoutData);
+			const response = await this.initializeBankPayoutDirect(payoutData);
 
 			if (!response || response.status !== "success") {
 				return {
@@ -618,7 +1094,7 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("PayChangu: getting bank payout details", { chargeId });
 
-			const response = await this.networkManager.getBankPayoutDetails(chargeId);
+			const response = await this.getBankPayoutDetailsDirect(chargeId);
 
 			// Accept both "successful" (as in the API docs) and "success" (to be safe)
 			if (!response || (response.status !== "successful" && response.status !== "success")) {
@@ -698,7 +1174,7 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("PayChangu: getting all bank payouts", { page, perPage });
 
-			const response = await this.networkManager.getAllBankPayouts(page, perPage);
+			const response = await this.getAllBankPayoutsDirect(page, perPage);
 
 			if (!response || response.status !== "success") {
 				return {
