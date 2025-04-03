@@ -1,3 +1,19 @@
+## [0.0.1-beta.7](https://github.com/yourusername/afrimomo/compare/v0.0.1-beta.6...v0.0.1-beta.7) (2025-04-03)
+
+
+### Features
+
+* add availability and active configuration endpoints to PawaPay service; implement corresponding methods in the SDK for improved merchant configuration management ([3857e96](https://github.com/yourusername/afrimomo/commit/3857e96cb681845578dcdb08985778e8efaa92a2))
+* add mobile money and bank payout functionalities to PayChangu service; implement methods for retrieving operators, initializing payouts, and fetching payout details ([9123e76](https://github.com/yourusername/afrimomo/commit/9123e760a4af6ca36013d185f30a343728d927f1))
+* add new '/services' route to retrieve configured services and update route paths in app.ts; change default port to 9999 in index.ts; add pino-pretty dependency in package.json; refactor SDK imports to use relative paths ([24b124e](https://github.com/yourusername/afrimomo/commit/24b124e0cfc4476f36d9e91109037ea506b2852d))
+* enhance PayChangu service with direct charge payment initialization, bank transfer processing, and transaction detail retrieval; update route paths and request parameters for improved functionality ([7e84364](https://github.com/yourusername/afrimomo/commit/7e84364734528a2f43d5459ceba5c43c00ab7766))
+* expand PayChangu service with new mobile money and bank payout routes; implement endpoints for retrieving operators, initializing payouts, and fetching payout details ([d7d53cb](https://github.com/yourusername/afrimomo/commit/d7d53cbed74c0ab91b339255c4920418615e247b))
+* implement direct charge payment functionality in PayChangu service; add methods for initializing payments and retrieving transaction details ([b719d95](https://github.com/yourusername/afrimomo/commit/b719d9511d0736becf743470ee30cc4808715bdd))
+* introduce generic adapter for custom payment providers in Afromomo SDK; enhance README with usage examples and update SDK to support custom provider configuration ([7c9594b](https://github.com/yourusername/afrimomo/commit/7c9594b7bdef1958703e6a6bea8292e484349c35))
+* refactor PayChangu service to use a dedicated network class for API communication; implement new methods for initiating payments, handling direct charges, and retrieving transaction details ([0734cd8](https://github.com/yourusername/afrimomo/commit/0734cd88f9a621c69cab3370f619fb461c983a67))
+
+
+
 ## [0.0.1-beta.6](https://github.com/yourusername/afrimomo/compare/v0.0.1-beta.5...v0.0.1-beta.6) (2025-04-02)
 
 
