@@ -43,6 +43,7 @@ import type {
 	PayChanguSingleBankPayoutResponse,
 	PayChanguAllBankPayoutsResponse,
 	PayChanguDirectChargeBankTransferResponse,
+	PayChanguVerifyTransactionResponse,
 } from "./types/response";
 
 export * from "./types";
@@ -1059,6 +1060,84 @@ export class PayChangu extends BaseService {
 						PerPage: 0,
 						NextPageUrl: null,
 					},
+				}
+			);
+		}
+	}
+
+	// #endregion
+
+	// #region Transaction Verification
+
+	/**
+	 * Verifies a transaction status directly
+	 * 
+	 * @param txRef - The transaction reference to verify
+	 * @returns Promise resolving to the transaction verification response
+	 */
+	private async verifyTransactionDirect(
+		txRef: string,
+	): Promise<PayChanguVerifyTransactionResponse | PayChanguErrorResponse> {
+		try {
+			logger.info("Verifying PayChangu transaction:", txRef);
+
+			return await this.network.get<PayChanguVerifyTransactionResponse>(
+				`/verify-payment/${txRef}`,
+				{
+					headers: {
+						Accept: "application/json",
+					},
+				},
+				`transaction verification for ${txRef}`
+			);
+		} catch (error) {
+			return this.handleApiError(error, "transaction verification");
+		}
+	}
+
+	/**
+	 * Verifies the status of a transaction
+	 * 
+	 * This method can be used to check the final status of transactions of all payment types
+	 * after they have been attempted (except MoMo Direct MoMo Charge).
+	 * 
+	 * @param txRef - The transaction reference to verify
+	 * @returns Promise resolving to the transaction verification response
+	 */
+	async verifyTransaction(
+		txRef: string,
+	): Promise<{ 
+		type: "success" | "error", 
+		payload: {
+			HasError: boolean,
+			TransactionDetails?: PayChanguTypes.VerifiedTransaction,
+			StackTraceError?: unknown
+		} 
+	}> {
+		try {
+			logger.info("PayChangu: verifying transaction", { txRef });
+
+			const response = await this.verifyTransactionDirect(txRef);
+
+			if (!response || response.status !== "success") {
+				return this.createStandardErrorResponse(
+					response,
+					"transaction verification",
+					{
+						TransactionDetails: undefined,
+					}
+				);
+			}
+
+			return this.createStandardSuccessResponse({
+				TransactionDetails: response.data,
+			});
+		} catch (error: unknown) {
+			return this.createStandardErrorResponse(
+				error,
+				"transaction verification",
+				{
+					TransactionDetails: undefined,
 				}
 			);
 		}

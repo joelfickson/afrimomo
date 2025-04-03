@@ -874,3 +874,118 @@ export interface PayChanguBankTransferPaymentResponse extends PayChangu.ServiceR
 	/** Error details if applicable */
 	StackTraceError?: unknown;
 }> {}
+
+/**
+ * Verify transaction response
+ * 
+ * Response when verifying a transaction status.
+ */
+export interface PayChanguVerifyTransactionResponse {
+	/** The status of the response */
+	status: "success";
+	
+	/** Success message */
+	message: string;
+	
+	/** The transaction data */
+	data: {
+		/** Event type (e.g., "checkout.payment") */
+		event_type: string;
+		
+		/** Transaction reference */
+		tx_ref: string;
+		
+		/** Mode (e.g., "live", "test") */
+		mode: string;
+		
+		/** Transaction type */
+		type: string;
+		
+		/** Transaction status */
+		status: string;
+		
+		/** Number of payment attempts */
+		number_of_attempts: number;
+		
+		/** Payment reference number */
+		reference: string;
+		
+		/** Currency code */
+		currency: string;
+		
+		/** Transaction amount */
+		amount: number;
+		
+		/** Transaction charges */
+		charges: number;
+		
+		/** Transaction customization */
+		customization: {
+			/** Transaction title */
+			title: string;
+			
+			/** Transaction description */
+			description: string;
+			
+			/** Logo URL */
+			logo: string | null;
+		};
+		
+		/** Additional metadata */
+		meta: Record<string, unknown> | null;
+		
+		/** Authorization details */
+		authorization: {
+			/** Payment channel */
+			channel: string;
+			
+			/** Masked card number */
+			card_number?: string;
+			
+			/** Card expiry */
+			expiry?: string;
+			
+			/** Card brand */
+			brand?: string;
+			
+			/** Payment provider */
+			provider: string | null;
+			
+			/** Mobile phone number */
+			mobile_number: string | null;
+			
+			/** When the payment was completed */
+			completed_at: string;
+		};
+		
+		/** Customer details */
+		customer: {
+			/** Customer email */
+			email: string;
+			
+			/** Customer first name */
+			first_name: string;
+			
+			/** Customer last name */
+			last_name: string;
+		};
+		
+		/** Transaction logs */
+		logs: Array<{
+			/** Log type */
+			type: string;
+			
+			/** Log message */
+			message: string;
+			
+			/** When the log was created */
+			created_at: string;
+		}>;
+		
+		/** When the transaction was created */
+		created_at: string;
+		
+		/** When the transaction was last updated */
+		updated_at: string;
+	};
+}
