@@ -2,10 +2,12 @@ import { BaseService } from "../../utils/baseService";
 import { logger } from "../../utils/logger";
 import { PayChanguNetworkManager } from "./network";
 import type { AccountInfo } from "./types/account";
-import type { PaymentDataInfo, PayChanguInitialPayment } from "./types/payment";
+import type { PaymentDataInfo, PayChanguInitialPayment, PayChanguDirectChargePayment } from "./types/payment";
 import type {
 	PayChanguPaymentResponse,
 	PayChanguTransactionResponse,
+	PayChanguDirectChargePaymentResponse,
+	PayChanguTransactionDetailsResponse,
 } from "./types/response";
 
 export * from "./types";
@@ -97,6 +99,65 @@ export class PayChangu extends BaseService {
 	}
 
 	/**
+	 * Initializes a direct charge payment for bank transfers
+	 * @param amount - The amount to charge
+	 * @param chargeId - Unique identifier for this transaction
+	 * @param currency - The currency (defaults to MWK)
+	 * @param accountInfo - Optional account information for the customer
+	 * @returns Promise resolving to the direct charge payment response
+	 */
+	async initializeDirectChargePayment(
+		amount: string | number,
+		chargeId: string,
+		currency: string = "MWK",
+		accountInfo?: Partial<AccountInfo>,
+	): Promise<PayChanguDirectChargePaymentResponse> {
+		try {
+			const directChargeData = {
+				amount: amount.toString(),
+				currency,
+				payment_method: "mobile_bank_transfer",
+				charge_id: chargeId,
+				...(accountInfo?.email && { email: accountInfo.email }),
+				...(accountInfo?.first_name && { first_name: accountInfo.first_name }),
+				...(accountInfo?.last_name && { last_name: accountInfo.last_name }),
+			} as PayChanguDirectChargePayment;
+
+			logger.info("PayChangu: initializing direct charge payment", { directChargeData });
+
+			const response = await this.networkManager.initializeDirectCharge(directChargeData);
+
+			if (!response || response.status !== "success") {
+				return {
+					type: "error",
+					payload: {
+						HasError: true,
+						StackTraceError: response,
+					},
+				};
+			}
+
+			return {
+				type: "success",
+				payload: {
+					TransactionDetails: response.data.transaction,
+					PaymentAccountDetails: response.data.payment_account_details,
+					HasError: false,
+				},
+			};
+		} catch (error: unknown) {
+			logger.error("PayChangu: direct charge payment initialization failed", error);
+			return {
+				type: "error",
+				payload: {
+					HasError: true,
+					StackTraceError: error,
+				},
+			};
+		}
+	}
+
+	/**
 	 * Gets transaction details by ID
 	 * @param transactionId - The transaction ID to look up
 	 * @returns Promise resolving to the transaction response
@@ -126,6 +187,48 @@ export class PayChangu extends BaseService {
 			return {
 				HasError: true,
 				StackTraceError: error,
+			};
+		}
+	}
+
+	/**
+	 * Gets direct charge transaction details by charge ID
+	 * @param chargeId - The charge ID to look up
+	 * @returns Promise resolving to the transaction details response
+	 */
+	async getDirectChargeTransactionDetails(
+		chargeId: string,
+	): Promise<PayChanguTransactionDetailsResponse> {
+		try {
+			logger.info("PayChangu: getting direct charge transaction details", { chargeId });
+
+			const response = await this.networkManager.getTransactionDetails(chargeId);
+
+			if (!response || response.status !== "success") {
+				return {
+					type: "error",
+					payload: {
+						HasError: true,
+						StackTraceError: response,
+					},
+				};
+			}
+
+			return {
+				type: "success",
+				payload: {
+					TransactionDetails: response.data.transaction,
+					HasError: false,
+				},
+			};
+		} catch (error: unknown) {
+			logger.error("PayChangu: direct charge transaction details retrieval failed", error);
+			return {
+				type: "error",
+				payload: {
+					HasError: true,
+					StackTraceError: error,
+				},
 			};
 		}
 	}
