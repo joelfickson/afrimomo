@@ -2,12 +2,20 @@ import { BaseService } from "../../utils/baseService";
 import { logger } from "../../utils/logger";
 import { PayChanguNetworkManager } from "./network";
 import type { AccountInfo } from "./types/account";
-import type { PaymentDataInfo, PayChanguInitialPayment, PayChanguDirectChargePayment } from "./types/payment";
+import type { PaymentDataInfo, PayChanguInitialPayment, PayChanguDirectChargePayment, PayChanguMobileMoneyPayout, PayChanguBankPayout, PayChanguDirectChargeBankTransfer } from "./types/payment";
 import type {
 	PayChanguPaymentResponse,
 	PayChanguTransactionResponse,
 	PayChanguDirectChargePaymentResponse,
 	PayChanguTransactionDetailsResponse,
+	PayChanguOperatorsResponse,
+	PayChanguPayoutResponse,
+	PayChanguPayoutDetailsResponse,
+	PayChanguBanksResponse,
+	PayChanguBankTransferResponse,
+	PayChanguBankPayoutDetailsResponse,
+	PayChanguBankPayoutsListResponse,
+	PayChanguBankTransferPaymentResponse,
 } from "./types/response";
 
 export * from "./types";
@@ -223,6 +231,428 @@ export class PayChangu extends BaseService {
 			};
 		} catch (error: unknown) {
 			logger.error("PayChangu: direct charge transaction details retrieval failed", error);
+			return {
+				type: "error",
+				payload: {
+					HasError: true,
+					StackTraceError: error,
+				},
+			};
+		}
+	}
+
+	/**
+	 * Gets all supported mobile money operators
+	 * @returns Promise resolving to the supported operators response
+	 */
+	async getMobileMoneyOperators(): Promise<PayChanguOperatorsResponse> {
+		try {
+			logger.info("PayChangu: getting mobile money operators");
+
+			const response = await this.networkManager.getMobileMoneyOperators();
+
+			if (!response || response.status !== "success") {
+				return {
+					type: "error",
+					payload: {
+						HasError: true,
+						StackTraceError: response,
+					},
+				};
+			}
+
+			return {
+				type: "success",
+				payload: {
+					Operators: response.data,
+					HasError: false,
+				},
+			};
+		} catch (error: unknown) {
+			logger.error("PayChangu: mobile money operators retrieval failed", error);
+			return {
+				type: "error",
+				payload: {
+					HasError: true,
+					StackTraceError: error,
+				},
+			};
+		}
+	}
+
+	/**
+	 * Initializes a mobile money payout to send funds to a mobile money account
+	 * @param mobile - The phone number of the recipient
+	 * @param operatorRefId - The mobile money operator's reference ID
+	 * @param amount - The amount to send
+	 * @param chargeId - Unique identifier for this transaction
+	 * @param options - Optional details for the transaction
+	 * @returns Promise resolving to the payout response
+	 */
+	async initializeMobileMoneyPayout(
+		mobile: string,
+		operatorRefId: string,
+		amount: string | number,
+		chargeId: string,
+		options?: {
+			email?: string;
+			firstName?: string;
+			lastName?: string;
+			transactionStatus?: "failed" | "successful";
+		}
+	): Promise<PayChanguPayoutResponse> {
+		try {
+			const payoutData: PayChanguMobileMoneyPayout = {
+				mobile,
+				mobile_money_operator_ref_id: operatorRefId,
+				amount: amount.toString(),
+				charge_id: chargeId,
+				...(options?.email && { email: options.email }),
+				...(options?.firstName && { first_name: options.firstName }),
+				...(options?.lastName && { last_name: options.lastName }),
+				...(options?.transactionStatus && { transaction_status: options.transactionStatus }),
+			};
+
+			logger.info("PayChangu: initializing mobile money payout", { payoutData });
+
+			const response = await this.networkManager.initializeMobileMoneyPayout(payoutData);
+
+			if (!response || response.status !== "success") {
+				return {
+					type: "error",
+					payload: {
+						HasError: true,
+						StackTraceError: response,
+					},
+				};
+			}
+
+			return {
+				type: "success",
+				payload: {
+					PayoutDetails: response.data,
+					HasError: false,
+				},
+			};
+		} catch (error: unknown) {
+			logger.error("PayChangu: mobile money payout initialization failed", error);
+			return {
+				type: "error",
+				payload: {
+					HasError: true,
+					StackTraceError: error,
+				},
+			};
+		}
+	}
+
+	/**
+	 * Gets mobile money payout details by charge ID
+	 * @param chargeId - The charge ID to look up
+	 * @returns Promise resolving to the payout details response
+	 */
+	async getMobileMoneyPayoutDetails(
+		chargeId: string,
+	): Promise<PayChanguPayoutDetailsResponse> {
+		try {
+			logger.info("PayChangu: getting mobile money payout details", { chargeId });
+
+			const response = await this.networkManager.getPayoutDetails(chargeId);
+
+			if (!response || response.status !== "success") {
+				return {
+					type: "error",
+					payload: {
+						HasError: true,
+						StackTraceError: response,
+					},
+				};
+			}
+
+			return {
+				type: "success",
+				payload: {
+					PayoutDetails: response.data,
+					HasError: false,
+				},
+			};
+		} catch (error: unknown) {
+			logger.error("PayChangu: mobile money payout details retrieval failed", error);
+			return {
+				type: "error",
+				payload: {
+					HasError: true,
+					StackTraceError: error,
+				},
+			};
+		}
+	}
+
+	/**
+	 * Gets all supported banks for direct charge payouts
+	 * @param currency - The currency to filter banks by (defaults to MWK)
+	 * @returns Promise resolving to the supported banks response
+	 */
+	async getSupportedBanks(
+		currency = "MWK",
+	): Promise<PayChanguBanksResponse> {
+		try {
+			logger.info("PayChangu: getting supported banks", { currency });
+
+			const response = await this.networkManager.getSupportedBanks(currency);
+
+			if (!response || response.status !== "success") {
+				return {
+					type: "error",
+					payload: {
+						HasError: true,
+						StackTraceError: response,
+					},
+				};
+			}
+
+			return {
+				type: "success",
+				payload: {
+					Banks: response.data,
+					HasError: false,
+				},
+			};
+		} catch (error: unknown) {
+			logger.error("PayChangu: supported banks retrieval failed", error);
+			return {
+				type: "error",
+				payload: {
+					HasError: true,
+					StackTraceError: error,
+				},
+			};
+		}
+	}
+
+	/**
+	 * Initializes a bank payout to send funds to a bank account
+	 * @param bankUuid - The UUID of the bank
+	 * @param accountName - The recipient's account name
+	 * @param accountNumber - The recipient's account number
+	 * @param amount - The amount to send
+	 * @param chargeId - Unique identifier for this transaction
+	 * @param options - Optional details for the transaction
+	 * @returns Promise resolving to the bank transfer response
+	 */
+	async initializeBankPayout(
+		bankUuid: string,
+		accountName: string,
+		accountNumber: string,
+		amount: string | number,
+		chargeId: string,
+		options?: {
+			email?: string;
+			firstName?: string;
+			lastName?: string;
+		}
+	): Promise<PayChanguBankTransferResponse> {
+		try {
+			const payoutData: PayChanguBankPayout = {
+				payout_method: "bank_transfer",
+				bank_uuid: bankUuid,
+				bank_account_name: accountName,
+				bank_account_number: accountNumber,
+				amount: amount.toString(),
+				charge_id: chargeId,
+				...(options?.email && { email: options.email }),
+				...(options?.firstName && { first_name: options.firstName }),
+				...(options?.lastName && { last_name: options.lastName }),
+			};
+
+			logger.info("PayChangu: initializing bank payout", { payoutData });
+
+			const response = await this.networkManager.initializeBankPayout(payoutData);
+
+			if (!response || response.status !== "success") {
+				return {
+					type: "error",
+					payload: {
+						HasError: true,
+						StackTraceError: response,
+					},
+				};
+			}
+
+			return {
+				type: "success",
+				payload: {
+					TransactionDetails: response.data.transaction,
+					HasError: false,
+				},
+			};
+		} catch (error: unknown) {
+			logger.error("PayChangu: bank payout initialization failed", error);
+			return {
+				type: "error",
+				payload: {
+					HasError: true,
+					StackTraceError: error,
+				},
+			};
+		}
+	}
+
+	/**
+	 * Gets bank payout details by charge ID
+	 * @param chargeId - The charge ID to look up
+	 * @returns Promise resolving to the bank payout details response
+	 */
+	async getBankPayoutDetails(
+		chargeId: string,
+	): Promise<PayChanguBankPayoutDetailsResponse> {
+		try {
+			logger.info("PayChangu: getting bank payout details", { chargeId });
+
+			const response = await this.networkManager.getBankPayoutDetails(chargeId);
+
+			if (!response || (response.status !== "successful" && response.status !== "success")) {
+				return {
+					type: "error",
+					payload: {
+						HasError: true,
+						StackTraceError: response,
+					},
+				};
+			}
+
+			return {
+				type: "success",
+				payload: {
+					PayoutDetails: response.data,
+					HasError: false,
+				},
+			};
+		} catch (error: unknown) {
+			logger.error("PayChangu: bank payout details retrieval failed", error);
+			return {
+				type: "error",
+				payload: {
+					HasError: true,
+					StackTraceError: error,
+				},
+			};
+		}
+	}
+
+	/**
+	 * Gets all bank payouts with pagination
+	 * @param page - The page number to fetch (optional)
+	 * @param perPage - The number of records per page (optional)
+	 * @returns Promise resolving to the bank payouts list response
+	 */
+	async getAllBankPayouts(
+		page?: number,
+		perPage?: number,
+	): Promise<PayChanguBankPayoutsListResponse> {
+		try {
+			logger.info("PayChangu: getting all bank payouts", { page, perPage });
+
+			const response = await this.networkManager.getAllBankPayouts(page, perPage);
+
+			if (!response || response.status !== "success") {
+				return {
+					type: "error",
+					payload: {
+						HasError: true,
+						StackTraceError: response,
+					},
+				};
+			}
+
+			return {
+				type: "success",
+				payload: {
+					Payouts: response.data.data,
+					Pagination: {
+						CurrentPage: response.data.current_page,
+						TotalPages: response.data.total_pages,
+						PerPage: response.data.per_page,
+						NextPageUrl: response.data.next_page_url,
+					},
+					HasError: false,
+				},
+			};
+		} catch (error: unknown) {
+			logger.error("PayChangu: all bank payouts retrieval failed", error);
+			return {
+				type: "error",
+				payload: {
+					HasError: true,
+					StackTraceError: error,
+				},
+			};
+		}
+	}
+
+	/**
+	 * Process a bank transfer payment
+	 * @param bankUuid - The UUID of the bank
+	 * @param accountName - The bank account name
+	 * @param accountNumber - The bank account number
+	 * @param amount - The amount to charge
+	 * @param chargeId - Unique identifier for this transaction
+	 * @param currency - The currency (defaults to MWK)
+	 * @param options - Optional details for the transaction
+	 * @returns Promise resolving to the bank transfer payment response
+	 */
+	async processBankTransfer(
+		bankUuid: string,
+		accountName: string,
+		accountNumber: string,
+		amount: string | number,
+		chargeId: string,
+		currency = "MWK",
+		options?: {
+			email?: string;
+			firstName?: string;
+			lastName?: string;
+		}
+	): Promise<PayChanguBankTransferPaymentResponse> {
+		try {
+			const bankTransferData: PayChanguDirectChargeBankTransfer = {
+				bank_uuid: bankUuid,
+				bank_account_name: accountName,
+				bank_account_number: accountNumber,
+				amount: amount.toString(),
+				currency,
+				charge_id: chargeId,
+				payment_method: "bank_transfer",
+				...(options?.email && { email: options.email }),
+				...(options?.firstName && { first_name: options.firstName }),
+				...(options?.lastName && { last_name: options.lastName }),
+			};
+
+			logger.info("PayChangu: processing bank transfer", { bankTransferData });
+
+			const response = await this.networkManager.processBankTransfer(bankTransferData);
+
+			if (!response || response.status !== "success") {
+				return {
+					type: "error",
+					payload: {
+						HasError: true,
+						StackTraceError: response,
+					},
+				};
+			}
+
+			return {
+				type: "success",
+				payload: {
+					TransactionDetails: response.data.transaction,
+					PaymentAccountDetails: response.data.payment_account_details,
+					RedirectUrl: response.data.redirectUrl,
+					HasError: false,
+				},
+			};
+		} catch (error: unknown) {
+			logger.error("PayChangu: bank transfer processing failed", error);
 			return {
 				type: "error",
 				payload: {
