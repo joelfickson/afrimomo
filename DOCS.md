@@ -11,6 +11,7 @@ Afromomo is a unified SDK for integrating with various African payment providers
     - [Direct Configuration](#direct-configuration)
     - [Accessing the SDK Instance](#accessing-the-sdk-instance)
     - [Checking Service Availability](#checking-service-availability)
+  - [Important: Initialization Order](#important-initialization-order)
   - [Getting Started](#getting-started)
   - [Payment Providers](#payment-providers)
     - [PayChangu](#paychangu)
@@ -21,12 +22,17 @@ Afromomo is a unified SDK for integrating with various African payment providers
 
 ## Installation
 
+We recommend using pnpm for installing the SDK to benefit from its efficient storage and improved performance:
+
 ```bash
-npm install afromomo
-# or
-yarn add afromomo
-# or
-pnpm add afromomo
+# Recommended: using pnpm
+pnpm add afrimomo-sdk
+
+# Alternative: using yarn
+yarn add afrimomo-sdk
+
+# Alternative: using npm
+npm install afrimomo-sdk
 ```
 
 ## Configuration
@@ -103,6 +109,27 @@ const hasPaychangu = sdk.isServiceConfigured('paychangu');
 // Get list of all configured services
 const services = sdk.getConfiguredServices();
 ```
+
+## Important: Initialization Order
+
+When using the SDK in an Express.js application or similar framework, the initialization order is critical to avoid "SDK not initialized" errors. Always follow this pattern:
+
+```typescript
+// 1. First, import the SDK
+import { AfromomoSDK } from 'afrimomo-sdk';
+
+// 2. Initialize the SDK before importing routes that use it
+AfromomoSDK.initialize();
+
+// 3. Only after initialization, import route files that call getInstance()
+import { yourRoutes } from './routes/your-routes';
+
+// Now create your app and use the routes...
+const app = express();
+app.use('/your-path', yourRoutes);
+```
+
+This order is necessary because route files typically call `AfromomoSDK.getInstance()` during their import, which will throw an error if the SDK hasn't been initialized yet.
 
 ## Getting Started
 
