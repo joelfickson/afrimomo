@@ -1,5 +1,6 @@
 import { PayChangu } from "./services/paychangu";
 import { PawaPay } from "./services/pawapay";
+import { PaymentProviderAdapter, PaymentProviderConfig } from "./services/generic/paymentProvider";
 import type { Environment } from "./config/constants";
 import {
 	type EnvConfig,
@@ -39,6 +40,11 @@ export interface SDKConfig {
 		/** Optional environment setting (defaults to DEVELOPMENT) */
 		environment?: Environment;
 	};
+	
+	/**
+	 * Custom payment providers configuration
+	 */
+	providers?: Record<string, PaymentProviderConfig>;
 }
 
 /**
@@ -49,6 +55,7 @@ export class AfromomoSDK {
 	private _paychangu?: PayChangu;
 	private _pawapay?: PawaPay;
 	private readonly envConfig?: EnvConfig;
+	private _providers: Record<string, PaymentProviderAdapter> = {};
 
 	private constructor(private readonly config: SDKConfig = {}) {
 		// Private constructor to enforce singleton pattern
@@ -72,17 +79,27 @@ export class AfromomoSDK {
 
 			// Log initialization status
 			const services = AfromomoSDK.instance.getConfiguredServices();
-			if (services.length === 0) {
+			const providers = Object.keys(AfromomoSDK.instance._providers);
+			
+			if (services.length === 0 && providers.length === 0) {
 				console.warn("⚠️ No payment services were configured");
-				console.log("Available services:");
+				console.log("Available built-in services:");
 				console.log("- PayChangu (requires PAYCHANGU_SECRET_KEY)");
 				console.log("- PawaPay (requires PAWAPAY_JWT)");
+				console.log("- Custom providers (configure via providers option)");
 			} else {
 				console.log("✓ Initialized Afromomo SDK with services:");
 				for (const service of services) {
 					console.log(
 						`- ${service.charAt(0).toUpperCase() + service.slice(1)}`,
 					);
+				}
+				
+				if (providers.length > 0) {
+					console.log("✓ Custom payment providers:");
+					for (const provider of providers) {
+						console.log(`- ${provider}`);
+					}
 				}
 			}
 		}
@@ -127,25 +144,53 @@ export class AfromomoSDK {
 		}
 		return this._pawapay;
 	}
+	
+	/**
+	 * Access a custom payment provider
+	 * @param providerName - The name of the custom provider
+	 * @throws Error if the provider is not configured
+	 */
+	getProvider(providerName: string): PaymentProviderAdapter {
+		if (!this._providers[providerName]) {
+			throw new Error(
+				`Provider '${providerName}' is not configured. Please add it to the providers configuration.`
+			);
+		}
+		return this._providers[providerName];
+	}
+	
+	/**
+	 * Add a new payment provider to the SDK
+	 * @param name - A unique name for the provider
+	 * @param config - The provider configuration
+	 * @returns The created provider instance
+	 */
+	addProvider(name: string, config: PaymentProviderConfig): PaymentProviderAdapter {
+		// Override name in config to ensure consistency
+		const providerConfig = { ...config, name };
+		const provider = new PaymentProviderAdapter(providerConfig);
+		this._providers[name] = provider;
+		return provider;
+	}
 
 	/**
 	 * Checks if a specific payment service is configured
 	 * @param service - The name of the service to check
 	 * @returns boolean indicating if the service is configured
 	 */
-	isServiceConfigured(service: "paychangu" | "pawapay"): boolean {
+	isServiceConfigured(service: "paychangu" | "pawapay" | string): boolean {
 		switch (service) {
 			case "paychangu":
 				return !!this._paychangu;
 			case "pawapay":
 				return !!this._pawapay;
 			default:
-				return false;
+				return !!this._providers[service];
 		}
 	}
 
 	/**
-	 * Gets a list of configured payment services
+	 * Gets a list of configured built-in payment services
 	 * @returns Array of configured service names
 	 */
 	getConfiguredServices(): ("paychangu" | "pawapay")[] {
@@ -154,10 +199,19 @@ export class AfromomoSDK {
 		if (this._pawapay) services.push("pawapay");
 		return services;
 	}
+	
+	/**
+	 * Gets a list of all custom providers
+	 * @returns Array of provider names
+	 */
+	getCustomProviders(): string[] {
+		return Object.keys(this._providers);
+	}
 
 	private initializeServices(): void {
 		this.initializeFromEnv();
 		this.initializeFromConfig();
+		this.initializeCustomProviders();
 	}
 
 	private initializeFromEnv(): void {
@@ -184,6 +238,15 @@ export class AfromomoSDK {
 
 		if (this.config.pawapay?.jwt) {
 			this._pawapay = new PawaPay(this.config.pawapay.jwt);
+		}
+	}
+	
+	private initializeCustomProviders(): void {
+		// Initialize custom providers if configured
+		if (this.config.providers) {
+			for (const [name, config] of Object.entries(this.config.providers)) {
+				this.addProvider(name, config);
+			}
 		}
 	}
 }

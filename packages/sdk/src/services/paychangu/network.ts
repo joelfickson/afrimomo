@@ -4,8 +4,9 @@
  * Manages network connections for the PayChangu payment service.
  */
 
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { logger } from "../../utils/logger";
+import type { NetworkResponse } from "../../types";
 
 // Base URL for the PayChangu API
 const BASE_PAYCHANGU_URL = "https://api.paychangu.com";
@@ -38,6 +39,111 @@ export class PayChanguNetwork {
 		});
 
 		this.setupInterceptors();
+	}
+
+	/**
+	 * Handles API errors in a consistent way
+	 * 
+	 * @param error - The error thrown during API request
+	 * @param context - Context about the operation for better error messages
+	 * @returns A standardized error response
+	 */
+	handleApiError(error: unknown, context: string): NetworkResponse {
+		logger.error(`PayChangu API Error - ${context}:`, error);
+
+		let errorMessage = `An error occurred during ${context}`;
+		let statusCode = 500;
+		let errorObject = "{}";
+
+		if (axios.isAxiosError(error) && error.response) {
+			statusCode = error.response.status;
+
+			try {
+				const data = error.response.data as {
+					message?: string;
+					status?: string;
+				};
+				
+				errorMessage = data.message || errorMessage;
+				errorObject = JSON.stringify(data);
+			} catch {
+				errorMessage = `Failed to parse error response during ${context}`;
+			}
+		} else if (error instanceof Error) {
+			errorMessage = error.message;
+		}
+
+		return {
+			errorMessage,
+			statusCode,
+			errorObject,
+		};
+	}
+
+	/**
+	 * Make a GET request to the PayChangu API
+	 * @param endpoint - API endpoint
+	 * @param config - Optional Axios request config
+	 * @param context - Context for error handling
+	 * @returns Promise resolving to the response data
+	 */
+	async get<T>(endpoint: string, config = {}, context = "GET request"): Promise<T> {
+		try {
+			const response = await this.axiosInstance.get<T>(endpoint, config);
+			return response.data;
+		} catch (error) {
+			throw this.handleApiError(error, context);
+		}
+	}
+
+	/**
+	 * Make a POST request to the PayChangu API
+	 * @param endpoint - API endpoint
+	 * @param data - Request payload
+	 * @param config - Optional Axios request config
+	 * @param context - Context for error handling
+	 * @returns Promise resolving to the response data
+	 */
+	async post<T>(endpoint: string, data: unknown, config = {}, context = "POST request"): Promise<T> {
+		try {
+			const response = await this.axiosInstance.post<T>(endpoint, data, config);
+			return response.data;
+		} catch (error) {
+			throw this.handleApiError(error, context);
+		}
+	}
+
+	/**
+	 * Make a PUT request to the PayChangu API
+	 * @param endpoint - API endpoint
+	 * @param data - Request payload
+	 * @param config - Optional Axios request config
+	 * @param context - Context for error handling
+	 * @returns Promise resolving to the response data
+	 */
+	async put<T>(endpoint: string, data: unknown, config = {}, context = "PUT request"): Promise<T> {
+		try {
+			const response = await this.axiosInstance.put<T>(endpoint, data, config);
+			return response.data;
+		} catch (error) {
+			throw this.handleApiError(error, context);
+		}
+	}
+
+	/**
+	 * Make a DELETE request to the PayChangu API
+	 * @param endpoint - API endpoint
+	 * @param config - Optional Axios request config
+	 * @param context - Context for error handling
+	 * @returns Promise resolving to the response data
+	 */
+	async delete<T>(endpoint: string, config = {}, context = "DELETE request"): Promise<T> {
+		try {
+			const response = await this.axiosInstance.delete<T>(endpoint, config);
+			return response.data;
+		} catch (error) {
+			throw this.handleApiError(error, context);
+		}
 	}
 
 	/**

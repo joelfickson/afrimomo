@@ -69,6 +69,82 @@ export class PayChangu extends BaseService {
 		this.network = new PayChanguNetwork(secretKey);
 	}
 
+	/**
+	 * Handles API errors in a consistent way
+	 * 
+	 * @param error - The error thrown during API request
+	 * @param context - Context about the operation for better error messages
+	 * @returns A standardized error response
+	 * @private
+	 */
+	private handleApiError(error: unknown, context: string): PayChanguErrorResponse {
+		logger.error(`PayChangu API Error - ${context}:`, error);
+
+		if (axios.isAxiosError(error) && error.response?.data) {
+			// Handle API-returned error format
+			if (error.response.data.status === "error" || error.response.data.status === "failed") {
+				return error.response.data as PayChanguErrorResponse;
+			}
+
+			// Create standard error response from error data
+			return {
+				message: error.response.data.message || `An error occurred during ${context}`,
+				status: "error"
+			};
+		}
+		
+		// Handle unexpected errors
+		return {
+			message: error instanceof Error ? error.message : `An unexpected error occurred during ${context}`,
+			status: "error"
+		};
+	}
+
+	/**
+	 * Creates a standardized error response for higher-level methods
+	 * 
+	 * @param error - The error or error response from lower-level methods
+	 * @param context - Context about the operation for better error messages
+	 * @param defaultPayload - Default payload object for the error response
+	 * @returns A standardized error response with the specified payload type
+	 * @private
+	 */
+	private createStandardErrorResponse<T>(
+		error: unknown, 
+		context: string, 
+		defaultPayload: T
+	): { type: "error", payload: T & { HasError: true, StackTraceError: unknown } } {
+		logger.error(`PayChangu Service Error - ${context}:`, error);
+		
+		return {
+			type: "error",
+			payload: {
+				...defaultPayload,
+				HasError: true,
+				StackTraceError: error,
+			},
+		};
+	}
+
+	/**
+	 * Creates a standardized success response for higher-level methods
+	 * 
+	 * @param payload - The payload to include in the success response
+	 * @returns A standardized success response with the specified payload type
+	 * @private
+	 */
+	private createStandardSuccessResponse<T>(
+		payload: T
+	): { type: "success", payload: T & { HasError: false } } {
+		return {
+			type: "success",
+			payload: {
+				...payload,
+				HasError: false,
+			},
+		};
+	}
+
 	// #region Direct Charge Methods
 
 	/**
@@ -83,29 +159,18 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("Initiating PayChangu payment:", data);
 
-			const response = await this.network.axiosInstance.post("/payment", data, {
-				headers: {
-					Accept: "application/json",
+			return await this.network.post<PayChanguDirectChargeResponse>(
+				"/payment", 
+				data, 
+				{
+					headers: {
+						Accept: "application/json",
+					},
 				},
-			});
-
-			return response.data;
+				"payment initiation"
+			);
 		} catch (error) {
-			logger.error("Error initiating PayChangu payment:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while processing the payment",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
+			return this.handleApiError(error, "payment initiation");
 		}
 	}
 
@@ -121,37 +186,23 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("Initializing PayChangu direct charge payment:", data);
 
-			const response = await this.network.axiosInstance.post(
+			return await this.network.post<PayChanguDirectChargeResponse | PayChanguDirectChargeErrorResponse>(
 				"/direct-charge/payments/initialize", 
 				data, 
 				{
 					headers: {
 						Accept: "application/json",
 					},
-				}
+				},
+				"direct charge initialization"
 			);
-
-			return response.data;
 		} catch (error) {
-			logger.error("Error initializing PayChangu direct charge payment:", error);
-
-			if (axios.isAxiosError(error)) {
-				if (error.response?.data?.status === "failed") {
-					return error.response.data as PayChanguDirectChargeErrorResponse;
-				}
-
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while processing the direct charge payment",
-					status: "error",
-				};
+			// Special handling for direct charge errors that have a "failed" status
+			if (axios.isAxiosError(error) && error.response?.data?.status === "failed") {
+				return error.response.data as PayChanguDirectChargeErrorResponse;
 			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
+			
+			return this.handleApiError(error, "direct charge initialization");
 		}
 	}
 
@@ -167,32 +218,17 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("Getting PayChangu transaction details:", chargeId);
 
-			const response = await this.network.axiosInstance.get(
+			return await this.network.get<PayChanguSingleTransactionResponse>(
 				`/direct-charge/transactions/${chargeId}/details`,
 				{
 					headers: {
 						Accept: "application/json",
 					},
 				},
+				`transaction details retrieval for ${chargeId}`
 			);
-
-			return response.data;
 		} catch (error) {
-			logger.error("Error getting PayChangu transaction details:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while retrieving transaction details",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
+			return this.handleApiError(error, "transaction details retrieval");
 		}
 	}
 
@@ -208,33 +244,18 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("Processing PayChangu bank transfer:", data);
 
-			const response = await this.network.axiosInstance.post(
+			return await this.network.post<PayChanguDirectChargeBankTransferResponse>(
 				"/direct-charge/payments/bank-transfer", 
 				data, 
 				{
 					headers: {
 						Accept: "application/json",
 					},
-				}
+				},
+				"bank transfer processing"
 			);
-
-			return response.data;
 		} catch (error) {
-			logger.error("Error processing PayChangu bank transfer:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while processing the bank transfer",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
+			return this.handleApiError(error, "bank transfer processing");
 		}
 	}
 
@@ -271,11 +292,10 @@ export class PayChangu extends BaseService {
 			const response = await this.initializeDirectCharge(directChargeData);
 
 			if (!response || response.status !== "success") {
-				return {
-					type: "error",
-					payload: {
-						HasError: true,
-						StackTraceError: response,
+				return this.createStandardErrorResponse(
+					response,
+					"direct charge payment initialization",
+					{
 						TransactionDetails: {} as PayChanguTypes.BaseTransaction,
 						PaymentAccountDetails: {
 							account_name: "",
@@ -283,25 +303,19 @@ export class PayChangu extends BaseService {
 							code: "",
 							name: "",
 						},
-					},
-				};
+					}
+				);
 			}
 
-			return {
-				type: "success",
-				payload: {
-					TransactionDetails: response.data.transaction,
-					PaymentAccountDetails: response.data.payment_account_details,
-					HasError: false,
-				},
-			};
+			return this.createStandardSuccessResponse({
+				TransactionDetails: response.data.transaction,
+				PaymentAccountDetails: response.data.payment_account_details,
+			});
 		} catch (error: unknown) {
-			logger.error("PayChangu: direct charge payment initialization failed", error);
-			return {
-				type: "error",
-				payload: {
-					HasError: true,
-					StackTraceError: error,
+			return this.createStandardErrorResponse(
+				error,
+				"direct charge payment initialization",
+				{
 					TransactionDetails: {} as PayChanguTypes.BaseTransaction,
 					PaymentAccountDetails: {
 						account_name: "",
@@ -309,8 +323,8 @@ export class PayChangu extends BaseService {
 						code: "",
 						name: "",
 					},
-				},
-			};
+				}
+			);
 		}
 	}
 
@@ -329,33 +343,26 @@ export class PayChangu extends BaseService {
 			const response = await this.getTransactionDetails(chargeId);
 
 			if (!response || response.status !== "success") {
-				return {
-					type: "error",
-					payload: {
-						HasError: true,
-						StackTraceError: response,
+				return this.createStandardErrorResponse(
+					response,
+					"direct charge transaction details retrieval",
+					{
 						TransactionDetails: {} as PayChanguTypes.BaseTransaction,
-					},
-				};
+					}
+				);
 			}
 
-			return {
-				type: "success",
-				payload: {
-					TransactionDetails: response.data.transaction,
-					HasError: false,
-				},
-			};
+			return this.createStandardSuccessResponse({
+				TransactionDetails: response.data.transaction,
+			});
 		} catch (error: unknown) {
-			logger.error("PayChangu: direct charge transaction details retrieval failed", error);
-			return {
-				type: "error",
-				payload: {
-					HasError: true,
-					StackTraceError: error,
+			return this.createStandardErrorResponse(
+				error,
+				"direct charge transaction details retrieval",
+				{
 					TransactionDetails: {} as PayChanguTypes.BaseTransaction,
-				},
-			};
+				}
+			);
 		}
 	}
 
@@ -403,11 +410,10 @@ export class PayChangu extends BaseService {
 			const response = await this.processBankTransferDirect(bankTransferData);
 
 			if (!response || response.status !== "success") {
-				return {
-					type: "error",
-					payload: {
-						HasError: true,
-						StackTraceError: response,
+				return this.createStandardErrorResponse(
+					response,
+					"bank transfer processing",
+					{
 						TransactionDetails: {} as PayChanguTypes.BaseTransaction,
 						PaymentAccountDetails: {
 							account_name: "",
@@ -415,26 +421,20 @@ export class PayChangu extends BaseService {
 							code: "",
 							name: "",
 						},
-					},
-				};
+					}
+				);
 			}
 
-			return {
-				type: "success",
-				payload: {
-					TransactionDetails: response.data.transaction,
-					PaymentAccountDetails: response.data.payment_account_details,
-					RedirectUrl: response.data.redirectUrl,
-					HasError: false,
-				},
-			};
+			return this.createStandardSuccessResponse({
+				TransactionDetails: response.data.transaction,
+				PaymentAccountDetails: response.data.payment_account_details,
+				RedirectUrl: response.data.redirectUrl,
+			});
 		} catch (error: unknown) {
-			logger.error("PayChangu: bank transfer processing failed", error);
-			return {
-				type: "error",
-				payload: {
-					HasError: true,
-					StackTraceError: error,
+			return this.createStandardErrorResponse(
+				error,
+				"bank transfer processing",
+				{
 					TransactionDetails: {} as PayChanguTypes.BaseTransaction,
 					PaymentAccountDetails: {
 						account_name: "",
@@ -442,8 +442,8 @@ export class PayChangu extends BaseService {
 						code: "",
 						name: "",
 					},
-				},
-			};
+				}
+			);
 		}
 	}
 
@@ -460,32 +460,17 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("Getting PayChangu mobile money operators");
 
-			const response = await this.network.axiosInstance.get(
+			return await this.network.get<PayChanguMobileMoneyOperatorsResponse>(
 				"/mobile-money",
 				{
 					headers: {
 						Accept: "application/json",
 					},
 				},
+				"mobile money operators retrieval"
 			);
-
-			return response.data;
 		} catch (error) {
-			logger.error("Error getting PayChangu mobile money operators:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while retrieving mobile money operators",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
+			return this.handleApiError(error, "mobile money operators retrieval");
 		}
 	}
 
@@ -501,33 +486,18 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("Initializing PayChangu mobile money payout:", data);
 
-			const response = await this.network.axiosInstance.post(
+			return await this.network.post<PayChanguMobileMoneyPayoutResponse>(
 				"/mobile-money/payouts/initialize", 
 				data, 
 				{
 					headers: {
 						Accept: "application/json",
 					},
-				}
+				},
+				"mobile money payout initialization"
 			);
-
-			return response.data;
 		} catch (error) {
-			logger.error("Error initializing PayChangu mobile money payout:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while processing the mobile money payout",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
+			return this.handleApiError(error, "mobile money payout initialization");
 		}
 	}
 
@@ -543,32 +513,17 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("Getting PayChangu payout details:", chargeId);
 
-			const response = await this.network.axiosInstance.get(
+			return await this.network.get<PayChanguSinglePayoutResponse>(
 				`/mobile-money/payments/${chargeId}/details`,
 				{
 					headers: {
 						Accept: "application/json",
 					},
 				},
+				`payout details retrieval for ${chargeId}`
 			);
-
-			return response.data;
 		} catch (error) {
-			logger.error("Error getting PayChangu payout details:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while retrieving payout details",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
+			return this.handleApiError(error, "payout details retrieval");
 		}
 	}
 
@@ -584,33 +539,22 @@ export class PayChangu extends BaseService {
 			const response = await this.getMobileMoneyOperatorsDirect();
 
 			if (!response || response.status !== "success") {
-				return {
-					type: "error",
-					payload: {
-						HasError: true,
-						StackTraceError: response,
-						Operators: [],
-					},
-				};
+				return this.createStandardErrorResponse(
+					response,
+					"mobile money operators retrieval",
+					{ Operators: [] }
+				);
 			}
 
-			return {
-				type: "success",
-				payload: {
-					Operators: response.data,
-					HasError: false,
-				},
-			};
+			return this.createStandardSuccessResponse({
+				Operators: response.data,
+			});
 		} catch (error: unknown) {
-			logger.error("PayChangu: mobile money operators retrieval failed", error);
-			return {
-				type: "error",
-				payload: {
-					HasError: true,
-					StackTraceError: error,
-					Operators: [],
-				},
-			};
+			return this.createStandardErrorResponse(
+				error,
+				"mobile money operators retrieval",
+				{ Operators: [] }
+			);
 		}
 	}
 
@@ -653,11 +597,10 @@ export class PayChangu extends BaseService {
 			const response = await this.initializeMobileMoneyPayoutDirect(payoutData);
 
 			if (!response || response.status !== "success") {
-				return {
-					type: "error",
-					payload: {
-						HasError: true,
-						StackTraceError: response,
+				return this.createStandardErrorResponse(
+					response,
+					"mobile money payout initialization",
+					{
 						PayoutDetails: {
 							charge_id: "",
 							mobile: "",
@@ -666,24 +609,18 @@ export class PayChangu extends BaseService {
 							created_at: "",
 							completed_at: null,
 						},
-					},
-				};
+					}
+				);
 			}
 
-			return {
-				type: "success",
-				payload: {
-					PayoutDetails: response.data,
-					HasError: false,
-				},
-			};
+			return this.createStandardSuccessResponse({
+				PayoutDetails: response.data,
+			});
 		} catch (error: unknown) {
-			logger.error("PayChangu: mobile money payout initialization failed", error);
-			return {
-				type: "error",
-				payload: {
-					HasError: true,
-					StackTraceError: error,
+			return this.createStandardErrorResponse(
+				error,
+				"mobile money payout initialization",
+				{
 					PayoutDetails: {
 						charge_id: "",
 						mobile: "",
@@ -692,8 +629,8 @@ export class PayChangu extends BaseService {
 						created_at: "",
 						completed_at: null,
 					},
-				},
-			};
+				}
+			);
 		}
 	}
 
@@ -712,11 +649,10 @@ export class PayChangu extends BaseService {
 			const response = await this.getPayoutDetailsDirect(chargeId);
 
 			if (!response || response.status !== "success") {
-				return {
-					type: "error",
-					payload: {
-						HasError: true,
-						StackTraceError: response,
+				return this.createStandardErrorResponse(
+					response,
+					"mobile money payout details retrieval",
+					{
 						PayoutDetails: {
 							charge_id: "",
 							mobile: "",
@@ -725,24 +661,18 @@ export class PayChangu extends BaseService {
 							created_at: "",
 							completed_at: null,
 						},
-					},
-				};
+					}
+				);
 			}
 
-			return {
-				type: "success",
-				payload: {
-					PayoutDetails: response.data,
-					HasError: false,
-				},
-			};
+			return this.createStandardSuccessResponse({
+				PayoutDetails: response.data,
+			});
 		} catch (error: unknown) {
-			logger.error("PayChangu: mobile money payout details retrieval failed", error);
-			return {
-				type: "error",
-				payload: {
-					HasError: true,
-					StackTraceError: error,
+			return this.createStandardErrorResponse(
+				error,
+				"mobile money payout details retrieval",
+				{
 					PayoutDetails: {
 						charge_id: "",
 						mobile: "",
@@ -751,8 +681,8 @@ export class PayChangu extends BaseService {
 						created_at: "",
 						completed_at: null,
 					},
-				},
-			};
+				}
+			);
 		}
 	}
 
@@ -772,7 +702,7 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("Getting PayChangu supported banks for currency:", currency);
 
-			const response = await this.network.axiosInstance.get(
+			return await this.network.get<PayChanguSupportedBanksResponse>(
 				"/direct-charge/payouts/supported-banks",
 				{
 					headers: {
@@ -782,25 +712,10 @@ export class PayChangu extends BaseService {
 						currency,
 					},
 				},
+				`supported banks retrieval for ${currency}`
 			);
-
-			return response.data;
 		} catch (error) {
-			logger.error("Error getting PayChangu supported banks:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while retrieving supported banks",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
+			return this.handleApiError(error, "supported banks retrieval");
 		}
 	}
 
@@ -816,33 +731,18 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("Initializing PayChangu bank payout:", data);
 
-			const response = await this.network.axiosInstance.post(
+			return await this.network.post<PayChanguBankPayoutResponse>(
 				"/direct-charge/payouts/initialize", 
 				data, 
 				{
 					headers: {
 						Accept: "application/json",
 					},
-				}
+				},
+				"bank payout initialization"
 			);
-
-			return response.data;
 		} catch (error) {
-			logger.error("Error initializing PayChangu bank payout:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while processing the bank payout",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
+			return this.handleApiError(error, "bank payout initialization");
 		}
 	}
 
@@ -858,32 +758,17 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("Getting PayChangu bank payout details:", chargeId);
 
-			const response = await this.network.axiosInstance.get(
+			return await this.network.get<PayChanguSingleBankPayoutResponse>(
 				`/direct-charge/payouts/${chargeId}/details`,
 				{
 					headers: {
 						Accept: "application/json",
 					},
 				},
+				`bank payout details retrieval for ${chargeId}`
 			);
-
-			return response.data;
 		} catch (error) {
-			logger.error("Error getting PayChangu bank payout details:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while retrieving bank payout details",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
+			return this.handleApiError(error, "bank payout details retrieval");
 		}
 	}
 
@@ -901,7 +786,7 @@ export class PayChangu extends BaseService {
 		try {
 			logger.info("Getting all PayChangu bank payouts");
 
-			const response = await this.network.axiosInstance.get(
+			return await this.network.get<PayChanguAllBankPayoutsResponse>(
 				"/direct-charge/payouts",
 				{
 					headers: {
@@ -912,25 +797,10 @@ export class PayChangu extends BaseService {
 						...(perPage && { per_page: perPage }),
 					},
 				},
+				`all bank payouts retrieval (page ${page || 1})`
 			);
-
-			return response.data;
 		} catch (error) {
-			logger.error("Error getting all PayChangu bank payouts:", error);
-
-			if (axios.isAxiosError(error)) {
-				return {
-					message:
-						error.response?.data?.message ||
-						"An error occurred while retrieving bank payouts",
-					status: "error",
-				};
-			}
-
-			return {
-				message: "An unexpected error occurred",
-				status: "error",
-			};
+			return this.handleApiError(error, "bank payouts retrieval");
 		}
 	}
 
@@ -949,33 +819,22 @@ export class PayChangu extends BaseService {
 			const response = await this.getSupportedBanksDirect(currency);
 
 			if (!response || response.status !== "success") {
-				return {
-					type: "error",
-					payload: {
-						HasError: true,
-						StackTraceError: response,
-						Banks: [],
-					},
-				};
+				return this.createStandardErrorResponse(
+					response,
+					"supported banks retrieval",
+					{ Banks: [] }
+				);
 			}
 
-			return {
-				type: "success",
-				payload: {
-					Banks: response.data,
-					HasError: false,
-				},
-			};
+			return this.createStandardSuccessResponse({
+				Banks: response.data,
+			});
 		} catch (error: unknown) {
-			logger.error("PayChangu: supported banks retrieval failed", error);
-			return {
-				type: "error",
-				payload: {
-					HasError: true,
-					StackTraceError: error,
-					Banks: [],
-				},
-			};
+			return this.createStandardErrorResponse(
+				error,
+				"supported banks retrieval",
+				{ Banks: [] }
+			);
 		}
 	}
 
@@ -1020,11 +879,10 @@ export class PayChangu extends BaseService {
 			const response = await this.initializeBankPayoutDirect(payoutData);
 
 			if (!response || response.status !== "success") {
-				return {
-					type: "error",
-					payload: {
-						HasError: true,
-						StackTraceError: response,
+				return this.createStandardErrorResponse(
+					response,
+					"bank payout initialization",
+					{
 						TransactionDetails: {
 							id: "",
 							charge_id: "",
@@ -1042,24 +900,18 @@ export class PayChangu extends BaseService {
 							created_at: "",
 							completed_at: null,
 						},
-					},
-				};
+					}
+				);
 			}
 
-			return {
-				type: "success",
-				payload: {
-					TransactionDetails: response.data.transaction,
-					HasError: false,
-				},
-			};
+			return this.createStandardSuccessResponse({
+				TransactionDetails: response.data.transaction,
+			});
 		} catch (error: unknown) {
-			logger.error("PayChangu: bank payout initialization failed", error);
-			return {
-				type: "error",
-				payload: {
-					HasError: true,
-					StackTraceError: error,
+			return this.createStandardErrorResponse(
+				error,
+				"bank payout initialization",
+				{
 					TransactionDetails: {
 						id: "",
 						charge_id: "",
@@ -1077,8 +929,8 @@ export class PayChangu extends BaseService {
 						created_at: "",
 						completed_at: null,
 					},
-				},
-			};
+				}
+			);
 		}
 	}
 
@@ -1098,11 +950,10 @@ export class PayChangu extends BaseService {
 
 			// Accept both "successful" (as in the API docs) and "success" (to be safe)
 			if (!response || (response.status !== "successful" && response.status !== "success")) {
-				return {
-					type: "error",
-					payload: {
-						HasError: true,
-						StackTraceError: response,
+				return this.createStandardErrorResponse(
+					response,
+					"bank payout details retrieval",
+					{
 						PayoutDetails: {
 							id: "",
 							charge_id: "",
@@ -1120,24 +971,18 @@ export class PayChangu extends BaseService {
 							created_at: "",
 							completed_at: null,
 						},
-					},
-				};
+					}
+				);
 			}
 
-			return {
-				type: "success",
-				payload: {
-					PayoutDetails: response.data,
-					HasError: false,
-				},
-			};
+			return this.createStandardSuccessResponse({
+				PayoutDetails: response.data,
+			});
 		} catch (error: unknown) {
-			logger.error("PayChangu: bank payout details retrieval failed", error);
-			return {
-				type: "error",
-				payload: {
-					HasError: true,
-					StackTraceError: error,
+			return this.createStandardErrorResponse(
+				error,
+				"bank payout details retrieval",
+				{
 					PayoutDetails: {
 						id: "",
 						charge_id: "",
@@ -1155,8 +1000,8 @@ export class PayChangu extends BaseService {
 						created_at: "",
 						completed_at: null,
 					},
-				},
-			};
+				}
+			);
 		}
 	}
 
@@ -1177,12 +1022,10 @@ export class PayChangu extends BaseService {
 			const response = await this.getAllBankPayoutsDirect(page, perPage);
 
 			if (!response || response.status !== "success") {
-				return {
-					type: "error",
-					payload: {
-						HasError: true,
-						StackTraceError: response,
-						// Provide default values for required properties
+				return this.createStandardErrorResponse(
+					response,
+					"bank payouts list retrieval",
+					{
 						Payouts: [],
 						Pagination: {
 							CurrentPage: 0,
@@ -1190,32 +1033,25 @@ export class PayChangu extends BaseService {
 							PerPage: 0,
 							NextPageUrl: null,
 						},
-					},
-				};
+					}
+				);
 			}
 
 			// The response structure from the API includes pagination metadata and a data array
-			return {
-				type: "success",
-				payload: {
-					Payouts: response.data,
-					Pagination: {
-						CurrentPage: response.current_page,
-						TotalPages: response.total_pages,
-						PerPage: response.per_page,
-						NextPageUrl: response.next_page_url,
-					},
-					HasError: false,
+			return this.createStandardSuccessResponse({
+				Payouts: response.data,
+				Pagination: {
+					CurrentPage: response.current_page,
+					TotalPages: response.total_pages,
+					PerPage: response.per_page,
+					NextPageUrl: response.next_page_url,
 				},
-			};
+			});
 		} catch (error: unknown) {
-			logger.error("PayChangu: all bank payouts retrieval failed", error);
-			return {
-				type: "error",
-				payload: {
-					HasError: true,
-					StackTraceError: error,
-					// Provide default values for required properties
+			return this.createStandardErrorResponse(
+				error,
+				"bank payouts list retrieval",
+				{
 					Payouts: [],
 					Pagination: {
 						CurrentPage: 0,
@@ -1223,8 +1059,8 @@ export class PayChangu extends BaseService {
 						PerPage: 0,
 						NextPageUrl: null,
 					},
-				},
-			};
+				}
+			);
 		}
 	}
 

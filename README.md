@@ -9,11 +9,13 @@ A unified SDK for African payment providers, making it easy to integrate multipl
 - 📚 Comprehensive documentation
 - 🛠️ Easy to configure and use
 - 🔄 Consistent error handling
+- 🔌 Generic adapter for custom payment providers
 
 ## Currently Supported Providers
 
 - **PayChangu** - Payment services in Malawi
 - **PawaPay** - Mobile money payments across Africa
+- **Custom Providers** - Add your own payment providers with the generic adapter
 
 ## Quick Start
 
@@ -33,6 +35,19 @@ const sdk = new AfromomoSDK({
   pawapay: {
     jwt: 'your-pawapay-jwt-token',
     environment: 'DEVELOPMENT'
+  },
+  // Optional: custom payment providers
+  providers: {
+    'my-provider': {
+      name: 'MyProvider',
+      baseUrl: 'https://api.myprovider.com',
+      authType: 'bearer',
+      authToken: 'your-api-key',
+      endpoints: {
+        createPayment: '/payments',
+        getTransaction: '/transactions/{id}'
+      }
+    }
   }
 });
 ```
@@ -40,16 +55,15 @@ const sdk = new AfromomoSDK({
 3. Use the services:
 ```typescript
 // Using PayChangu
-const paymentResponse = await sdk.paychangu.initiatePayment({
-  account_id: 'user123',
-  purchase_amount: '1000',
-  purchase_currency: 'MWK',
-  item_title: 'Product Purchase',
-  description: 'Purchase description'
-}, {
-  email: 'user@example.com',
-  first_name: 'John',
-  last_name: 'Doe'
+const paymentResponse = await sdk.paychangu.initiateDirectChargePayment({
+  amount: 1000,
+  currency: 'MWK',
+  chargeId: 'order-123',
+  accountInfo: {
+    email: 'user@example.com',
+    first_name: 'John',
+    last_name: 'Doe'
+  }
 });
 
 // Using PawaPay
@@ -61,6 +75,65 @@ const depositResponse = await sdk.pawapay.deposits.sendDeposit({
   correspondent: 'MTN_MOMO_GHA',
   statementDescription: 'Payment for services',
   country: 'GHA'
+});
+
+// Using custom provider
+const customPayment = await sdk.getProvider('my-provider').createPayment({
+  amount: '2000',
+  currency: 'NGN',
+  reference: 'order-456',
+  customerInfo: {
+    email: 'customer@example.com',
+    name: 'Jane Smith'
+  }
+});
+```
+
+## Using the Generic Payment Provider Adapter
+
+You can easily add support for any payment provider with the generic adapter:
+
+```typescript
+import { AfromomoSDK, PaymentProviderConfig } from 'afromomo';
+
+// Configure a new payment provider
+const flutterwaveConfig: PaymentProviderConfig = {
+  name: 'Flutterwave',
+  baseUrl: 'https://api.flutterwave.com/v3',
+  authType: 'bearer',
+  authToken: 'your-flutterwave-secret-key',
+  defaultHeaders: {
+    'Content-Type': 'application/json'
+  },
+  endpoints: {
+    createPayment: '/payments',
+    getTransaction: '/transactions/{id}',
+    getBalance: '/balances'
+  },
+  // Optional: Transform requests to match the provider's API
+  requestTransformer: (request) => ({
+    amount: request.amount,
+    currency: request.currency,
+    tx_ref: request.reference,
+    customer: {
+      email: request.customerInfo?.email
+    }
+  })
+};
+
+// Initialize the SDK and add your provider
+const sdk = AfromomoSDK.initialize();
+const flutterwave = sdk.addProvider('flutterwave', flutterwaveConfig);
+
+// Use your provider
+const payment = await flutterwave.createPayment({
+  amount: '5000',
+  currency: 'NGN',
+  reference: 'order-789',
+  customerInfo: {
+    email: 'customer@example.com',
+    name: 'Alex Johnson'
+  }
 });
 ```
 
