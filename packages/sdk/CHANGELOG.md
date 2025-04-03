@@ -1,3 +1,12 @@
+## [0.0.1-beta.8](https://github.com/yourusername/afrimomo/compare/v0.0.1-beta.7...v0.0.1-beta.8) (2025-04-03)
+
+
+### Features
+
+* add transaction verification methods to PayChangu service; implement response types for verifying transaction status and details ([5c47c26](https://github.com/yourusername/afrimomo/commit/5c47c26d00c8f1db030d57048c96e2217fc3ceb4))
+
+
+
 ## [0.0.1-beta.7](https://github.com/yourusername/afrimomo/compare/v0.0.1-beta.6...v0.0.1-beta.7) (2025-04-03)
 
 
