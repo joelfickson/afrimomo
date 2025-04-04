@@ -1,3 +1,13 @@
+## [0.0.1-beta.9](https://github.com/yourusername/afrimomo/compare/v0.0.1-beta.8...v0.0.1-beta.9) (2025-04-04)
+
+
+### Features
+
+* add transaction verification endpoint to PayChangu router; implement logic to verify transaction status using transaction reference ([fa5bfd3](https://github.com/yourusername/afrimomo/commit/fa5bfd32b0e9d28d8d211d528f7721658d189cea))
+* enhance PayChangu payment initiation process; refactor request structure and response handling for improved flexibility and error management ([72d5f37](https://github.com/yourusername/afrimomo/commit/72d5f37cab1c3a4f6131823d438fbae871968132))
+
+
+
 ## [0.0.1-beta.8](https://github.com/yourusername/afrimomo/compare/v0.0.1-beta.7...v0.0.1-beta.8) (2025-04-03)
 
 
