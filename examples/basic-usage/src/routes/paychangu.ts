@@ -193,4 +193,15 @@ router.get('/bank-payouts', async (req: Request, res: Response, next: NextFuncti
   }
 });
 
+// Verify transaction status
+router.get('/verify/:txRef', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { txRef } = req.params;
+    const response = await sdk.paychangu.verifyTransaction(txRef);
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export const paychanguRouter = router; 
