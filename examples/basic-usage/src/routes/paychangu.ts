@@ -5,16 +5,36 @@ import { AfromomoSDK } from 'afrimomo-sdk';
 const router = Router();
 const sdk = AfromomoSDK.getInstance();
 
-// Initialize direct charge payment
+// Initialize payment
 router.post('/payments/initiate', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { amount, chargeId, currency, accountInfo } = req.body;
-    const response = await sdk.paychangu.initializeDirectChargePayment(
-      amount,
-      chargeId || `TX_${Date.now()}`,
-      currency || 'MWK',
-      accountInfo
-    );
+    const { 
+      amount, 
+      currency = 'MWK',
+      callback_url,
+      return_url,
+      tx_ref,
+      first_name,
+      last_name,
+      email,
+      meta,
+      uuid,
+      customization,
+    } = req.body;
+
+    const response = await sdk.paychangu.initiatePayment({
+      amount: amount.toString(),
+      currency,
+      tx_ref: tx_ref || `TX_${Date.now()}`,
+      callback_url: callback_url || process.env.PAYCHANGU_CALLBACK_URL || 'https://example.com/callback',
+      return_url: return_url || process.env.PAYCHANGU_RETURN_URL || 'https://example.com/return',
+      first_name,
+      last_name,
+      email,
+      meta,
+      uuid,
+      customization,
+    });
     res.json(response);
   } catch (error) {
     next(error);

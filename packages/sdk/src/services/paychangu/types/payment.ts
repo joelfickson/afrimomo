@@ -134,27 +134,57 @@ export interface PayChanguDirectChargeBankTransfer {
 	last_name?: string;
 }
 
+/**
+ * Payment customization options
+ */
 export interface PayChanguCustomization {
-	title: string;
-	description: string;
+	/** Payment title */
+	title?: string;
+	/** Payment description */
+	description?: string;
+}
+
+/**
+ * Initial payment request parameters
+ */
+export interface PayChanguInitialPayment {
+	/** Amount to charge the customer */
+	amount: string;
+
+	/** Currency to charge in (MWK or USD) */
+	currency: string;
+
+	/** Unique transaction reference */
+	tx_ref: string;
+
+	/** Customer's first name */
+	first_name?: string;
+
+	/** Customer's last name */
+	last_name?: string;
+
+	/** IPN URL for payment notifications */
+	callback_url: string;
+
+	/** URL to redirect on cancellation/failure */
+	return_url: string;
+
+	/** Customer's email address */
+	email?: string;
+
+	/** Additional metadata */
+	meta?: Record<string, unknown>;
+
+	/** Optional UUID */
+	uuid?: string;
+
+	/** Payment customization options */
+	customization?: PayChanguCustomization;
 }
 
 export interface PayChanguMeta {
 	response: string;
 	uuid: string;
-}
-
-export interface PayChanguInitialPayment {
-	meta: PayChanguMeta;
-	currency: string;
-	amount: string;
-	tx_ref: string;
-	email: string;
-	first_name: string;
-	last_name: string;
-	callback_url: string;
-	return_url: string;
-	customization: PayChanguCustomization;
 }
 
 export interface PaymentDataInfo {

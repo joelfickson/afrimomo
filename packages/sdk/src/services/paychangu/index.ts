@@ -18,7 +18,8 @@ import type {
 	PayChanguDirectChargePayment,
 	PayChanguMobileMoneyPayout,
 	PayChanguBankPayout,
-	PayChanguDirectChargeBankTransfer
+	PayChanguDirectChargeBankTransfer,
+	PayChanguCustomization,
 } from "./types/payment";
 import type {
 	PayChanguDirectChargePaymentResponse,
@@ -44,6 +45,8 @@ import type {
 	PayChanguAllBankPayoutsResponse,
 	PayChanguDirectChargeBankTransferResponse,
 	PayChanguVerifyTransactionResponse,
+	PayChanguPaymentInitiationResponse,
+	PayChanguPaymentInitiationErrorResponse,
 } from "./types/response";
 
 export * from "./types";
@@ -155,14 +158,14 @@ export class PayChangu extends BaseService {
 	 * @returns Promise resolving to the payment response
 	 */
 	public async initiatePayment(
-		data: PayChanguInitialPayment,
-	): Promise<PayChanguDirectChargeResponse | PayChanguErrorResponse> {
+		data: PayChanguInitialPayment
+	): Promise<PayChanguPaymentInitiationResponse | PayChanguPaymentInitiationErrorResponse> {
 		try {
 			logger.info("Initiating PayChangu payment:", data);
 
-			return await this.network.post<PayChanguDirectChargeResponse>(
+			const response = await this.network.post<PayChanguPaymentInitiationResponse>(
 				"/payment", 
-				data, 
+				data,
 				{
 					headers: {
 						Accept: "application/json",
@@ -170,8 +173,18 @@ export class PayChangu extends BaseService {
 				},
 				"payment initiation"
 			);
+
+			return response;
 		} catch (error) {
-			return this.handleApiError(error, "payment initiation");
+			if (axios.isAxiosError(error) && error.response?.data) {
+				return error.response.data as PayChanguPaymentInitiationErrorResponse;
+			}
+			
+			return {
+				status: "failed",
+				message: error instanceof Error ? error.message : "An unexpected error occurred",
+				data: null,
+			};
 		}
 	}
 

@@ -989,3 +989,55 @@ export interface PayChanguVerifyTransactionResponse {
 		updated_at: string;
 	};
 }
+
+/**
+ * Payment initiation response
+ */
+export interface PayChanguPaymentInitiationResponse {
+	/** Response message */
+	message: string;
+
+	/** Response status */
+	status: "success" | "failed";
+
+	/** Response data */
+	data: {
+		/** Event type */
+		event: string;
+
+		/** Checkout URL */
+		checkout_url: string;
+
+		/** Transaction data */
+		data: {
+			/** Transaction reference */
+			tx_ref: string;
+
+			/** Currency code */
+			currency: string;
+
+			/** Transaction amount */
+			amount: number;
+
+			/** Mode (sandbox/live) */
+			mode: string;
+
+			/** Transaction status */
+			status: string;
+		};
+	} | null;
+}
+
+/**
+ * Payment initiation error response
+ */
+export interface PayChanguPaymentInitiationErrorResponse {
+	/** Response status */
+	status: "failed";
+
+	/** Error message */
+	message: string;
+
+	/** Error data */
+	data: string | null;
+}
