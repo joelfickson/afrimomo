@@ -117,4 +117,15 @@ router.get('/active-conf', async (req: Request, res: Response, next: NextFunctio
   }
 });
 
+// Get transaction details
+router.get('/payments/:depositId', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { depositId } = req.params;
+    const response = await sdk.pawapay.deposits.getDeposit(depositId);
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export const pawapayRouter = router; 
