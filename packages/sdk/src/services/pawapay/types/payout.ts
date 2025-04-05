@@ -27,6 +27,18 @@ export interface PawaPayPayoutTransaction {
 	created: string;
 }
 
+export interface BulkPayoutResponse {
+	transactions: Array<{
+		payoutId: string;
+		status: PayoutStatus;
+		created: string;
+		rejectionReason?: {
+			rejectionCode: string;
+			rejectionMessage: string;
+		};
+	}>;
+}
+
 export enum PayoutStatus {
 	ACCEPTED = "ACCEPTED",
 	ENQUEUED = "ENQUEUED",

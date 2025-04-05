@@ -6,6 +6,7 @@ import { PawapayNetwork } from "../network";
 import type {
 	PayoutTransaction,
 	PawaPayPayoutTransaction,
+	BulkPayoutResponse,
 } from "../types/payout";
 
 export class PawapayPayouts extends BaseService {
@@ -55,13 +56,13 @@ export class PawapayPayouts extends BaseService {
 	 */
 	async sendBulkPayout(
 		transactions: PayoutTransaction[],
-	): Promise<PawaPayPayoutTransaction[] | NetworkResponse> {
+	): Promise<BulkPayoutResponse | NetworkResponse> {
 		try {
 			const response = await this.networkHandler
-				.post(this.baseEndpoint, { transactions });
+				.post<BulkPayoutResponse>(`${this.baseEndpoint}/bulk`,  transactions );
 
 			logger.info("Bulk payout transaction successful:", response);
-			return response as PawaPayPayoutTransaction[];
+			return response;
 		} catch (error) {
 			logger.error("Bulk payout transaction failed:", error);
 			return this.networkHandler.handleApiError(error, "sendBulkPayout");
