@@ -1,3 +1,15 @@
+## [0.0.1-beta.10](https://github.com/yourusername/afrimomo/compare/v0.0.1-beta.9...v0.0.1-beta.10) (2025-04-05)
+
+
+### Features
+
+* add bulk payout endpoint to PawaPay router; implement transaction validation and response structure for bulk payouts ([384a088](https://github.com/yourusername/afrimomo/commit/384a088003c58d3c16bdca77d5dbf1e5f8b6f99a))
+* add endpoint to retrieve transaction details by deposit ID in PawaPay router ([409adbd](https://github.com/yourusername/afrimomo/commit/409adbd5e071e0c18f5429a70062f7a2d9f7255e))
+* enhance PawaPay service integration; add logging for payment initiation and refactor network handling for improved error management ([f47fdbb](https://github.com/yourusername/afrimomo/commit/f47fdbb032ea736ff954506373c1851426f39915))
+* implement payout processing and validation in PawaPay router; add error handling for authorization failures and enhance payout transaction structure ([7803453](https://github.com/yourusername/afrimomo/commit/78034537f100c78c87079b41d5136e6d98d9f42b))
+
+
+
 ## [0.0.1-beta.9](https://github.com/yourusername/afrimomo/compare/v0.0.1-beta.8...v0.0.1-beta.9) (2025-04-04)
 
 
