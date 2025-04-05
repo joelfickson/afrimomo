@@ -117,7 +117,7 @@ router.post('/mobile-money/payouts', async (req: Request, res: Response, next: N
       transaction_status 
     } = req.body;
 
-    console.log(req.body);
+  
     
     const response = await sdk.paychangu.initializeMobileMoneyPayout(
       mobile,
