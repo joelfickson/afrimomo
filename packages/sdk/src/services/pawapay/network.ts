@@ -1,26 +1,66 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import type { Environment } from "../../config/constants";
-import { NetworkManager } from "../../utils/network";
 import { logger } from "../../utils/logger";
 import type { NetworkResponse } from "../../types";
 
 /**
  * Network manager for PawaPay API calls
  */
-export class PawapayNetwork extends NetworkManager {
-	constructor(jwt: string, environment: Environment = "DEVELOPMENT") {
-		// Call parent constructor
-		super(jwt, environment);
+export class PawapayNetwork {
+	public readonly axiosInstance: AxiosInstance;
 
-		// Override base URL to use PawaPay-specific endpoints
+	constructor(jwt: string, environment: Environment = "DEVELOPMENT") {
 		const baseUrl =
 			environment === "PRODUCTION"
 				? "https://api.pawapay.io/v1"
 				: "https://api.sandbox.pawapay.io/v1";
 
-		// Update axios instance base URL
-		const instance = this.getInstance();
-		instance.defaults.baseURL = baseUrl;
+		this.axiosInstance = axios.create({
+			baseURL: baseUrl,
+			headers: {
+				Authorization: `Bearer ${jwt}`,
+				"Content-Type": "application/json",
+				Accept: "application/json"
+			},
+		});
+
+		this.setupInterceptors();
+	}
+
+	private setupInterceptors(): void {
+		this.axiosInstance.interceptors.request.use(
+			(config) => {
+				logger.debug("PawaPay API Request:", {
+					method: config.method,
+					url: config.url,
+					headers: config.headers,
+					data: config.data
+				});
+				return config;
+			},
+			(error) => {
+				logger.error("PawaPay API Request Error:", error);
+				return Promise.reject(error);
+			}
+		);
+
+		this.axiosInstance.interceptors.response.use(
+			(response) => {
+				logger.debug("PawaPay API Response:", {
+					status: response.status,
+					statusText: response.statusText,
+					data: response.data,
+				});
+				return response;
+			},
+			(error) => {
+				logger.error("PawaPay API Response Error:", {
+					message: error.message,
+					response: error.response?.data,
+				});
+				return Promise.reject(error);
+			}
+		);
 	}
 
 	/**
@@ -70,7 +110,7 @@ export class PawapayNetwork extends NetworkManager {
 	 */
 	async get<T>(endpoint: string, context = "GET request"): Promise<T> {
 		try {
-			const response = await this.getInstance().get<T>(endpoint);
+			const response = await this.axiosInstance.get<T>(endpoint);
 			return response.data;
 		} catch (error) {
 			throw this.handleApiError(error, context);
@@ -86,7 +126,7 @@ export class PawapayNetwork extends NetworkManager {
 	 */
 	async post<T>(endpoint: string, data: unknown, context = "POST request"): Promise<T> {
 		try {
-			const response = await this.getInstance().post<T>(endpoint, data);
+			const response = await this.axiosInstance.post<T>(endpoint, data);
 			return response.data;
 		} catch (error) {
 			throw this.handleApiError(error, context);
@@ -102,7 +142,7 @@ export class PawapayNetwork extends NetworkManager {
 	 */
 	async put<T>(endpoint: string, data: unknown, context = "PUT request"): Promise<T> {
 		try {
-			const response = await this.getInstance().put<T>(endpoint, data);
+			const response = await this.axiosInstance.put<T>(endpoint, data);
 			return response.data;
 		} catch (error) {
 			throw this.handleApiError(error, context);
@@ -117,7 +157,7 @@ export class PawapayNetwork extends NetworkManager {
 	 */
 	async delete<T>(endpoint: string, context = "DELETE request"): Promise<T> {
 		try {
-			const response = await this.getInstance().delete<T>(endpoint);
+			const response = await this.axiosInstance.delete<T>(endpoint);
 			return response.data;
 		} catch (error) {
 			throw this.handleApiError(error, context);

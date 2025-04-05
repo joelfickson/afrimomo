@@ -25,6 +25,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/paychangu', paychanguRouter);
 app.use('/pawapay', pawapayRouter);
 
+
+
 // New route to get all configured services
 app.get('/services', (req, res) => {
   const sdk = AfromomoSDK.getInstance();

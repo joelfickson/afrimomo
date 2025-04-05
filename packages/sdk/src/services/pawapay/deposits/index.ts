@@ -8,11 +8,12 @@ import type {
 	PayoutTransaction,
 } from "../types/payout";
 import type { NetworkResponse } from "../../../types";
+import { PawapayNetwork } from "../network";
 
 export class PawapayDeposits extends BaseService {
 	private readonly baseEndpoint = "/deposits";
 
-	constructor(private readonly networkHandler: NetworkManager) {
+	constructor(private readonly networkHandler: PawapayNetwork) {
 		super();
 	}
 
@@ -39,7 +40,6 @@ export class PawapayDeposits extends BaseService {
 			);
 
 			const response = await this.networkHandler
-				.getInstance()
 				.post(this.baseEndpoint, {
 					payoutId: transaction.payoutId,
 					amount: transaction.amount.toString(),
@@ -54,11 +54,11 @@ export class PawapayDeposits extends BaseService {
 					statementDescription: transaction.statementDescription,
 				});
 
-			logger.info("Payout transaction successful:", response.data);
-			return response.data as PawaPayPayoutTransaction;
+			logger.info("Payout transaction successful:", response);
+			return response as PawaPayPayoutTransaction;
 		} catch (error: unknown) {
 			logger.error("Payout transaction failed:", error);
-			return this.networkHandler.handleErrors(error);
+			return this.networkHandler.handleApiError(error, "sendDeposit");
 		}
 	}
 
@@ -72,13 +72,13 @@ export class PawapayDeposits extends BaseService {
 	): Promise<PaymentTransaction[] | NetworkResponse> {
 		try {
 			const endPoint = `${this.baseEndpoint}/${depositId}`;
-			const response = await this.networkHandler.getInstance().get(endPoint);
+			const response = await this.networkHandler.get(endPoint);
 
-			logger.info("Deposit details retrieved successfully:", response.data);
-			return response.data as PaymentTransaction[];
+			logger.info("Deposit details retrieved successfully:", response);
+			return response as PaymentTransaction[];
 		} catch (error) {
 			logger.error("Get deposit failed:", error);
-			return this.networkHandler.handleErrors(error);
+			return this.networkHandler.handleApiError(error, "getDeposit");
 		}
 	}
 
@@ -91,15 +91,14 @@ export class PawapayDeposits extends BaseService {
 		depositId: string,
 	): Promise<ResendCallbackResponse | NetworkResponse> {
 		try {
-			const { data } = await this.networkHandler
-				.getInstance()
+			const response = await this.networkHandler
 				.post(`${this.baseEndpoint}/resend-callback`, { depositId });
 
-			logger.info("Callback resend successful:", data);
-			return data as ResendCallbackResponse;
+			logger.info("Callback resend successful:", response);
+			return response as ResendCallbackResponse;
 		} catch (error: unknown) {
 			logger.error("Callback resend failed:", error);
-			return this.networkHandler.handleErrors(error);
+			return this.networkHandler.handleApiError(error, "resendCallback");
 		}
 	}
 }

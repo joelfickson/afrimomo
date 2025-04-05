@@ -11,12 +11,12 @@ interface PaymentApiResponse {
 }
 
 export class PawapayPayments {
-	private readonly baseEndpoint = "v1/widget/sessions";
+	private readonly baseEndpoint = "widget/sessions";
 
 	constructor(private readonly network: PawapayNetwork) {}
 
 	/**
-	 * Initiates a payment process by sending payment data to v1/widget/sessions.
+	 * Initiates a payment process by sending payment data to widget/sessions.
 	 * @param paymentData - Data required for initiating the payment
 	 * @returns Promise resolving to the payment initiation response or error
 	 */
@@ -25,25 +25,31 @@ export class PawapayPayments {
 	): Promise<InitiatePaymentResponse | NetworkResponse> {
 		try {
 			logger.info(
-				"Sending payment initiation request for deposit:",
-				paymentData.deposit_id,
-				"with amount:",
-				paymentData.price,
+				`Payment Data: ${JSON.stringify(paymentData, null, 2)}`
 			);
 
+			// Ensure the payment data is properly structured
 			const requestData = {
-				depositId: paymentData.deposit_id,
-				amount: paymentData.price.toString(),
+				depositId: paymentData.depositId,
 				returnUrl: paymentData.returnUrl,
-				country: paymentData.basePaymentCountryIso,
+				statementDescription: paymentData.statementDescription,
+				amount: paymentData.amount,
+				msisdn: paymentData.msisdn,
+				language: paymentData.language || "EN",
+				country: paymentData.country,
 				reason: paymentData.reason,
+				metadata: paymentData.metadata || []
 			};
 
-			// Use the enhanced network's post method with context
+			// Use the network's post method with context
 			const response = await this.network.post<PaymentApiResponse>(
-				this.baseEndpoint, 
-				requestData, 
-				`payment initiation for deposit ${paymentData.deposit_id}`
+				this.baseEndpoint,
+				requestData,
+				`payment initiation for deposit ${paymentData.depositId}`
+			);
+
+			logger.info(
+				`Payment Response: ${JSON.stringify(response, null, 2)}`
 			);
 
 			return {
@@ -51,6 +57,11 @@ export class PawapayPayments {
 				error: false,
 			} as InitiatePaymentResponse;
 		} catch (error: unknown) {
+			// log the whole stack trace
+			logger.error(
+				`##INITIATE PAYMENT ERROR## ${JSON.stringify(error, null, 2)}`,
+			);
+
 			// The error is already handled by the network layer and properly formatted
 			if ((error as NetworkResponse).errorMessage) {
 				return error as NetworkResponse;
@@ -59,7 +70,7 @@ export class PawapayPayments {
 			// Fallback for unexpected errors
 			return this.network.handleApiError(
 				error,
-				`payment initiation for deposit ${paymentData.deposit_id}`
+				`payment initiation for deposit ${paymentData.depositId}`
 			);
 		}
 	}

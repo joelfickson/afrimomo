@@ -2,6 +2,7 @@ import type { NetworkResponse } from "../../../types";
 import { BaseService } from "../../../utils/baseService";
 import { logger } from "../../../utils/logger";
 import type { NetworkManager } from "../../../utils/network";
+import { PawapayNetwork } from "../network";
 import type {
 	PayoutTransaction,
 	PawaPayPayoutTransaction,
@@ -10,7 +11,7 @@ import type {
 export class PawapayPayouts extends BaseService {
 	private readonly baseEndpoint = "/payouts";
 
-	constructor(private readonly networkHandler: NetworkManager) {
+	constructor(private readonly networkHandler: PawapayNetwork) {
 		super();
 	}
 
@@ -37,7 +38,6 @@ export class PawapayPayouts extends BaseService {
 			);
 
 			const response = await this.networkHandler
-				.getInstance()
 				.post(this.baseEndpoint, {
 					payoutId: transaction.payoutId,
 					amount: transaction.amount.toString(),
@@ -52,11 +52,11 @@ export class PawapayPayouts extends BaseService {
 					statementDescription: transaction.statementDescription,
 				});
 
-			logger.info("Payout transaction successful:", response.data);
-			return response.data as PawaPayPayoutTransaction;
+			logger.info("Payout transaction successful:", response);
+			return response as PawaPayPayoutTransaction;
 		} catch (error) {
 			logger.error("Payout transaction failed:", error);
-			return this.networkHandler.handleErrors(error);
+			return this.networkHandler.handleApiError(error, "sendPayout");
 		}
 	}
 
@@ -84,14 +84,13 @@ export class PawapayPayouts extends BaseService {
 			}));
 
 			const response = await this.networkHandler
-				.getInstance()
 				.post(this.baseEndpoint, { formattedTransactions });
 
-			logger.info("Bulk payout transaction successful:", response.data);
-			return response.data as PawaPayPayoutTransaction[];
+			logger.info("Bulk payout transaction successful:", response);
+			return response as PawaPayPayoutTransaction[];
 		} catch (error) {
 			logger.error("Bulk payout transaction failed:", error);
-			return this.networkHandler.handleErrors(error);
+			return this.networkHandler.handleApiError(error, "sendBulkPayout");
 		}
 	}
 
@@ -105,14 +104,13 @@ export class PawapayPayouts extends BaseService {
 	): Promise<PawaPayPayoutTransaction | NetworkResponse> {
 		try {
 			const response = await this.networkHandler
-				.getInstance()
 				.get(`${this.baseEndpoint}/${depositId}`);
 
-			logger.info("Payout details retrieved successfully:", response.data);
-			return response.data as PawaPayPayoutTransaction;
+			logger.info("Payout details retrieved successfully:", response);
+			return response as PawaPayPayoutTransaction;
 		} catch (error) {
 			logger.error("Get payout failed:", error);
-			return this.networkHandler.handleErrors(error);
+			return this.networkHandler.handleApiError(error, "getPayout");
 		}
 	}
 }

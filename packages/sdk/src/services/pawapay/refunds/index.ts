@@ -3,11 +3,11 @@ import { BaseService } from "../../../utils/baseService";
 import { logger } from "../../../utils/logger";
 import type { NetworkResponse } from "../../../types";
 import type { RefundResponse, RefundTransaction } from "../types/refund";
-
+import { PawapayNetwork } from "../network";
 export class PawapayRefunds extends BaseService {
 	private readonly baseEndpoint = "/refunds";
 
-	constructor(private readonly networkHandler: NetworkManager) {
+	constructor(private readonly networkHandler: PawapayNetwork) {
 		super();
 	}
 
@@ -22,7 +22,6 @@ export class PawapayRefunds extends BaseService {
 	}): Promise<RefundResponse | NetworkResponse> {
 		try {
 			const response = await this.networkHandler
-				.getInstance()
 				.post(this.baseEndpoint, {
 					refundId: refundData.refundId,
 					depositId: refundData.depositId,
@@ -34,10 +33,10 @@ export class PawapayRefunds extends BaseService {
 				"with refundId:",
 				refundData.refundId,
 			);
-			return response.data as RefundResponse;
+			return response as RefundResponse;
 		} catch (error: unknown) {
 			logger.error("Refund request failed:", error);
-			return this.networkHandler.handleErrors(error);
+			return this.networkHandler.handleApiError(error, "createRefundRequest");
 		}
 	}
 
@@ -51,13 +50,13 @@ export class PawapayRefunds extends BaseService {
 	): Promise<RefundTransaction | NetworkResponse> {
 		try {
 			const endPoint = `${this.baseEndpoint}/${refundId}`;
-			const response = await this.networkHandler.getInstance().get(endPoint);
+			const response = await this.networkHandler.get(endPoint);
 
-			logger.info("Refund details retrieved successfully:", response.data);
-			return response.data as RefundTransaction;
+			logger.info("Refund details retrieved successfully:", response);
+			return response as RefundTransaction;
 		} catch (error: unknown) {
 			logger.error("Get refund status failed:", error);
-			return this.networkHandler.handleErrors(error);
+			return this.networkHandler.handleApiError(error, "getRefundStatus");
 		}
 	}
 }

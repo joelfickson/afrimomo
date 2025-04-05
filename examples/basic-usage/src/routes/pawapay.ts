@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import type { Request, Response, NextFunction } from 'express';
-import { AfromomoSDK } from 'afrimomo-sdk';
+import { AfromomoSDK, logger } from 'afrimomo-sdk';
 
 const router = Router();
 const sdk = AfromomoSDK.getInstance();
@@ -29,8 +29,24 @@ router.get('/wallets/balances/:country', async (req: Request, res: Response, nex
 // Initiate payment
 router.post('/payments/initiate', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { paymentData } = req.body;
+    // Transform request data to match SDK's PaymentData interface
+    const paymentData = {
+      depositId: req.body.depositId,
+      returnUrl: req.body.returnUrl,
+      statementDescription: req.body.statementDescription,
+      amount: req.body.amount,
+      msisdn: req.body.msisdn,
+      language: req.body.language || "EN",
+      country: req.body.country,
+      reason: req.body.reason,
+      metadata: req.body.metadata
+    };
+    
+  
+
     const response = await sdk.pawapay.payments.initiatePayment(paymentData);
+
+    logger.info(`##INITIATE PAYMENT RESPONSE## ${JSON.stringify(response, null, 2)}`);
     res.json(response);
   } catch (error) {
     next(error);
