@@ -56,10 +56,49 @@ router.post('/payments/initiate', async (req: Request, res: Response, next: Next
 // Send payout
 router.post('/payouts/send', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { transaction } = req.body;
-    const response = await sdk.pawapay.deposits.sendDeposit(transaction);
+    const {
+      payoutId,
+      amount,
+      currency,
+      correspondent,
+      recipient,
+      customerTimestamp,
+      statementDescription,
+      country,
+      metadata
+    } = req.body;
+
+    // Validate required fields
+    if (!payoutId || !amount || !currency || !correspondent || !recipient || !customerTimestamp || !statementDescription) {
+      return res.status(400).json({
+        errorId: Date.now().toString(),
+        errorCode: 400,
+        errorMessage: "Missing required fields"
+      });
+    }
+
+    const response = await sdk.pawapay.payouts.sendPayout({
+      payoutId,
+      amount,
+      currency,
+      correspondent,
+      recipient,
+      customerTimestamp,
+      statementDescription,
+      country,
+      metadata
+    });
+
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
+    // Handle specific error cases
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        errorId: Date.now().toString(),
+        errorCode: 401,
+        errorMessage: "Authorization Failure. Please check your authentication token"
+      });
+    }
     next(error);
   }
 });
@@ -122,6 +161,17 @@ router.get('/payments/:depositId', async (req: Request, res: Response, next: Nex
   try {
     const { depositId } = req.params;
     const response = await sdk.pawapay.deposits.getDeposit(depositId);
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get payout details
+router.get('/payouts/details/:depositId', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { depositId } = req.params;
+    const response = await sdk.pawapay.payouts.getPayout(depositId);
     res.json(response);
   } catch (error) {
     next(error);

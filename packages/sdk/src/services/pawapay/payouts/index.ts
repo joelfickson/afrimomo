@@ -24,7 +24,7 @@ export class PawapayPayouts extends BaseService {
 		transaction: PayoutTransaction,
 	): Promise<PawaPayPayoutTransaction | NetworkResponse> {
 		try {
-			const phoneNumber = this.formatPhoneNumber(transaction.phoneNumber);
+			const phoneNumber = transaction.recipient.address.value;
 
 			logger.info(
 				"Sending payout to",
@@ -38,19 +38,7 @@ export class PawapayPayouts extends BaseService {
 			);
 
 			const response = await this.networkHandler
-				.post(this.baseEndpoint, {
-					payoutId: transaction.payoutId,
-					amount: transaction.amount.toString(),
-					currency: transaction.currency,
-					correspondent: transaction.correspondent,
-					recipient: {
-						type: "MSISDN",
-						address: { value: phoneNumber },
-					},
-					customerTimestamp:
-						transaction.customerTimestamp || new Date().toISOString(),
-					statementDescription: transaction.statementDescription,
-				});
+				.post(this.baseEndpoint, transaction);
 
 			logger.info("Payout transaction successful:", response);
 			return response as PawaPayPayoutTransaction;
@@ -69,22 +57,8 @@ export class PawapayPayouts extends BaseService {
 		transactions: PayoutTransaction[],
 	): Promise<PawaPayPayoutTransaction[] | NetworkResponse> {
 		try {
-			const formattedTransactions = transactions.map((transaction) => ({
-				payoutId: transaction.payoutId,
-				amount: transaction.amount.toString(),
-				currency: transaction.currency,
-				correspondent: transaction.correspondent,
-				recipient: {
-					type: "MSISDN",
-					address: { value: this.formatPhoneNumber(transaction.phoneNumber) },
-				},
-				customerTimestamp:
-					transaction.customerTimestamp || new Date().toISOString(),
-				statementDescription: transaction.statementDescription,
-			}));
-
 			const response = await this.networkHandler
-				.post(this.baseEndpoint, { formattedTransactions });
+				.post(this.baseEndpoint, { transactions });
 
 			logger.info("Bulk payout transaction successful:", response);
 			return response as PawaPayPayoutTransaction[];

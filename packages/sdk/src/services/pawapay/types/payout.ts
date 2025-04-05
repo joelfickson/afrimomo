@@ -1,14 +1,24 @@
 import type { MoMoCurrency, Correspondent } from "../../../types/shared";
 
 export interface PayoutTransaction {
-	amount: string;
-	phoneNumber: string;
 	payoutId: string;
-	currency: MoMoCurrency;
-	correspondent: Correspondent;
+	amount: string;
+	currency: string;
+	correspondent: string;
+	recipient: {
+		type: 'MSISDN';
+		address: {
+			value: string;
+		};
+	};
+	customerTimestamp: string;
 	statementDescription: string;
-	country: string;
-	customerTimestamp?: string;
+	country?: string;
+	metadata?: Array<{
+		fieldName: string;
+		fieldValue: string;
+		isPII?: boolean;
+	}>;
 }
 
 export interface PawaPayPayoutTransaction {

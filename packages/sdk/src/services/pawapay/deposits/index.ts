@@ -26,7 +26,7 @@ export class PawapayDeposits extends BaseService {
 		transaction: PayoutTransaction,
 	): Promise<PawaPayPayoutTransaction | NetworkResponse> {
 		try {
-			const phoneNumber = this.formatPhoneNumber(transaction.phoneNumber);
+			const phoneNumber = transaction.recipient.address.value;
 
 			logger.info(
 				"Sending payout to",
@@ -40,19 +40,7 @@ export class PawapayDeposits extends BaseService {
 			);
 
 			const response = await this.networkHandler
-				.post(this.baseEndpoint, {
-					payoutId: transaction.payoutId,
-					amount: transaction.amount.toString(),
-					currency: transaction.currency,
-					correspondent: transaction.correspondent,
-					recipient: {
-						type: "MSISDN",
-						address: { value: phoneNumber },
-					},
-					customerTimestamp:
-						transaction.customerTimestamp || new Date().toISOString(),
-					statementDescription: transaction.statementDescription,
-				});
+				.post(this.baseEndpoint, transaction);
 
 			logger.info("Payout transaction successful:", response);
 			return response as PawaPayPayoutTransaction;
