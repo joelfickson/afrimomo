@@ -82,15 +82,14 @@ export class PayChangu extends BaseService {
 	 * @private
 	 */
 	private handleApiError(error: unknown, context: string): PayChanguErrorResponse {
-		logger.error(`PayChangu API Error - ${context}:`, error);
+		console.log(error);
+		logger.error(`PayChangu API Error - ${context}: ${JSON.stringify(error, null, 2)}`);
 
 		if (axios.isAxiosError(error) && error.response?.data) {
-			// Handle API-returned error format
 			if (error.response.data.status === "error" || error.response.data.status === "failed") {
 				return error.response.data as PayChanguErrorResponse;
 			}
 
-			// Create standard error response from error data
 			return {
 				message: error.response.data.message || `An error occurred during ${context}`,
 				status: "error"

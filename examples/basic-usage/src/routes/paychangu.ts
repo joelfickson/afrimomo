@@ -108,24 +108,32 @@ router.post('/mobile-money/payouts', async (req: Request, res: Response, next: N
   try {
     const { 
       mobile, 
-      operatorRefId, 
+      mobile_money_operator_ref_id, 
       amount, 
-      chargeId, 
+      charge_id, 
       email, 
-      firstName, 
-      lastName,
-      transactionStatus 
+      first_name, 
+      last_name,
+      transaction_status 
     } = req.body;
+
+    console.log(req.body);
     
     const response = await sdk.paychangu.initializeMobileMoneyPayout(
       mobile,
-      operatorRefId,
+      mobile_money_operator_ref_id,
       amount,
-      chargeId || `TX_${Date.now()}`,
-      { email, firstName, lastName, transactionStatus }
+      charge_id || `TX_${Date.now()}`,
+      { 
+        email, 
+        firstName: first_name, 
+        lastName: last_name, 
+        transactionStatus: transaction_status 
+      }
     );
     res.json(response);
   } catch (error) {
+    console.log(error);
     next(error);
   }
 });
