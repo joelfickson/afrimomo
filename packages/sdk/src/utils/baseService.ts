@@ -14,16 +14,21 @@ export class BaseService {
 	 * @returns True if the response is a NetworkResponse
 	 */
 	protected isNetworkError(response: unknown): boolean {
+		interface NetworkErrorResponse {
+			errorMessage: string;
+			statusCode: number;
+			errorObject: string;
+			[key: string]: unknown;
+		}
+
 		if (typeof response === "object" && response !== null) {
+			const res = response as NetworkErrorResponse;
 			const hasErrorMessage =
-				"errorMessage" in response &&
-				typeof (response as any).errorMessage === "string";
+				"errorMessage" in res && typeof res.errorMessage === "string";
 			const hasStatusCode =
-				"statusCode" in response &&
-				typeof (response as any).statusCode === "number";
+				"statusCode" in res && typeof res.statusCode === "number";
 			const hasErrorObject =
-				"errorObject" in response &&
-				typeof (response as any).errorObject === "string";
+				"errorObject" in res && typeof res.errorObject === "string";
 
 			return hasErrorMessage && hasStatusCode && hasErrorObject;
 		}

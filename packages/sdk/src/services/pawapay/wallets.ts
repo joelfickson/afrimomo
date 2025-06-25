@@ -18,10 +18,9 @@ export class PawapayWallets {
 			logger.info("Getting all PawaPay wallet balances");
 			return await this.network.get<WalletBalancesResponse>(
 				"/wallet-balances",
-				"retrieving all wallet balances"
+				"retrieving all wallet balances",
 			);
 		} catch (error: unknown) {
-			// The error is already handled by the network layer and properly formatted
 			if ((error as NetworkResponse).errorMessage) {
 				return error as NetworkResponse;
 			}
@@ -29,7 +28,7 @@ export class PawapayWallets {
 			// Fallback for unexpected errors
 			return this.network.handleApiError(
 				error,
-				"retrieving all wallet balances"
+				"retrieving all wallet balances",
 			);
 		}
 	}
@@ -39,12 +38,14 @@ export class PawapayWallets {
 	 * @param country - ISO country code (e.g., 'ZMB', 'UGA')
 	 * @returns Promise resolving to wallet balances for the specified country
 	 */
-	async getCountryBalance(country: string): Promise<WalletBalancesResponse | NetworkResponse> {
+	async getCountryBalance(
+		country: string,
+	): Promise<WalletBalancesResponse | NetworkResponse> {
 		try {
 			logger.info(`Getting PawaPay wallet balances for country: ${country}`);
 			return await this.network.get<WalletBalancesResponse>(
 				`/wallet-balances/${country}`,
-				`retrieving wallet balance for ${country}`
+				`retrieving wallet balance for ${country}`,
 			);
 		} catch (error: unknown) {
 			// The error is already handled by the network layer and properly formatted
@@ -55,7 +56,7 @@ export class PawapayWallets {
 			// Fallback for unexpected errors
 			return this.network.handleApiError(
 				error,
-				`retrieving wallet balance for ${country}`
+				`retrieving wallet balance for ${country}`,
 			);
 		}
 	}
