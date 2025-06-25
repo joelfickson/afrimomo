@@ -16,6 +16,22 @@ A unified SDK for African payment providers, making it easy to integrate multipl
 - **PayChangu** - Payment services in Malawi
 - **PawaPay** - Mobile money payments across Africa
 
+## Prerequisites
+
+Before using the Afrimomo SDK, you'll need to create accounts with the payment providers:
+
+### PawaPay Account Setup
+1. Visit [PawaPay](https://www.pawapay.io/) and create a developer account
+2. Complete the onboarding process and verification
+3. Get your API token from the PawaPay dashboard
+4. Note your environment (sandbox for testing, production for live transactions)
+
+### PayChangu Account Setup
+1. Visit [PayChangu](https://paychangu.com/) and create a merchant account
+2. Complete the business verification process
+3. Get your secret key from the PayChangu merchant dashboard
+4. Configure your webhook URLs for payment notifications
+
 ## Installation
 
 ```bash
@@ -32,12 +48,12 @@ yarn add afrimomo-sdk
 import { AfromomoSDK } from "afrimomo-sdk";
 
 const sdk = new AfromomoSDK({
-  environment: "sandbox", // or "production"
+  environment: "sandbox", // Use "sandbox" for testing, "production" for live
   pawapay: {
-    apiToken: "your-pawapay-token"
+    apiToken: "your-pawapay-api-token" // Get this from PawaPay dashboard
   },
   paychangu: {
-    secretKey: "your-paychangu-secret"
+    secretKey: "your-paychangu-secret-key" // Get this from PayChangu dashboard
   }
 });
 
@@ -45,17 +61,19 @@ const sdk = new AfromomoSDK({
 const paymentResponse = await sdk.pawapay.payments.initiate({
   depositId: "unique-deposit-id",
   amount: "100.00",
-  msisdn: "260123456789",
+  msisdn: "260123456789", // Customer's phone number
   returnUrl: "https://your-app.com/callback",
   statementDescription: "Payment for services",
   language: "EN",
-  country: "ZMB",
+  country: "ZMB", // ISO country code
   reason: "Service payment"
 });
 
 // Use PayChangu
 const operatorsResponse = await sdk.paychangu.getMobileMoneyOperators();
 ```
+
+> **Note**: Always use sandbox/test credentials during development. Switch to production credentials only when you're ready to process real payments.
 
 ## Type Imports
 
@@ -150,6 +168,20 @@ function processTransaction(transaction: PayChanguTypes.BaseTransaction) {
 }
 ```
 
+### Getting Started with Test Credentials
+
+Both providers offer sandbox environments for testing:
+
+**PawaPay Sandbox:**
+- Use sandbox API tokens for testing
+- Test with sandbox phone numbers provided in their documentation
+- No real money is processed in sandbox mode
+
+**PayChangu Testing:**
+- Use test secret keys for development
+- Test transactions won't affect real accounts
+- Webhook URLs can point to local development servers (use ngrok for testing)
+
 ## Environment Configuration
 
 The SDK supports both sandbox and production environments:
@@ -162,6 +194,8 @@ const sdk = new AfromomoSDK({
   // ... provider configurations
 });
 ```
+
+> **Security Tip**: Never commit your production API keys to version control. Use environment variables or secure configuration management.
 
 ## Features
 
