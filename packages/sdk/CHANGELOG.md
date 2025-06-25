@@ -1,3 +1,7 @@
+## [0.0.1-beta.11](https://github.com/yourusername/afrimomo/compare/v0.0.1-beta.10...v0.0.1-beta.11) (2025-06-25)
+
+
+
 ## [0.0.1-beta.10](https://github.com/yourusername/afrimomo/compare/v0.0.1-beta.9...v0.0.1-beta.10) (2025-04-05)
 
 
