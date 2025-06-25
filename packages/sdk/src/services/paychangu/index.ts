@@ -1,9 +1,9 @@
 /**
  * PayChangu Payment Service
- * 
+ *
  * Provides a unified interface for interacting with the PayChangu payment gateway.
  * Supports multiple payment methods including direct charge, bank transfers, and mobile money.
- * 
+ *
  * @module PayChangu
  */
 
@@ -13,7 +13,7 @@ import { logger } from "../../utils/logger";
 import { PayChanguNetwork } from "./network";
 import type { AccountInfo } from "./types/account";
 import { PayChangu as PayChanguTypes } from "./types";
-import type { 
+import type {
 	PayChanguInitialPayment,
 	PayChanguDirectChargePayment,
 	PayChanguMobileMoneyPayout,
@@ -53,7 +53,7 @@ export * from "./types";
 
 /**
  * PayChangu Service - Main class for interacting with the PayChangu payment gateway
- * 
+ *
  * This service provides methods for:
  * - Direct charge payments (virtual accounts)
  * - Bank transfers
@@ -65,7 +65,7 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Creates a new instance of the PayChangu service
-	 * 
+	 *
 	 * @param secretKey - The API secret key for authentication with PayChangu
 	 */
 	constructor(secretKey: string) {
@@ -75,37 +75,49 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Handles API errors in a consistent way
-	 * 
+	 *
 	 * @param error - The error thrown during API request
 	 * @param context - Context about the operation for better error messages
 	 * @returns A standardized error response
 	 * @private
 	 */
-	private handleApiError(error: unknown, context: string): PayChanguErrorResponse {
+	private handleApiError(
+		error: unknown,
+		context: string,
+	): PayChanguErrorResponse {
 		console.log(error);
-		logger.error(`PayChangu API Error - ${context}: ${JSON.stringify(error, null, 2)}`);
+		logger.error(
+			`PayChangu API Error - ${context}: ${JSON.stringify(error, null, 2)}`,
+		);
 
 		if (axios.isAxiosError(error) && error.response?.data) {
-			if (error.response.data.status === "error" || error.response.data.status === "failed") {
+			if (
+				error.response.data.status === "error" ||
+				error.response.data.status === "failed"
+			) {
 				return error.response.data as PayChanguErrorResponse;
 			}
 
 			return {
-				message: error.response.data.message || `An error occurred during ${context}`,
-				status: "error"
+				message:
+					error.response.data.message || `An error occurred during ${context}`,
+				status: "error",
 			};
 		}
-		
+
 		// Handle unexpected errors
 		return {
-			message: error instanceof Error ? error.message : `An unexpected error occurred during ${context}`,
-			status: "error"
+			message:
+				error instanceof Error
+					? error.message
+					: `An unexpected error occurred during ${context}`,
+			status: "error",
 		};
 	}
 
 	/**
 	 * Creates a standardized error response for higher-level methods
-	 * 
+	 *
 	 * @param error - The error or error response from lower-level methods
 	 * @param context - Context about the operation for better error messages
 	 * @param defaultPayload - Default payload object for the error response
@@ -113,12 +125,15 @@ export class PayChangu extends BaseService {
 	 * @private
 	 */
 	private createStandardErrorResponse<T>(
-		error: unknown, 
-		context: string, 
-		defaultPayload: T
-	): { type: "error", payload: T & { HasError: true, StackTraceError: unknown } } {
+		error: unknown,
+		context: string,
+		defaultPayload: T,
+	): {
+		type: "error";
+		payload: T & { HasError: true; StackTraceError: unknown };
+	} {
 		logger.error(`PayChangu Service Error - ${context}:`, error);
-		
+
 		return {
 			type: "error",
 			payload: {
@@ -131,14 +146,15 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Creates a standardized success response for higher-level methods
-	 * 
+	 *
 	 * @param payload - The payload to include in the success response
 	 * @returns A standardized success response with the specified payload type
 	 * @private
 	 */
-	private createStandardSuccessResponse<T>(
-		payload: T
-	): { type: "success", payload: T & { HasError: false } } {
+	private createStandardSuccessResponse<T>(payload: T): {
+		type: "success";
+		payload: T & { HasError: false };
+	} {
 		return {
 			type: "success",
 			payload: {
@@ -152,36 +168,42 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Initiates a payment using the standard PayChangu flow
-	 * 
+	 *
 	 * @param data - The payment data
 	 * @returns Promise resolving to the payment response
 	 */
 	public async initiatePayment(
-		data: PayChanguInitialPayment
-	): Promise<PayChanguPaymentInitiationResponse | PayChanguPaymentInitiationErrorResponse> {
+		data: PayChanguInitialPayment,
+	): Promise<
+		PayChanguPaymentInitiationResponse | PayChanguPaymentInitiationErrorResponse
+	> {
 		try {
 			logger.info("Initiating PayChangu payment:", data);
 
-			const response = await this.network.post<PayChanguPaymentInitiationResponse>(
-				"/payment", 
-				data,
-				{
-					headers: {
-						Accept: "application/json",
+			const response =
+				await this.network.post<PayChanguPaymentInitiationResponse>(
+					"/payment",
+					data,
+					{
+						headers: {
+							Accept: "application/json",
+						},
 					},
-				},
-				"payment initiation"
-			);
+					"payment initiation",
+				);
 
 			return response;
 		} catch (error) {
 			if (axios.isAxiosError(error) && error.response?.data) {
 				return error.response.data as PayChanguPaymentInitiationErrorResponse;
 			}
-			
+
 			return {
 				status: "failed",
-				message: error instanceof Error ? error.message : "An unexpected error occurred",
+				message:
+					error instanceof Error
+						? error.message
+						: "An unexpected error occurred",
 				data: null,
 			};
 		}
@@ -189,39 +211,48 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Initializes a direct charge payment through bank transfer
-	 * 
+	 *
 	 * @param data - The direct charge payment data
 	 * @returns Promise resolving to the direct charge response
 	 */
 	private async initializeDirectCharge(
 		data: PayChanguDirectChargePayment,
-	): Promise<PayChanguDirectChargeResponse | PayChanguDirectChargeErrorResponse | PayChanguErrorResponse> {
+	): Promise<
+		| PayChanguDirectChargeResponse
+		| PayChanguDirectChargeErrorResponse
+		| PayChanguErrorResponse
+	> {
 		try {
 			logger.info("Initializing PayChangu direct charge payment:", data);
 
-			return await this.network.post<PayChanguDirectChargeResponse | PayChanguDirectChargeErrorResponse>(
-				"/direct-charge/payments/initialize", 
-				data, 
+			return await this.network.post<
+				PayChanguDirectChargeResponse | PayChanguDirectChargeErrorResponse
+			>(
+				"/direct-charge/payments/initialize",
+				data,
 				{
 					headers: {
 						Accept: "application/json",
 					},
 				},
-				"direct charge initialization"
+				"direct charge initialization",
 			);
 		} catch (error) {
 			// Special handling for direct charge errors that have a "failed" status
-			if (axios.isAxiosError(error) && error.response?.data?.status === "failed") {
+			if (
+				axios.isAxiosError(error) &&
+				error.response?.data?.status === "failed"
+			) {
 				return error.response.data as PayChanguDirectChargeErrorResponse;
 			}
-			
+
 			return this.handleApiError(error, "direct charge initialization");
 		}
 	}
 
 	/**
 	 * Gets details for a specific direct charge transaction
-	 * 
+	 *
 	 * @param chargeId - The charge ID to look up
 	 * @returns Promise resolving to the transaction details
 	 */
@@ -238,7 +269,7 @@ export class PayChangu extends BaseService {
 						Accept: "application/json",
 					},
 				},
-				`transaction details retrieval for ${chargeId}`
+				`transaction details retrieval for ${chargeId}`,
 			);
 		} catch (error) {
 			return this.handleApiError(error, "transaction details retrieval");
@@ -247,25 +278,27 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Processes a bank transfer payment
-	 * 
+	 *
 	 * @param data - The bank transfer data
 	 * @returns Promise resolving to the bank transfer response
 	 */
 	private async processBankTransferDirect(
 		data: PayChanguDirectChargeBankTransfer,
-	): Promise<PayChanguDirectChargeBankTransferResponse | PayChanguErrorResponse> {
+	): Promise<
+		PayChanguDirectChargeBankTransferResponse | PayChanguErrorResponse
+	> {
 		try {
 			logger.info("Processing PayChangu bank transfer:", data);
 
 			return await this.network.post<PayChanguDirectChargeBankTransferResponse>(
-				"/direct-charge/payments/bank-transfer", 
-				data, 
+				"/direct-charge/payments/bank-transfer",
+				data,
 				{
 					headers: {
 						Accept: "application/json",
 					},
 				},
-				"bank transfer processing"
+				"bank transfer processing",
 			);
 		} catch (error) {
 			return this.handleApiError(error, "bank transfer processing");
@@ -274,9 +307,9 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Initiates a direct charge payment via virtual account
-	 * 
+	 *
 	 * Creates a dynamic virtual account to facilitate instant payments through bank transfers.
-	 * 
+	 *
 	 * @param amount - The amount to charge
 	 * @param chargeId - Unique identifier for this transaction
 	 * @param currency - The currency (defaults to MWK)
@@ -296,11 +329,15 @@ export class PayChangu extends BaseService {
 				payment_method: "mobile_bank_transfer",
 				charge_id: chargeId,
 				...(accountInfo?.email && { email: accountInfo.email }),
-				...(accountInfo?.first_name && { first_name: accountInfo.first_name }),
+				...(accountInfo?.first_name && {
+					first_name: accountInfo.first_name,
+				}),
 				...(accountInfo?.last_name && { last_name: accountInfo.last_name }),
 			} as PayChanguDirectChargePayment;
 
-			logger.info("PayChangu: initializing direct charge payment", { directChargeData });
+			logger.info("PayChangu: initializing direct charge payment", {
+				directChargeData,
+			});
 
 			const response = await this.initializeDirectCharge(directChargeData);
 
@@ -316,7 +353,7 @@ export class PayChangu extends BaseService {
 							code: "",
 							name: "",
 						},
-					}
+					},
 				);
 			}
 
@@ -336,14 +373,14 @@ export class PayChangu extends BaseService {
 						code: "",
 						name: "",
 					},
-				}
+				},
 			);
 		}
 	}
 
 	/**
 	 * Gets transaction details for a direct charge payment
-	 * 
+	 *
 	 * @param chargeId - The charge ID to look up
 	 * @returns Promise resolving to the transaction details response
 	 */
@@ -351,7 +388,9 @@ export class PayChangu extends BaseService {
 		chargeId: string,
 	): Promise<PayChanguTransactionDetailsResponse> {
 		try {
-			logger.info("PayChangu: getting direct charge transaction details", { chargeId });
+			logger.info("PayChangu: getting direct charge transaction details", {
+				chargeId,
+			});
 
 			const response = await this.getTransactionDetails(chargeId);
 
@@ -361,7 +400,7 @@ export class PayChangu extends BaseService {
 					"direct charge transaction details retrieval",
 					{
 						TransactionDetails: {} as PayChanguTypes.BaseTransaction,
-					}
+					},
 				);
 			}
 
@@ -374,14 +413,14 @@ export class PayChangu extends BaseService {
 				"direct charge transaction details retrieval",
 				{
 					TransactionDetails: {} as PayChanguTypes.BaseTransaction,
-				}
+				},
 			);
 		}
 	}
 
 	/**
 	 * Process a bank transfer payment
-	 * 
+	 *
 	 * @param bankUuid - The UUID of the bank
 	 * @param accountName - The bank account name
 	 * @param accountNumber - The bank account number
@@ -402,7 +441,7 @@ export class PayChangu extends BaseService {
 			email?: string;
 			firstName?: string;
 			lastName?: string;
-		}
+		},
 	): Promise<PayChanguBankTransferPaymentResponse> {
 		try {
 			const bankTransferData: PayChanguDirectChargeBankTransfer = {
@@ -418,7 +457,9 @@ export class PayChangu extends BaseService {
 				...(options?.lastName && { last_name: options.lastName }),
 			};
 
-			logger.info("PayChangu: processing bank transfer", { bankTransferData });
+			logger.info("PayChangu: processing bank transfer", {
+				bankTransferData,
+			});
 
 			const response = await this.processBankTransferDirect(bankTransferData);
 
@@ -434,7 +475,7 @@ export class PayChangu extends BaseService {
 							code: "",
 							name: "",
 						},
-					}
+					},
 				);
 			}
 
@@ -455,7 +496,7 @@ export class PayChangu extends BaseService {
 						code: "",
 						name: "",
 					},
-				}
+				},
 			);
 		}
 	}
@@ -466,10 +507,12 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Gets all supported mobile money operators directly
-	 * 
+	 *
 	 * @returns Promise resolving to the list of operators
 	 */
-	private async getMobileMoneyOperatorsDirect(): Promise<PayChanguMobileMoneyOperatorsResponse | PayChanguErrorResponse> {
+	private async getMobileMoneyOperatorsDirect(): Promise<
+		PayChanguMobileMoneyOperatorsResponse | PayChanguErrorResponse
+	> {
 		try {
 			logger.info("Getting PayChangu mobile money operators");
 
@@ -480,7 +523,7 @@ export class PayChangu extends BaseService {
 						Accept: "application/json",
 					},
 				},
-				"mobile money operators retrieval"
+				"mobile money operators retrieval",
 			);
 		} catch (error) {
 			return this.handleApiError(error, "mobile money operators retrieval");
@@ -489,7 +532,7 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Initializes a mobile money payout directly
-	 * 
+	 *
 	 * @param data - The mobile money payout data
 	 * @returns Promise resolving to the payout response
 	 */
@@ -500,14 +543,14 @@ export class PayChangu extends BaseService {
 			logger.info("Initializing PayChangu mobile money payout:", data);
 
 			return await this.network.post<PayChanguMobileMoneyPayoutResponse>(
-				"/mobile-money/payouts/initialize", 
-				data, 
+				"/mobile-money/payouts/initialize",
+				data,
 				{
 					headers: {
 						Accept: "application/json",
 					},
 				},
-				"mobile money payout initialization"
+				"mobile money payout initialization",
 			);
 		} catch (error) {
 			return this.handleApiError(error, "mobile money payout initialization");
@@ -516,7 +559,7 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Gets details of a specific mobile money payout directly
-	 * 
+	 *
 	 * @param chargeId - The charge ID to look up
 	 * @returns Promise resolving to the payout details
 	 */
@@ -533,7 +576,7 @@ export class PayChangu extends BaseService {
 						Accept: "application/json",
 					},
 				},
-				`payout details retrieval for ${chargeId}`
+				`payout details retrieval for ${chargeId}`,
 			);
 		} catch (error) {
 			return this.handleApiError(error, "payout details retrieval");
@@ -542,7 +585,7 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Gets all supported mobile money operators
-	 * 
+	 *
 	 * @returns Promise resolving to the supported operators response
 	 */
 	async getMobileMoneyOperators(): Promise<PayChanguOperatorsResponse> {
@@ -555,7 +598,7 @@ export class PayChangu extends BaseService {
 				return this.createStandardErrorResponse(
 					response,
 					"mobile money operators retrieval",
-					{ Operators: [] }
+					{ Operators: [] },
 				);
 			}
 
@@ -566,14 +609,14 @@ export class PayChangu extends BaseService {
 			return this.createStandardErrorResponse(
 				error,
 				"mobile money operators retrieval",
-				{ Operators: [] }
+				{ Operators: [] },
 			);
 		}
 	}
 
 	/**
 	 * Initializes a mobile money payout to send funds to a mobile money account
-	 * 
+	 *
 	 * @param mobile - The phone number of the recipient
 	 * @param operatorRefId - The mobile money operator's reference ID
 	 * @param amount - The amount to send
@@ -591,7 +634,7 @@ export class PayChangu extends BaseService {
 			firstName?: string;
 			lastName?: string;
 			transactionStatus?: "failed" | "successful";
-		}
+		},
 	): Promise<PayChanguPayoutResponse> {
 		try {
 			const payoutData: PayChanguMobileMoneyPayout = {
@@ -602,10 +645,14 @@ export class PayChangu extends BaseService {
 				...(options?.email && { email: options.email }),
 				...(options?.firstName && { first_name: options.firstName }),
 				...(options?.lastName && { last_name: options.lastName }),
-				...(options?.transactionStatus && { transaction_status: options.transactionStatus }),
+				...(options?.transactionStatus && {
+					transaction_status: options.transactionStatus,
+				}),
 			};
 
-			logger.info("PayChangu: initializing mobile money payout", { payoutData });
+			logger.info("PayChangu: initializing mobile money payout", {
+				payoutData,
+			});
 
 			const response = await this.initializeMobileMoneyPayoutDirect(payoutData);
 
@@ -622,7 +669,7 @@ export class PayChangu extends BaseService {
 							created_at: "",
 							completed_at: null,
 						},
-					}
+					},
 				);
 			}
 
@@ -642,14 +689,14 @@ export class PayChangu extends BaseService {
 						created_at: "",
 						completed_at: null,
 					},
-				}
+				},
 			);
 		}
 	}
 
 	/**
 	 * Gets mobile money payout details by charge ID
-	 * 
+	 *
 	 * @param chargeId - The charge ID to look up
 	 * @returns Promise resolving to the payout details response
 	 */
@@ -657,7 +704,9 @@ export class PayChangu extends BaseService {
 		chargeId: string,
 	): Promise<PayChanguPayoutDetailsResponse> {
 		try {
-			logger.info("PayChangu: getting mobile money payout details", { chargeId });
+			logger.info("PayChangu: getting mobile money payout details", {
+				chargeId,
+			});
 
 			const response = await this.getPayoutDetailsDirect(chargeId);
 
@@ -674,7 +723,7 @@ export class PayChangu extends BaseService {
 							created_at: "",
 							completed_at: null,
 						},
-					}
+					},
 				);
 			}
 
@@ -694,7 +743,7 @@ export class PayChangu extends BaseService {
 						created_at: "",
 						completed_at: null,
 					},
-				}
+				},
 			);
 		}
 	}
@@ -705,7 +754,7 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Gets all supported banks for a specific currency directly
-	 * 
+	 *
 	 * @param currency - The currency to filter banks by
 	 * @returns Promise resolving to the list of banks
 	 */
@@ -725,7 +774,7 @@ export class PayChangu extends BaseService {
 						currency,
 					},
 				},
-				`supported banks retrieval for ${currency}`
+				`supported banks retrieval for ${currency}`,
 			);
 		} catch (error) {
 			return this.handleApiError(error, "supported banks retrieval");
@@ -734,7 +783,7 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Initializes a bank payout directly
-	 * 
+	 *
 	 * @param data - The bank payout data
 	 * @returns Promise resolving to the bank payout response
 	 */
@@ -745,14 +794,14 @@ export class PayChangu extends BaseService {
 			logger.info("Initializing PayChangu bank payout:", data);
 
 			return await this.network.post<PayChanguBankPayoutResponse>(
-				"/direct-charge/payouts/initialize", 
-				data, 
+				"/direct-charge/payouts/initialize",
+				data,
 				{
 					headers: {
 						Accept: "application/json",
 					},
 				},
-				"bank payout initialization"
+				"bank payout initialization",
 			);
 		} catch (error) {
 			return this.handleApiError(error, "bank payout initialization");
@@ -761,7 +810,7 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Gets details of a specific bank payout directly
-	 * 
+	 *
 	 * @param chargeId - The charge ID to look up
 	 * @returns Promise resolving to the bank payout details
 	 */
@@ -778,7 +827,7 @@ export class PayChangu extends BaseService {
 						Accept: "application/json",
 					},
 				},
-				`bank payout details retrieval for ${chargeId}`
+				`bank payout details retrieval for ${chargeId}`,
 			);
 		} catch (error) {
 			return this.handleApiError(error, "bank payout details retrieval");
@@ -787,7 +836,7 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Gets a paginated list of all bank payouts directly
-	 * 
+	 *
 	 * @param page - The page number to fetch (optional)
 	 * @param perPage - The number of records per page (optional)
 	 * @returns Promise resolving to the bank payouts list
@@ -810,7 +859,7 @@ export class PayChangu extends BaseService {
 						...(perPage && { per_page: perPage }),
 					},
 				},
-				`all bank payouts retrieval (page ${page || 1})`
+				`all bank payouts retrieval (page ${page || 1})`,
 			);
 		} catch (error) {
 			return this.handleApiError(error, "bank payouts retrieval");
@@ -819,13 +868,11 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Gets all supported banks for direct charge payouts
-	 * 
+	 *
 	 * @param currency - The currency to filter banks by (defaults to MWK)
 	 * @returns Promise resolving to the supported banks response
 	 */
-	async getSupportedBanks(
-		currency = "MWK",
-	): Promise<PayChanguBanksResponse> {
+	async getSupportedBanks(currency = "MWK"): Promise<PayChanguBanksResponse> {
 		try {
 			logger.info("PayChangu: getting supported banks", { currency });
 
@@ -835,7 +882,7 @@ export class PayChangu extends BaseService {
 				return this.createStandardErrorResponse(
 					response,
 					"supported banks retrieval",
-					{ Banks: [] }
+					{ Banks: [] },
 				);
 			}
 
@@ -846,14 +893,14 @@ export class PayChangu extends BaseService {
 			return this.createStandardErrorResponse(
 				error,
 				"supported banks retrieval",
-				{ Banks: [] }
+				{ Banks: [] },
 			);
 		}
 	}
 
 	/**
 	 * Initializes a bank payout to send funds to a bank account
-	 * 
+	 *
 	 * @param bankUuid - The UUID of the bank
 	 * @param accountName - The recipient's account name
 	 * @param accountNumber - The recipient's account number
@@ -872,7 +919,7 @@ export class PayChangu extends BaseService {
 			email?: string;
 			firstName?: string;
 			lastName?: string;
-		}
+		},
 	): Promise<PayChanguBankTransferResponse> {
 		try {
 			const payoutData: PayChanguBankPayout = {
@@ -913,7 +960,7 @@ export class PayChangu extends BaseService {
 							created_at: "",
 							completed_at: null,
 						},
-					}
+					},
 				);
 			}
 
@@ -942,14 +989,14 @@ export class PayChangu extends BaseService {
 						created_at: "",
 						completed_at: null,
 					},
-				}
+				},
 			);
 		}
 	}
 
 	/**
 	 * Gets bank payout details by charge ID
-	 * 
+	 *
 	 * @param chargeId - The charge ID to look up
 	 * @returns Promise resolving to the bank payout details response
 	 */
@@ -962,7 +1009,10 @@ export class PayChangu extends BaseService {
 			const response = await this.getBankPayoutDetailsDirect(chargeId);
 
 			// Accept both "successful" (as in the API docs) and "success" (to be safe)
-			if (!response || (response.status !== "successful" && response.status !== "success")) {
+			if (
+				!response ||
+				(response.status !== "successful" && response.status !== "success")
+			) {
 				return this.createStandardErrorResponse(
 					response,
 					"bank payout details retrieval",
@@ -984,7 +1034,7 @@ export class PayChangu extends BaseService {
 							created_at: "",
 							completed_at: null,
 						},
-					}
+					},
 				);
 			}
 
@@ -1013,14 +1063,14 @@ export class PayChangu extends BaseService {
 						created_at: "",
 						completed_at: null,
 					},
-				}
+				},
 			);
 		}
 	}
 
 	/**
 	 * Gets all bank payouts with pagination
-	 * 
+	 *
 	 * @param page - The page number to fetch (optional)
 	 * @param perPage - The number of records per page (optional)
 	 * @returns Promise resolving to the bank payouts list response
@@ -1046,7 +1096,7 @@ export class PayChangu extends BaseService {
 							PerPage: 0,
 							NextPageUrl: null,
 						},
-					}
+					},
 				);
 			}
 
@@ -1072,7 +1122,7 @@ export class PayChangu extends BaseService {
 						PerPage: 0,
 						NextPageUrl: null,
 					},
-				}
+				},
 			);
 		}
 	}
@@ -1083,7 +1133,7 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Verifies a transaction status directly
-	 * 
+	 *
 	 * @param txRef - The transaction reference to verify
 	 * @returns Promise resolving to the transaction verification response
 	 */
@@ -1100,7 +1150,7 @@ export class PayChangu extends BaseService {
 						Accept: "application/json",
 					},
 				},
-				`transaction verification for ${txRef}`
+				`transaction verification for ${txRef}`,
 			);
 		} catch (error) {
 			return this.handleApiError(error, "transaction verification");
@@ -1109,23 +1159,16 @@ export class PayChangu extends BaseService {
 
 	/**
 	 * Verifies the status of a transaction
-	 * 
+	 *
 	 * This method can be used to check the final status of transactions of all payment types
 	 * after they have been attempted (except MoMo Direct MoMo Charge).
-	 * 
+	 *
 	 * @param txRef - The transaction reference to verify
 	 * @returns Promise resolving to the transaction verification response
 	 */
 	async verifyTransaction(
 		txRef: string,
-	): Promise<{ 
-		type: "success" | "error", 
-		payload: {
-			HasError: boolean,
-			TransactionDetails?: PayChanguTypes.VerifiedTransaction,
-			StackTraceError?: unknown
-		} 
-	}> {
+	): Promise<PayChanguVerifyTransactionResponse> {
 		try {
 			logger.info("PayChangu: verifying transaction", { txRef });
 
@@ -1137,20 +1180,18 @@ export class PayChangu extends BaseService {
 					"transaction verification",
 					{
 						TransactionDetails: undefined,
-					}
+					},
 				);
 			}
 
-			return this.createStandardSuccessResponse({
-				TransactionDetails: response.data,
-			});
+			return response.data;
 		} catch (error: unknown) {
 			return this.createStandardErrorResponse(
 				error,
 				"transaction verification",
 				{
 					TransactionDetails: undefined,
-				}
+				},
 			);
 		}
 	}
