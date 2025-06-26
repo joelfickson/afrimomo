@@ -1,10 +1,7 @@
 import { logger } from "../../../utils/logger";
-import {PawaPayPaymentData, PawaPayInitiatePaymentResponse, PawaPayPaymentApiResponse} from "../types";
 import type { PawaPayNetworkResponse } from "../../../types";
 import type { PawapayNetwork } from "../network";
-
-
-
+import PawaPayTypes from "../types";
 
 export class PawapayPayments {
 	private readonly baseEndpoint = "widget/sessions";
@@ -17,12 +14,10 @@ export class PawapayPayments {
 	 * @returns Promise resolving to the payment initiation response or error
 	 */
 	public async initiatePayment(
-		paymentData: PawaPayPaymentData,
-	): Promise<PawaPayInitiatePaymentResponse | PawaPayNetworkResponse> {
+		paymentData: PawaPayTypes.PaymentData,
+	): Promise<PawaPayTypes.InitiatePaymentResponse | PawaPayNetworkResponse> {
 		try {
-			logger.info(
-				`Payment Data: ${JSON.stringify(paymentData, null, 2)}`
-			);
+			logger.info(`Payment Data: ${JSON.stringify(paymentData, null, 2)}`);
 
 			// Ensure the payment data is properly structured
 			const requestData = {
@@ -34,24 +29,22 @@ export class PawapayPayments {
 				language: paymentData.language || "EN",
 				country: paymentData.country,
 				reason: paymentData.reason,
-				metadata: paymentData.metadata || []
+				metadata: paymentData.metadata || [],
 			};
 
 			// Use the network's post-method with context
-			const response = await this.network.post<PawaPayPaymentApiResponse>(
+			const response = await this.network.post<PawaPayTypes.PaymentApiResponse>(
 				this.baseEndpoint,
 				requestData,
-				`payment initiation for deposit ${paymentData.depositId}`
+				`payment initiation for deposit ${paymentData.depositId}`,
 			);
 
-			logger.info(
-				`Payment Response: ${JSON.stringify(response, null, 2)}`
-			);
+			logger.info(`Payment Response: ${JSON.stringify(response, null, 2)}`);
 
 			return {
 				redirectUrl: response.redirectUrl,
 				error: false,
-			} as PawaPayInitiatePaymentResponse;
+			} as PawaPayTypes.InitiatePaymentResponse;
 		} catch (error: unknown) {
 			// log the whole stack trace
 			logger.error(
@@ -66,7 +59,7 @@ export class PawapayPayments {
 			// Fallback for unexpected errors
 			return this.network.handleApiError(
 				error,
-				`payment initiation for deposit ${paymentData.depositId}`
+				`payment initiation for deposit ${paymentData.depositId}`,
 			);
 		}
 	}

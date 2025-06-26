@@ -1156,45 +1156,4 @@ export class PayChangu extends BaseService {
 			return this.handleApiError(error, "transaction verification");
 		}
 	}
-
-	/**
-	 * Verifies the status of a transaction
-	 *
-	 * This method can be used to check the final status of transactions of all payment types
-	 * after they have been attempted (except MoMo Direct MoMo Charge).
-	 *
-	 * @param txRef - The transaction reference to verify
-	 * @returns Promise resolving to the transaction verification response
-	 */
-	async verifyTransaction(
-		txRef: string,
-	): Promise<PayChanguVerifyTransactionResponse> {
-		try {
-			logger.info("PayChangu: verifying transaction", { txRef });
-
-			const response = await this.verifyTransactionDirect(txRef);
-
-			if (!response || response.status !== "success") {
-				return this.createStandardErrorResponse(
-					response,
-					"transaction verification",
-					{
-						TransactionDetails: undefined,
-					},
-				);
-			}
-
-			return response.data;
-		} catch (error: unknown) {
-			return this.createStandardErrorResponse(
-				error,
-				"transaction verification",
-				{
-					TransactionDetails: undefined,
-				},
-			);
-		}
-	}
-
-	// #endregion
 }
