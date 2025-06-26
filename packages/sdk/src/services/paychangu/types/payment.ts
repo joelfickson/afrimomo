@@ -1,7 +1,6 @@
 /**
  * Payment request type definitions for PayChangu service
  */
-import type { AccountInfo } from "./account";
 import { PayChangu } from "./index";
 
 /**
@@ -53,7 +52,7 @@ export interface PayChanguMobileMoneyPayout {
 	/** Optional customer email address */
 	email?: string;
 	
-	/** Optional customer first name */
+	/** Optional customer-first name */
 	first_name?: string;
 	
 	/** Optional customer last name */
@@ -90,7 +89,7 @@ export interface PayChanguBankPayout {
 	/** Optional customer email address */
 	email?: string;
 	
-	/** Optional customer first name */
+	/** Optional customer-first name */
 	first_name?: string;
 	
 	/** Optional customer last name */
@@ -127,7 +126,7 @@ export interface PayChanguDirectChargeBankTransfer {
 	/** Optional customer email address */
 	email?: string;
 	
-	/** Optional customer first name */
+	/** Optional customer-first name */
 	first_name?: string;
 	
 	/** Optional customer last name */
@@ -187,7 +186,7 @@ export interface PayChanguMeta {
 	uuid: string;
 }
 
-export interface PaymentDataInfo {
+export interface PayChanguPaymentDataInfo {
 	account_id: string;
 	purchase_amount: string;
 	purchase_currency: string;

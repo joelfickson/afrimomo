@@ -8,7 +8,7 @@
  * Contains essential customer details used for payment processing and 
  * transaction notifications.
  */
-export interface AccountInfo {
+export interface PayChanguAccountInfo {
 	/** Customer's email address where notifications will be sent */
 	email: string;
 	

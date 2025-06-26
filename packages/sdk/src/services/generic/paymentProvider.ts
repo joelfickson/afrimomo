@@ -7,7 +7,7 @@
 
 import { ApiNetworkManager, ApiConfig, AuthConfig } from "../../utils/apiNetworkManager";
 import { logger } from "../../utils/logger";
-import type { NetworkResponse } from "../../types";
+import type { PawaPayNetworkResponse } from "../../types";
 
 // Generic transaction interface that can be extended by specific providers
 export interface GenericTransaction {
@@ -130,10 +130,10 @@ export class PaymentProviderAdapter {
     } catch (error) {
       logger.error(`${this.config.name}: Failed to create payment`, error);
       
-      if ((error as NetworkResponse).errorMessage) {
+      if ((error as PawaPayNetworkResponse).errorMessage) {
         return {
           success: false,
-          message: (error as NetworkResponse).errorMessage,
+          message: (error as PawaPayNetworkResponse).errorMessage,
         };
       }
       

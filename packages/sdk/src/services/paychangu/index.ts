@@ -11,7 +11,7 @@ import axios from "axios";
 import { BaseService } from "../../utils/baseService";
 import { logger } from "../../utils/logger";
 import { PayChanguNetwork } from "./network";
-import type { AccountInfo } from "./types/account";
+import type { PayChanguAccountInfo } from "./types/account";
 import { PayChangu as PayChanguTypes } from "./types";
 import type {
 	PayChanguInitialPayment,
@@ -320,7 +320,7 @@ export class PayChangu extends BaseService {
 		amount: string | number,
 		chargeId: string,
 		currency = "MWK",
-		accountInfo?: Partial<AccountInfo>,
+		accountInfo?: Partial<PayChanguAccountInfo>,
 	): Promise<PayChanguDirectChargePaymentResponse> {
 		try {
 			const directChargeData = {

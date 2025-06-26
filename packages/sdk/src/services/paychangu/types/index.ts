@@ -75,7 +75,7 @@ export namespace PayChangu {
   /**
    * Verified transaction details as returned by the transaction verification endpoint
    */
-  export interface VerifiedTransaction {
+  export interface PayChanguVerifiedTransaction {
     /** Event type (e.g., "checkout.payment") */
     event_type: string;
     
@@ -150,7 +150,7 @@ export namespace PayChangu {
       /** Customer email */
       email: string;
       
-      /** Customer first name */
+      /** Customer-first name */
       first_name: string;
       
       /** Customer last name */

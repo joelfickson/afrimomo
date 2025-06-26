@@ -1,14 +1,10 @@
-import type { NetworkManager } from "../../../utils/network";
 import { logger } from "../../../utils/logger";
-import type { PaymentData, InitiatePaymentResponse } from "../types/payment";
-import type { NetworkResponse } from "../../../types";
+import {PawaPayPaymentData, PawaPayInitiatePaymentResponse, PawaPayPaymentApiResponse} from "../types";
+import type { PawaPayNetworkResponse } from "../../../types";
 import type { PawapayNetwork } from "../network";
 
-// Define a type for the API response
-interface PaymentApiResponse {
-	redirectUrl: string;
-	[key: string]: unknown;
-}
+
+
 
 export class PawapayPayments {
 	private readonly baseEndpoint = "widget/sessions";
@@ -21,8 +17,8 @@ export class PawapayPayments {
 	 * @returns Promise resolving to the payment initiation response or error
 	 */
 	public async initiatePayment(
-		paymentData: PaymentData,
-	): Promise<InitiatePaymentResponse | NetworkResponse> {
+		paymentData: PawaPayPaymentData,
+	): Promise<PawaPayInitiatePaymentResponse | PawaPayNetworkResponse> {
 		try {
 			logger.info(
 				`Payment Data: ${JSON.stringify(paymentData, null, 2)}`
@@ -41,8 +37,8 @@ export class PawapayPayments {
 				metadata: paymentData.metadata || []
 			};
 
-			// Use the network's post method with context
-			const response = await this.network.post<PaymentApiResponse>(
+			// Use the network's post-method with context
+			const response = await this.network.post<PawaPayPaymentApiResponse>(
 				this.baseEndpoint,
 				requestData,
 				`payment initiation for deposit ${paymentData.depositId}`
@@ -55,7 +51,7 @@ export class PawapayPayments {
 			return {
 				redirectUrl: response.redirectUrl,
 				error: false,
-			} as InitiatePaymentResponse;
+			} as PawaPayInitiatePaymentResponse;
 		} catch (error: unknown) {
 			// log the whole stack trace
 			logger.error(
@@ -63,8 +59,8 @@ export class PawapayPayments {
 			);
 
 			// The error is already handled by the network layer and properly formatted
-			if ((error as NetworkResponse).errorMessage) {
-				return error as NetworkResponse;
+			if ((error as PawaPayNetworkResponse).errorMessage) {
+				return error as PawaPayNetworkResponse;
 			}
 
 			// Fallback for unexpected errors

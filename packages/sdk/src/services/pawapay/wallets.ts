@@ -1,6 +1,6 @@
-import type { WalletBalancesResponse } from "./types/wallet";
+import type { PawaPayTypes } from "./types";
 import type { PawapayNetwork } from "./network";
-import type { NetworkResponse } from "../../types";
+import type { PawaPayNetworkResponse } from "../../types";
 import { logger } from "../../utils/logger";
 
 /**
@@ -13,16 +13,18 @@ export class PawapayWallets {
 	 * Get wallet balances for all countries
 	 * @returns Promise resolving to wallet balances across all countries
 	 */
-	async getAllBalances(): Promise<WalletBalancesResponse | NetworkResponse> {
+	async getAllBalances(): Promise<
+		PawaPayTypes.WalletBalancesResponse | PawaPayNetworkResponse
+	> {
 		try {
 			logger.info("Getting all PawaPay wallet balances");
-			return await this.network.get<WalletBalancesResponse>(
+			return await this.network.get<PawaPayTypes.WalletBalancesResponse>(
 				"/wallet-balances",
 				"retrieving all wallet balances",
 			);
 		} catch (error: unknown) {
-			if ((error as NetworkResponse).errorMessage) {
-				return error as NetworkResponse;
+			if ((error as PawaPayNetworkResponse).errorMessage) {
+				return error as PawaPayNetworkResponse;
 			}
 
 			// Fallback for unexpected errors
@@ -40,17 +42,17 @@ export class PawapayWallets {
 	 */
 	async getCountryBalance(
 		country: string,
-	): Promise<WalletBalancesResponse | NetworkResponse> {
+	): Promise<PawaPayTypes.WalletBalancesResponse | PawaPayNetworkResponse> {
 		try {
 			logger.info(`Getting PawaPay wallet balances for country: ${country}`);
-			return await this.network.get<WalletBalancesResponse>(
+			return await this.network.get<PawaPayTypes.WalletBalancesResponse>(
 				`/wallet-balances/${country}`,
 				`retrieving wallet balance for ${country}`,
 			);
 		} catch (error: unknown) {
 			// The error is already handled by the network layer and properly formatted
-			if ((error as NetworkResponse).errorMessage) {
-				return error as NetworkResponse;
+			if ((error as PawaPayNetworkResponse).errorMessage) {
+				return error as PawaPayNetworkResponse;
 			}
 
 			// Fallback for unexpected errors

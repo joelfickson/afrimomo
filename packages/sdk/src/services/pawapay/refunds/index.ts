@@ -1,8 +1,7 @@
-import type { NetworkManager } from "../../../utils/network";
 import { BaseService } from "../../../utils/baseService";
 import { logger } from "../../../utils/logger";
-import type { NetworkResponse } from "../../../types";
-import type { RefundResponse, RefundTransaction } from "../types/refund";
+import type { PawaPayNetworkResponse } from "../../../types";
+import type { PawaPayTypes } from "../types";
 import { PawapayNetwork } from "../network";
 export class PawapayRefunds extends BaseService {
 	private readonly baseEndpoint = "/refunds";
@@ -19,13 +18,12 @@ export class PawapayRefunds extends BaseService {
 	async createRefundRequest(refundData: {
 		refundId: string;
 		depositId: string;
-	}): Promise<RefundResponse | NetworkResponse> {
+	}): Promise<PawaPayTypes.RefundResponse | PawaPayNetworkResponse> {
 		try {
-			const response = await this.networkHandler
-				.post(this.baseEndpoint, {
-					refundId: refundData.refundId,
-					depositId: refundData.depositId,
-				});
+			const response = await this.networkHandler.post(this.baseEndpoint, {
+				refundId: refundData.refundId,
+				depositId: refundData.depositId,
+			});
 
 			logger.info(
 				"Sending refund request for deposit:",
@@ -33,7 +31,7 @@ export class PawapayRefunds extends BaseService {
 				"with refundId:",
 				refundData.refundId,
 			);
-			return response as RefundResponse;
+			return response as PawaPayTypes.RefundResponse;
 		} catch (error: unknown) {
 			logger.error("Refund request failed:", error);
 			return this.networkHandler.handleApiError(error, "createRefundRequest");
@@ -47,13 +45,13 @@ export class PawapayRefunds extends BaseService {
 	 */
 	async getRefundStatus(
 		refundId: string,
-	): Promise<RefundTransaction | NetworkResponse> {
+	): Promise<PawaPayTypes.RefundTransaction | PawaPayNetworkResponse> {
 		try {
 			const endPoint = `${this.baseEndpoint}/${refundId}`;
 			const response = await this.networkHandler.get(endPoint);
 
 			logger.info("Refund details retrieved successfully:", response);
-			return response as RefundTransaction;
+			return response as PawaPayTypes.RefundTransaction;
 		} catch (error: unknown) {
 			logger.error("Get refund status failed:", error);
 			return this.networkHandler.handleApiError(error, "getRefundStatus");

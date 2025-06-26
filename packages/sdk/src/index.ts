@@ -3,23 +3,22 @@
  * @module afrimomo
  */
 
-// Export the main SDK class and its configuration
 export { AfromomoSDK } from "./sdk";
 export type { SDKConfig } from "./sdk";
 
 // Export PayChangu types
-export type { AccountInfo } from "./services/paychangu/types/account";
+export type { PayChanguAccountInfo } from "./services/paychangu/types/account";
 export type {
-	PaymentDataInfo,
+	PayChanguPaymentDataInfo,
 	PayChanguInitialPayment,
 	PayChanguDirectChargePayment,
 	PayChanguMobileMoneyPayout,
 	PayChanguBankPayout,
 	PayChanguDirectChargeBankTransfer,
 	PayChanguCustomization,
+	PayChanguMeta,
 } from "./services/paychangu/types/payment";
 
-// Export PayChangu response types
 export type {
 	PayChanguErrorResponse,
 	PayChanguDirectChargePaymentResponse,
@@ -48,50 +47,9 @@ export type {
 	PayChanguPaymentInitiationErrorResponse,
 } from "./services/paychangu/types/response";
 
-// Export PawaPay types
-export type {
-	PaymentData as PawapayPaymentData,
-	InitiatePaymentResponse as PawapayInitiatePaymentResponse,
-	PaymentStatus,
-	PaymentTransaction,
-	Payer,
-	SuspiciousActivityReport,
-} from "./services/pawapay/types/payment";
-
-export type {
-	PayoutTransaction,
-	PawaPayPayoutTransaction,
-	BulkPayoutResponse,
-	PayoutStatus,
-	ResendCallbackResponseStatus,
-	ResendCallbackResponse,
-} from "./services/pawapay/types/payout";
-
-export type {
-	RefundResponse,
-	RefundRejectionCode,
-	RefundTransaction,
-	RefundFailureCode,
-} from "./services/pawapay/types/refund";
-
-export type {
-	WalletBalance,
-	WalletBalancesResponse,
-} from "./services/pawapay/types/wallet";
-
-// Export PawaPay network types
-export type {
-	OperationStatus,
-	OperationType,
-	CorrespondentOperation,
-	Correspondent as PawapayCorrespondent,
-	CountryCorrespondents,
-	AvailabilityResponse,
-	OperationConfig,
-	CorrespondentConfig,
-	CountryConfig,
-	ActiveConfigResponse,
-} from "./services/pawapay/types/network";
+// Export PawaPay types namespace
+export { PawaPayTypes } from "./services/pawapay/types";
+export type { default as PawaPayTypesDefault } from "./services/pawapay/types";
 
 // Export environment constants
 export { Environment, ENVIRONMENTS, URLS } from "./config/constants";
@@ -101,7 +59,11 @@ export type { ApiUrl } from "./config/constants";
 export type { EnvConfig, EnvLoadOptions } from "./config/env";
 
 // Export shared types
-export type { NetworkResponse } from "./types/shared";
+export type {
+	NetworkResponse,
+	MoMoCurrency,
+	Correspondent,
+} from "./types/index";
 
 // Export services
 export { PawaPay } from "./services/pawapay";
@@ -109,12 +71,6 @@ export { PayChangu } from "./services/paychangu";
 
 // Export PayChangu namespace types
 export type { PayChangu as PayChanguTypes } from "./services/paychangu/types";
-
-// Export primary types (these take precedence)
-export type {
-	MoMoCurrency,
-	Correspondent,
-} from "./types/shared";
 
 // Export utilities
 export { NetworkManager } from "./utils/network";

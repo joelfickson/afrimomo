@@ -1,13 +1,8 @@
-import type { NetworkResponse } from "../../../types";
+import type { PawaPayNetworkResponse } from "../../../types";
 import { BaseService } from "../../../utils/baseService";
 import { logger } from "../../../utils/logger";
-import type { NetworkManager } from "../../../utils/network";
 import { PawapayNetwork } from "../network";
-import type {
-	PayoutTransaction,
-	PawaPayPayoutTransaction,
-	BulkPayoutResponse,
-} from "../types/payout";
+import type { PawaPayTypes } from "../types";
 
 export class PawapayPayouts extends BaseService {
 	private readonly baseEndpoint = "/payouts";
@@ -22,8 +17,8 @@ export class PawapayPayouts extends BaseService {
 	 * @returns Promise resolving to the payout transaction response or error
 	 */
 	async sendPayout(
-		transaction: PayoutTransaction,
-	): Promise<PawaPayPayoutTransaction | NetworkResponse> {
+		transaction: PawaPayTypes.PayoutTransaction,
+	): Promise<PawaPayTypes.PayoutTransaction | PawaPayNetworkResponse> {
 		try {
 			const phoneNumber = transaction.recipient.address.value;
 
@@ -38,11 +33,13 @@ export class PawapayPayouts extends BaseService {
 				transaction.currency,
 			);
 
-			const response = await this.networkHandler
-				.post(this.baseEndpoint, transaction);
+			const response = await this.networkHandler.post(
+				this.baseEndpoint,
+				transaction,
+			);
 
 			logger.info("Payout transaction successful:", response);
-			return response as PawaPayPayoutTransaction;
+			return response as PawaPayTypes.PayoutTransaction;
 		} catch (error) {
 			logger.error("Payout transaction failed:", error);
 			return this.networkHandler.handleApiError(error, "sendPayout");
@@ -52,14 +49,17 @@ export class PawapayPayouts extends BaseService {
 	/**
 	 * Processes multiple payout transactions in bulk
 	 * @param transactions - Array of payout transactions to process
-	 * @returns Promise resolving to array of payout transaction responses or error
+	 * @returns Promise resolving to an array of payout transaction responses or error
 	 */
 	async sendBulkPayout(
-		transactions: PayoutTransaction[],
-	): Promise<BulkPayoutResponse | NetworkResponse> {
+		transactions: PawaPayTypes.PayoutTransaction[],
+	): Promise<PawaPayTypes.BulkPayoutResponse | PawaPayNetworkResponse> {
 		try {
-			const response = await this.networkHandler
-				.post<BulkPayoutResponse>(`${this.baseEndpoint}/bulk`,  transactions );
+			const response =
+				await this.networkHandler.post<PawaPayTypes.BulkPayoutResponse>(
+					`${this.baseEndpoint}/bulk`,
+					transactions,
+				);
 
 			logger.info("Bulk payout transaction successful:", response);
 			return response;
@@ -76,13 +76,14 @@ export class PawapayPayouts extends BaseService {
 	 */
 	async getPayout(
 		depositId: string,
-	): Promise<PawaPayPayoutTransaction | NetworkResponse> {
+	): Promise<PawaPayTypes.PayoutTransaction | PawaPayNetworkResponse> {
 		try {
-			const response = await this.networkHandler
-				.get(`${this.baseEndpoint}/${depositId}`);
+			const response = await this.networkHandler.get(
+				`${this.baseEndpoint}/${depositId}`,
+			);
 
 			logger.info("Payout details retrieved successfully:", response);
-			return response as PawaPayPayoutTransaction;
+			return response as PawaPayTypes.PayoutTransaction;
 		} catch (error) {
 			logger.error("Get payout failed:", error);
 			return this.networkHandler.handleApiError(error, "getPayout");

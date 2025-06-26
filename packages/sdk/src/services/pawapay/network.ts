@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import type { Environment } from "../../config/constants";
 import { logger } from "../../utils/logger";
-import type { NetworkResponse } from "../../types";
+import type { PawaPayNetworkResponse } from "../../types";
 
 /**
  * Network manager for PawaPay API calls
@@ -70,7 +70,7 @@ export class PawapayNetwork {
 	 * @param context - Context about the operation for better error messages
 	 * @returns A standardized error response
 	 */
-	handleApiError(error: unknown, context: string): NetworkResponse {
+	handleApiError(error: unknown, context: string): PawaPayNetworkResponse {
 		logger.error(`PawaPay API Error - ${context}:`, error);
 
 		let errorMessage = `An error occurred during ${context}`;

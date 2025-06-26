@@ -6,7 +6,7 @@
 
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { logger } from "../../utils/logger";
-import type { NetworkResponse } from "../../types";
+import type { PawaPayNetworkResponse } from "../../types";
 
 // Base URL for the PayChangu API
 const BASE_PAYCHANGU_URL = "https://api.paychangu.com";
@@ -48,7 +48,7 @@ export class PayChanguNetwork {
 	 * @param context - Context about the operation for better error messages
 	 * @returns A standardized error response
 	 */
-	handleApiError(error: unknown, context: string): NetworkResponse {
+	handleApiError(error: unknown, context: string): PawaPayNetworkResponse {
 		logger.error(`PayChangu API Error - ${context}:`, error);
 
 		let errorMessage = `An error occurred during ${context}`;

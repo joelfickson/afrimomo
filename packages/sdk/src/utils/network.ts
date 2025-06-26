@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestHeaders } from "axios";
 import { URLS, type Environment, ENVIRONMENTS } from "../config/constants";
-import type { NetworkResponse } from "../types";
+import type { PawaPayNetworkResponse } from "../types";
 import { logger } from "./logger";
 
 export class NetworkManager {
@@ -33,7 +33,7 @@ export class NetworkManager {
 		return this.axiosInstance;
 	}
 
-	public handleErrors(error: unknown): NetworkResponse {
+	public handleErrors(error: unknown): PawaPayNetworkResponse {
 		logger.error("Error occurred", error);
 
 		let errorMessage = "An unknown error occurred";

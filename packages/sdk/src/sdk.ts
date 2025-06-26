@@ -1,6 +1,6 @@
-import { PayChangu } from "./services/paychangu";
-import { PawaPay } from "./services/pawapay";
-import { PaymentProviderAdapter, PaymentProviderConfig } from "./services/generic/paymentProvider";
+import { PayChangu } from "./services";
+import { PawaPay } from "./services";
+import { PaymentProviderAdapter, PaymentProviderConfig } from "./services";
 import type { Environment } from "./config/constants";
 import {
 	type EnvConfig,
@@ -58,7 +58,7 @@ export class AfromomoSDK {
 	private _providers: Record<string, PaymentProviderAdapter> = {};
 
 	private constructor(private readonly config: SDKConfig = {}) {
-		// Private constructor to enforce singleton pattern
+		// Private constructor to enforce a singleton pattern
 		if (config.env) {
 			loadEnvFile(config.env);
 		} else {
