@@ -19,7 +19,6 @@ export class PawapayPayments {
 		try {
 			logger.info(`Payment Data: ${JSON.stringify(paymentData, null, 2)}`);
 
-			// Ensure the payment data is properly structured
 			const requestData = {
 				depositId: paymentData.depositId,
 				returnUrl: paymentData.returnUrl,
@@ -32,7 +31,6 @@ export class PawapayPayments {
 				metadata: paymentData.metadata || [],
 			};
 
-			// Use the network's post-method with context
 			const response = await this.network.post<PawaPayTypes.PaymentApiResponse>(
 				this.baseEndpoint,
 				requestData,
