@@ -1137,7 +1137,7 @@ export class PayChangu extends BaseService {
 	 * @param txRef - The transaction reference to verify
 	 * @returns Promise resolving to the transaction verification response
 	 */
-	private async verifyTransactionDirect(
+	async verifyTransactionDirect(
 		txRef: string,
 	): Promise<PayChanguVerifyTransactionResponse | PayChanguErrorResponse> {
 		try {
