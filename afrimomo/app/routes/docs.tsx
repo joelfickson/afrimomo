@@ -43,7 +43,12 @@ export default function Docs() {
         <div className="grid md:grid-cols-2 gap-8 mb-20">
           {/* SDK Card */}
           <div className="border border-white/10 rounded-lg p-8 hover:border-lime-400/50 transition-colors">
-            <h2 className="text-3xl font-bold mb-4">Afrimomo SDK</h2>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-3xl font-bold">Afrimomo SDK</h2>
+              <span className="bg-lime-400/10 text-lime-400 px-3 py-1 rounded-full text-xs font-semibold border border-lime-400/20">
+                v0.0.1-beta.13
+              </span>
+            </div>
             <p className="text-gray-400 mb-6">
               A unified TypeScript SDK for integrating African payment providers into your Node.js and web applications.
             </p>
@@ -75,7 +80,12 @@ export default function Docs() {
 
           {/* MCP Card */}
           <div className="border border-white/10 rounded-lg p-8 hover:border-lime-400/50 transition-colors">
-            <h2 className="text-3xl font-bold mb-4">Afrimomo MCP</h2>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-3xl font-bold">Afrimomo MCP</h2>
+              <span className="bg-lime-400/10 text-lime-400 px-3 py-1 rounded-full text-xs font-semibold border border-lime-400/20">
+                v0.0.2-beta.1
+              </span>
+            </div>
             <p className="text-gray-400 mb-6">
               Model Context Protocol server enabling AI assistants like Claude to handle payment operations through natural language.
             </p>

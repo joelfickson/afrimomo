@@ -30,9 +30,14 @@ export default function SDK() {
 
       {/* Hero */}
       <section className="container mx-auto px-4 py-20">
-        <h1 className="text-5xl font-bold mb-6">
-          Afrimomo <span className="text-lime-400">SDK</span>
-        </h1>
+        <div className="flex items-center gap-4 mb-6">
+          <h1 className="text-5xl font-bold">
+            Afrimomo <span className="text-lime-400">SDK</span>
+          </h1>
+          <span className="bg-lime-400/10 text-lime-400 px-4 py-1 rounded-full text-sm font-semibold border border-lime-400/20">
+            v0.0.1-beta.13
+          </span>
+        </div>
         <p className="text-xl text-gray-400 max-w-3xl">
           A unified TypeScript SDK for seamless integration with African payment providers.
           Type-safe, reliable, and built for production.

@@ -30,9 +30,14 @@ export default function MCP() {
 
       {/* Hero */}
       <section className="container mx-auto px-4 py-20">
-        <h1 className="text-5xl font-bold mb-6">
-          Afrimomo <span className="text-lime-400">MCP Server</span>
-        </h1>
+        <div className="flex items-center gap-4 mb-6">
+          <h1 className="text-5xl font-bold">
+            Afrimomo <span className="text-lime-400">MCP Server</span>
+          </h1>
+          <span className="bg-lime-400/10 text-lime-400 px-4 py-1 rounded-full text-sm font-semibold border border-lime-400/20">
+            v0.0.2-beta.1
+          </span>
+        </div>
         <p className="text-xl text-gray-400 max-w-3xl">
           Model Context Protocol server enabling AI assistants like Claude to handle payment operations through natural language.
           23 comprehensive tools for seamless payment management.
