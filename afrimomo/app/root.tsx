@@ -11,6 +11,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
+  { rel: "icon", type: "image/png", href: "/logo.png" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
@@ -33,9 +34,11 @@ export function meta() {
     { property: "og:title", content: "Afrimomo - Unified African Payment Integration" },
     { property: "og:description", content: "A unified SDK and MCP server for seamless integration with African payment providers." },
     { property: "og:type", content: "website" },
+    { property: "og:image", content: "/logo.png" },
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: "Afrimomo - Unified African Payment Integration" },
     { name: "twitter:description", content: "A unified SDK and MCP server for seamless integration with African payment providers." },
+    { name: "twitter:image", content: "/logo.png" },
   ];
 }
 
