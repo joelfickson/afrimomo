@@ -5,14 +5,10 @@
  */
 
 import type { PayChangu } from "afrimomo-sdk";
+import type { ToolRegistrationFunction } from "../../types/index.js";
 
 export function registerPayChanguOperatorTools(
-  registerTool: (
-    name: string,
-    description: string,
-    inputSchema: any,
-    handler: (args: any) => Promise<any>
-  ) => void,
+  registerTool: ToolRegistrationFunction,
   paychangu: PayChangu
 ) {
   // Get Mobile Money Operators

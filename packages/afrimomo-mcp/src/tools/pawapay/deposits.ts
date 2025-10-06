@@ -4,15 +4,11 @@
  * Tools for requesting and managing deposit transactions
  */
 
-import type { PawaPay } from "afrimomo-sdk";
+import type { PawaPay, PawaPayTypes } from "afrimomo-sdk";
+import type { ToolRegistrationFunction, PawapayToolArgs } from "../../types/index.js";
 
 export function registerPawapayDepositTools(
-  registerTool: (
-    name: string,
-    description: string,
-    inputSchema: any,
-    handler: (args: any) => Promise<any>
-  ) => void,
+  registerTool: ToolRegistrationFunction,
   pawapay: PawaPay
 ) {
   // Request Deposit
@@ -57,21 +53,24 @@ export function registerPawapayDepositTools(
       ],
     },
     async (args) => {
-      const transaction = {
-        payoutId: args.depositId,
-        amount: args.amount,
-        currency: args.currency,
-        correspondent: args.correspondent,
+      const { depositId, amount, currency, correspondent, msisdn, statementDescription } =
+        args as PawapayToolArgs.RequestDeposit;
+
+      const transaction: PawaPayTypes.PayoutTransaction = {
+        payoutId: depositId,
+        amount,
+        currency,
+        correspondent,
         recipient: {
-          type: "MSISDN" as const,
+          type: "MSISDN",
           address: {
-            value: args.msisdn,
+            value: msisdn,
           },
         },
         customerTimestamp: new Date().toISOString(),
-        statementDescription: args.statementDescription,
+        statementDescription,
       };
-      return await pawapay.deposits.sendDeposit(transaction as any);
+      return await pawapay.deposits.sendDeposit(transaction);
     }
   );
 
@@ -90,7 +89,8 @@ export function registerPawapayDepositTools(
       required: ["depositId"],
     },
     async (args) => {
-      return await pawapay.deposits.getDeposit(args.depositId);
+      const { depositId } = args as PawapayToolArgs.GetDeposit;
+      return await pawapay.deposits.getDeposit(depositId);
     }
   );
 
@@ -109,7 +109,8 @@ export function registerPawapayDepositTools(
       required: ["depositId"],
     },
     async (args) => {
-      return await pawapay.deposits.resendCallback(args.depositId);
+      const { depositId } = args as PawapayToolArgs.ResendDepositCallback;
+      return await pawapay.deposits.resendCallback(depositId);
     }
   );
 }

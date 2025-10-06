@@ -4,15 +4,11 @@
  * Tools for sending payouts to mobile money accounts
  */
 
-import type { PawaPay } from "afrimomo-sdk";
+import type { PawaPay, PawaPayTypes } from "afrimomo-sdk";
+import type { ToolRegistrationFunction, PawapayToolArgs } from "../../types/index.js";
 
 export function registerPawapayPayoutTools(
-  registerTool: (
-    name: string,
-    description: string,
-    inputSchema: any,
-    handler: (args: any) => Promise<any>
-  ) => void,
+  registerTool: ToolRegistrationFunction,
   pawapay: PawaPay
 ) {
   // Send Payout
@@ -58,19 +54,22 @@ export function registerPawapayPayoutTools(
       ],
     },
     async (args) => {
-      const transaction = {
-        payoutId: args.payoutId,
-        amount: args.amount,
-        currency: args.currency,
-        correspondent: args.correspondent,
+      const { payoutId, amount, currency, correspondent, msisdn, statementDescription } =
+        args as PawapayToolArgs.SendPayout;
+
+      const transaction: PawaPayTypes.PayoutTransaction = {
+        payoutId,
+        amount,
+        currency,
+        correspondent,
         recipient: {
-          type: "MSISDN" as const,
+          type: "MSISDN",
           address: {
-            value: args.msisdn,
+            value: msisdn,
           },
         },
         customerTimestamp: new Date().toISOString(),
-        statementDescription: args.statementDescription,
+        statementDescription,
       };
       return await pawapay.payouts.sendPayout(transaction);
     }
@@ -128,13 +127,15 @@ export function registerPawapayPayoutTools(
       required: ["payouts"],
     },
     async (args) => {
-      const transactions = args.payouts.map((payout: any) => ({
+      const { payouts } = args as PawapayToolArgs.SendBulkPayout;
+
+      const transactions: PawaPayTypes.PayoutTransaction[] = payouts.map((payout) => ({
         payoutId: payout.payoutId,
         amount: payout.amount,
         currency: payout.currency,
         correspondent: payout.correspondent,
         recipient: {
-          type: "MSISDN" as const,
+          type: "MSISDN",
           address: {
             value: payout.msisdn,
           },
@@ -161,7 +162,8 @@ export function registerPawapayPayoutTools(
       required: ["payoutId"],
     },
     async (args) => {
-      return await pawapay.payouts.getPayout(args.payoutId);
+      const { payoutId } = args as PawapayToolArgs.GetPayout;
+      return await pawapay.payouts.getPayout(payoutId);
     }
   );
 }

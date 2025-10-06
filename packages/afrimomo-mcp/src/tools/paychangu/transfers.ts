@@ -5,14 +5,10 @@
  */
 
 import type { PayChangu } from "afrimomo-sdk";
+import type { ToolRegistrationFunction, PayChanguToolArgs } from "../../types/index.js";
 
 export function registerPayChanguTransferTools(
-  registerTool: (
-    name: string,
-    description: string,
-    inputSchema: any,
-    handler: (args: any) => Promise<any>
-  ) => void,
+  registerTool: ToolRegistrationFunction,
   paychangu: PayChangu
 ) {
   // Process Bank Transfer
@@ -69,17 +65,29 @@ export function registerPayChanguTransferTools(
       ],
     },
     async (args) => {
+      const {
+        bank_uuid,
+        account_name,
+        account_number,
+        amount,
+        charge_id,
+        currency,
+        email,
+        first_name,
+        last_name,
+      } = args as PayChanguToolArgs.ProcessBankTransfer;
+
       return await paychangu.processBankTransfer(
-        args.bank_uuid,
-        args.account_name,
-        args.account_number,
-        args.amount,
-        args.charge_id,
-        args.currency || "MWK",
+        bank_uuid,
+        account_name,
+        account_number,
+        amount,
+        charge_id,
+        currency || "MWK",
         {
-          email: args.email,
-          firstName: args.first_name,
-          lastName: args.last_name,
+          email,
+          firstName: first_name,
+          lastName: last_name,
         }
       );
     }
@@ -100,7 +108,8 @@ export function registerPayChanguTransferTools(
       },
     },
     async (args) => {
-      return await paychangu.getSupportedBanks(args.currency || "MWK");
+      const { currency } = args as PayChanguToolArgs.GetSupportedBanks;
+      return await paychangu.getSupportedBanks(currency || "MWK");
     }
   );
 }

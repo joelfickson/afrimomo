@@ -67,9 +67,17 @@ const server = new Server(
 	},
 );
 
+import type { JSONSchema, ToolHandler } from "./types/index.js";
+
 // Storage for tool definitions and handlers
-const tools: any[] = [];
-const toolHandlers = new Map<string, (args: any) => Promise<any>>();
+interface ToolDefinition {
+	name: string;
+	description: string;
+	inputSchema: JSONSchema;
+}
+
+const tools: ToolDefinition[] = [];
+const toolHandlers = new Map<string, ToolHandler>();
 
 /**
  * Register a tool with the MCP server
@@ -77,8 +85,8 @@ const toolHandlers = new Map<string, (args: any) => Promise<any>>();
 function registerTool(
 	name: string,
 	description: string,
-	inputSchema: any,
-	handler: (args: any) => Promise<any>,
+	inputSchema: JSONSchema,
+	handler: ToolHandler,
 ) {
 	tools.push({
 		name,

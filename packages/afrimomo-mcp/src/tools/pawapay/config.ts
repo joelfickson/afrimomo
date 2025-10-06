@@ -5,14 +5,10 @@
  */
 
 import type { PawaPay } from "afrimomo-sdk";
+import type { ToolRegistrationFunction } from "../../types/index.js";
 
 export function registerPawapayConfigTools(
-  registerTool: (
-    name: string,
-    description: string,
-    inputSchema: any,
-    handler: (args: any) => Promise<any>
-  ) => void,
+  registerTool: ToolRegistrationFunction,
   pawapay: PawaPay
 ) {
   // Get Active Configuration

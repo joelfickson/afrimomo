@@ -5,14 +5,10 @@
  */
 
 import type { PayChangu } from "afrimomo-sdk";
+import type { ToolRegistrationFunction, PayChanguToolArgs } from "../../types/index.js";
 
 export function registerPayChanguTools(
-  registerTool: (
-    name: string,
-    description: string,
-    inputSchema: any,
-    handler: (args: any) => Promise<any>
-  ) => void,
+  registerTool: ToolRegistrationFunction,
   paychangu: PayChangu
 ) {
   // Initiate Payment
@@ -59,7 +55,8 @@ export function registerPayChanguTools(
       required: ["amount", "tx_ref", "callback_url", "return_url", "email"],
     },
     async (args) => {
-      return await paychangu.initiatePayment(args);
+      const paymentArgs = args as PayChanguToolArgs.InitiatePayment;
+      return await paychangu.initiatePayment(paymentArgs);
     }
   );
 
@@ -78,7 +75,8 @@ export function registerPayChanguTools(
       required: ["tx_ref"],
     },
     async (args) => {
-      return await paychangu.verifyTransactionDirect(args.tx_ref);
+      const { tx_ref } = args as PayChanguToolArgs.VerifyTransaction;
+      return await paychangu.verifyTransactionDirect(tx_ref);
     }
   );
 
@@ -118,15 +116,18 @@ export function registerPayChanguTools(
       required: ["amount", "charge_id"],
     },
     async (args) => {
+      const { amount, charge_id, currency, email, first_name, last_name } =
+        args as PayChanguToolArgs.InitiateDirectCharge;
+
       const accountInfo = {
-        email: args.email,
-        first_name: args.first_name,
-        last_name: args.last_name,
+        email,
+        first_name,
+        last_name,
       };
       return await paychangu.initializeDirectChargePayment(
-        args.amount,
-        args.charge_id,
-        args.currency || "MWK",
+        amount,
+        charge_id,
+        currency || "MWK",
         accountInfo
       );
     }
@@ -147,7 +148,8 @@ export function registerPayChanguTools(
       required: ["charge_id"],
     },
     async (args) => {
-      return await paychangu.getDirectChargeTransactionDetails(args.charge_id);
+      const { charge_id } = args as PayChanguToolArgs.GetTransactionDetails;
+      return await paychangu.getDirectChargeTransactionDetails(charge_id);
     }
   );
 }

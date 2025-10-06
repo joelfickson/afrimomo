@@ -5,14 +5,10 @@
  */
 
 import type { PawaPay } from "afrimomo-sdk";
+import type { ToolRegistrationFunction, PawapayToolArgs } from "../../types/index.js";
 
 export function registerPawapayRefundTools(
-  registerTool: (
-    name: string,
-    description: string,
-    inputSchema: any,
-    handler: (args: any) => Promise<any>
-  ) => void,
+  registerTool: ToolRegistrationFunction,
   pawapay: PawaPay
 ) {
   // Create Refund
@@ -34,9 +30,10 @@ export function registerPawapayRefundTools(
       required: ["refundId", "depositId"],
     },
     async (args) => {
+      const { refundId, depositId } = args as PawapayToolArgs.CreateRefund;
       return await pawapay.refunds.createRefundRequest({
-        refundId: args.refundId,
-        depositId: args.depositId,
+        refundId,
+        depositId,
       });
     }
   );
@@ -56,7 +53,8 @@ export function registerPawapayRefundTools(
       required: ["refundId"],
     },
     async (args) => {
-      return await pawapay.refunds.getRefundStatus(args.refundId);
+      const { refundId } = args as PawapayToolArgs.GetRefundStatus;
+      return await pawapay.refunds.getRefundStatus(refundId);
     }
   );
 }

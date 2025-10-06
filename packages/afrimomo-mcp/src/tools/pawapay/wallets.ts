@@ -5,14 +5,10 @@
  */
 
 import type { PawaPay } from "afrimomo-sdk";
+import type { ToolRegistrationFunction, PawapayToolArgs } from "../../types/index.js";
 
 export function registerPawapayWalletTools(
-  registerTool: (
-    name: string,
-    description: string,
-    inputSchema: any,
-    handler: (args: any) => Promise<any>
-  ) => void,
+  registerTool: ToolRegistrationFunction,
   pawapay: PawaPay
 ) {
   // Get All Balances
@@ -43,7 +39,8 @@ export function registerPawapayWalletTools(
       required: ["country"],
     },
     async (args) => {
-      return await pawapay.wallets.getCountryBalance(args.country);
+      const { country } = args as PawapayToolArgs.GetCountryBalance;
+      return await pawapay.wallets.getCountryBalance(country);
     }
   );
 }

@@ -5,14 +5,10 @@
  */
 
 import type { PayChangu } from "afrimomo-sdk";
+import type { ToolRegistrationFunction, PayChanguToolArgs } from "../../types/index.js";
 
 export function registerPayChanguPayoutTools(
-  registerTool: (
-    name: string,
-    description: string,
-    inputSchema: any,
-    handler: (args: any) => Promise<any>
-  ) => void,
+  registerTool: ToolRegistrationFunction,
   paychangu: PayChangu
 ) {
   // Initialize Mobile Money Payout
@@ -60,16 +56,27 @@ export function registerPayChanguPayoutTools(
       required: ["mobile", "mobile_money_operator_ref_id", "amount", "charge_id"],
     },
     async (args) => {
+      const {
+        mobile,
+        mobile_money_operator_ref_id,
+        amount,
+        charge_id,
+        email,
+        first_name,
+        last_name,
+        transaction_status,
+      } = args as PayChanguToolArgs.MobileMoneyPayout;
+
       return await paychangu.initializeMobileMoneyPayout(
-        args.mobile,
-        args.mobile_money_operator_ref_id,
-        args.amount,
-        args.charge_id,
+        mobile,
+        mobile_money_operator_ref_id,
+        amount,
+        charge_id,
         {
-          email: args.email,
-          firstName: args.first_name,
-          lastName: args.last_name,
-          transactionStatus: args.transaction_status,
+          email,
+          firstName: first_name,
+          lastName: last_name,
+          transactionStatus: transaction_status,
         }
       );
     }
@@ -90,7 +97,8 @@ export function registerPayChanguPayoutTools(
       required: ["charge_id"],
     },
     async (args) => {
-      return await paychangu.getMobileMoneyPayoutDetails(args.charge_id);
+      const { charge_id } = args as PayChanguToolArgs.GetMobilePayoutDetails;
+      return await paychangu.getMobileMoneyPayoutDetails(charge_id);
     }
   );
 
@@ -137,16 +145,19 @@ export function registerPayChanguPayoutTools(
       required: ["bank_uuid", "account_name", "account_number", "amount", "charge_id"],
     },
     async (args) => {
+      const { bank_uuid, account_name, account_number, amount, charge_id, email, first_name, last_name } =
+        args as PayChanguToolArgs.BankPayout;
+
       return await paychangu.initializeBankPayout(
-        args.bank_uuid,
-        args.account_name,
-        args.account_number,
-        args.amount,
-        args.charge_id,
+        bank_uuid,
+        account_name,
+        account_number,
+        amount,
+        charge_id,
         {
-          email: args.email,
-          firstName: args.first_name,
-          lastName: args.last_name,
+          email,
+          firstName: first_name,
+          lastName: last_name,
         }
       );
     }
@@ -167,7 +178,8 @@ export function registerPayChanguPayoutTools(
       required: ["charge_id"],
     },
     async (args) => {
-      return await paychangu.getBankPayoutDetails(args.charge_id);
+      const { charge_id } = args as PayChanguToolArgs.GetBankPayoutDetails;
+      return await paychangu.getBankPayoutDetails(charge_id);
     }
   );
 
@@ -189,7 +201,8 @@ export function registerPayChanguPayoutTools(
       },
     },
     async (args) => {
-      return await paychangu.getAllBankPayouts(args.page, args.per_page);
+      const { page, per_page } = args as PayChanguToolArgs.ListBankPayouts;
+      return await paychangu.getAllBankPayouts(page, per_page);
     }
   );
 }
