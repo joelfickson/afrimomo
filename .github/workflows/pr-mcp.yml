@@ -1,0 +1,124 @@
+name: MCP Pull Request
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'packages/afrimomo-mcp/**'
+      - '.github/workflows/pr-mcp.yml'
+
+jobs:
+  validate:
+    name: Validate MCP Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+
+      - name: Setup npm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: |
+          cd packages/afrimomo-mcp
+          npm ci
+
+      - name: Build
+        run: |
+          cd packages/afrimomo-mcp
+          npm run build
+
+      - name: Check build output
+        run: |
+          cd packages/afrimomo-mcp
+          if [ ! -f "dist/index.js" ]; then
+            echo "❌ Build failed: dist/index.js not found"
+            exit 1
+          fi
+          echo "✅ Build successful"
+
+      - name: Verify package can be installed
+        run: |
+          cd packages/afrimomo-mcp
+          npm pack
+          PACKAGE_FILE=$(ls afrimomo-mcp-*.tgz)
+          echo "Package created: $PACKAGE_FILE"
+
+          # Test installation in a temp directory
+          mkdir -p /tmp/test-install
+          cd /tmp/test-install
+          npm init -y
+          npm install $GITHUB_WORKSPACE/packages/afrimomo-mcp/$PACKAGE_FILE
+
+          # Verify the package installed correctly
+          if [ ! -d "node_modules/afrimomo-mcp" ]; then
+            echo "❌ Package installation failed"
+            exit 1
+          fi
+          echo "✅ Package installation successful"
+
+      - name: Check required files
+        run: |
+          cd packages/afrimomo-mcp
+          REQUIRED_FILES=("README.md" "INSTALLATION.md" "CHANGELOG.md" "LICENSE" "package.json" "tsconfig.json")
+
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing required file: $file"
+              exit 1
+            fi
+          done
+          echo "✅ All required files present"
+
+      - name: Validate package.json
+        run: |
+          cd packages/afrimomo-mcp
+
+          # Check required fields
+          node -e "
+            const pkg = require('./package.json');
+            const required = ['name', 'version', 'description', 'main', 'bin', 'license'];
+            const missing = required.filter(f => !pkg[f]);
+            if (missing.length > 0) {
+              console.error('❌ Missing required fields:', missing);
+              process.exit(1);
+            }
+
+            // Check version format
+            if (!/^\d+\.\d+\.\d+(-beta\.\d+)?$/.test(pkg.version)) {
+              console.error('❌ Invalid version format:', pkg.version);
+              process.exit(1);
+            }
+
+            console.log('✅ package.json validation passed');
+          "
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ All MCP validation checks passed!"
+          echo ""
+          echo "Package Details:"
+          cd packages/afrimomo-mcp
+          node -e "
+            const pkg = require('./package.json');
+            console.log('Name:', pkg.name);
+            console.log('Version:', pkg.version);
+            console.log('Description:', pkg.description);
+          "
