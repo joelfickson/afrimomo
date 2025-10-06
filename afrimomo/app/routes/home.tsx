@@ -142,6 +142,23 @@ const payment = await sdk.pawapay.payments.initiate({
         </div>
       </section>
 
+      {/* Trusted By Section */}
+      <section className="container mx-auto px-4 py-20">
+        <h3 className="text-3xl font-bold mb-12 text-center">Trusted in Production</h3>
+        <div className="max-w-4xl mx-auto">
+          <div className="border border-white/10 rounded-lg p-12 text-center">
+            <img
+              src="/vwaza.jpg"
+              alt="Vwaza Multimedia"
+              className="h-16 mx-auto mb-6 object-contain filter brightness-0 invert opacity-70 hover:opacity-100 transition-opacity"
+            />
+            <p className="text-gray-400">
+              Using both <span className="text-lime-400 font-semibold">Afrimomo SDK</span> and <span className="text-lime-400 font-semibold">MCP Server</span> in production
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <h3 className="text-4xl font-bold mb-6">Ready to integrate?</h3>

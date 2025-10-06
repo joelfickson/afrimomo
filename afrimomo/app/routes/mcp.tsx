@@ -290,6 +290,21 @@ npx afrimomo-mcp`}
           </div>
         </div>
 
+        {/* Trusted By */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold mb-6 border-b border-white/10 pb-3">Used in Production</h2>
+          <div className="border border-white/10 rounded-lg p-8 text-center">
+            <img
+              src="/vwaza.jpg"
+              alt="Vwaza Multimedia"
+              className="h-12 mx-auto mb-4 object-contain filter brightness-0 invert opacity-70"
+            />
+            <p className="text-gray-400 text-sm">
+              Vwaza Multimedia uses Afrimomo MCP Server in production
+            </p>
+          </div>
+        </div>
+
         {/* Resources */}
         <div className="border border-lime-400/50 rounded-lg p-8 bg-lime-400/5">
           <h3 className="text-2xl font-bold mb-4">Additional Resources</h3>
