@@ -1,15 +1,30 @@
-# Afrimomo SDK
+# Afrimomo
 
-A unified SDK for African payment providers, making it easy to integrate multiple payment services with a consistent interface.
+A unified ecosystem for African payment providers, featuring both an SDK and MCP server for seamless integration.
 
-## Features
+## Packages
+
+This monorepo contains two main packages:
+
+- **[afrimomo-sdk](./packages/sdk)** - TypeScript SDK for African payment providers
+- **[afrimomo-mcp](./packages/afrimomo-mcp)** - Model Context Protocol server for AI assistants
+
+## Afrimomo SDK Features
 
 - 🌍 Support for multiple African payment providers
 - 🔒 Type-safe API with full TypeScript support
 - 📚 Comprehensive documentation
 - 🛠️ Easy to configure and use
 - 🔄 Consistent error handling
-- � Clean imports - no deep imports required
+- 🎯 Clean imports - no deep imports required
+
+## Afrimomo MCP Features
+
+- 🤖 AI-powered payment operations via Claude Desktop
+- 🛠️ 23 tools for comprehensive payment management
+- 💳 Support for PayChangu and PawaPay
+- 🔐 Environment-based configuration
+- 📦 Easy installation via npm or npx
 
 ## Currently Supported Providers
 
@@ -34,6 +49,8 @@ Before using the Afrimomo SDK, you'll need to create accounts with the payment p
 
 ## Installation
 
+### SDK Installation
+
 ```bash
 npm install afrimomo-sdk
 # or
@@ -41,6 +58,18 @@ pnpm add afrimomo-sdk
 # or
 yarn add afrimomo-sdk
 ```
+
+### MCP Server Installation
+
+```bash
+# Global installation
+npm install -g afrimomo-mcp
+
+# Or use with npx (no installation required)
+npx afrimomo-mcp
+```
+
+See [afrimomo-mcp documentation](./packages/afrimomo-mcp) for configuration details.
 
 ## Quick Start
 
@@ -219,9 +248,11 @@ const sdk = new AfromomoSDK({
 
 This is a monorepo containing:
 
-- `packages/sdk/` - The main Afrimomo SDK package
+- `packages/sdk/` - The Afrimomo SDK package
+- `packages/afrimomo-mcp/` - The Afrimomo MCP Server package
 - `examples/` - Usage examples and demos
 - `tests/` - Test suites
+- `.github/workflows/` - GitHub Actions for CI/CD
 
 ## Development
 
@@ -246,18 +277,40 @@ pnpm format
 
 ## Release
 
-The project uses automated releases via GitHub Actions:
+The project uses automated releases via GitHub Actions with separate workflows for each package:
 
-- `patch` - Bug fixes and small improvements
-- `minor` - New features
-- `major` - Breaking changes
-- `beta` - Pre-release versions
+### SDK Releases
+Workflow: `.github/workflows/release.yml`
+- Publish to npm as `afrimomo-sdk`
+- Tags: `v{version}` (e.g., `v1.0.0`)
+
+### MCP Server Releases
+Workflow: `.github/workflows/release-mcp.yml`
+- Publish to npm as `afrimomo-mcp`
+- Tags: `afrimomo-mcp-v{version}` (e.g., `afrimomo-mcp-v1.0.0`)
+
+### Release Types
+- `patch` - Bug fixes and small improvements (0.0.1 → 0.0.2)
+- `minor` - New features (0.1.0 → 0.2.0)
+- `major` - Breaking changes (1.0.0 → 2.0.0)
+- `beta` - Pre-release versions (1.0.0 → 1.0.1-beta.1)
+
+See [Workflows README](./.github/workflows/README.md) for detailed release instructions.
 
 ## Documentation
 
+### SDK Documentation
 - [Type Imports Guide](./packages/sdk/TYPE_IMPORTS.md) - Complete guide for importing types
 - [API Documentation](./DOCS.md) - Detailed API documentation
 - [Examples](./examples/) - Usage examples and demos
+
+### MCP Server Documentation
+- [MCP README](./packages/afrimomo-mcp/README.md) - Overview and usage guide
+- [Installation Guide](./packages/afrimomo-mcp/INSTALLATION.md) - Detailed setup instructions
+- [Changelog](./packages/afrimomo-mcp/CHANGELOG.md) - Version history
+
+### Development Documentation
+- [Workflows Guide](./.github/workflows/README.md) - CI/CD and release process
 
 ## Contributing
 

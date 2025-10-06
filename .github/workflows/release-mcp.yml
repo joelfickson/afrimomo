@@ -1,0 +1,227 @@
+name: Release MCP
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release Type'
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+          - beta
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release:
+    name: Release MCP Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Dependencies
+        run: |
+          cd packages/afrimomo-mcp
+          npm install
+          git add package-lock.json || true
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          cd ../..
+          git commit -m "chore: add mcp package-lock.json" || true
+
+      - name: Setup Release Environment
+        id: setup
+        run: |
+          cd packages/afrimomo-mcp
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+
+          # Get all published versions from npm
+          ALL_VERSIONS=$(npm view afrimomo-mcp versions --json 2>/dev/null || echo "[]")
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+
+          echo "Current version from package.json: $CURRENT_VERSION"
+          echo "All published versions: $ALL_VERSIONS"
+
+          if [[ "$RELEASE_TYPE" == "beta" ]]; then
+            echo "IS_BETA=true" >> $GITHUB_OUTPUT
+            echo "TAG_NAME=beta" >> $GITHUB_OUTPUT
+
+            # Find latest beta version
+            LATEST_BETA=$(echo "$ALL_VERSIONS" | node -e "
+              try {
+                const versions = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                const betas = versions.filter(v => v.includes('-beta.'));
+                console.log(betas.length > 0 ? betas[betas.length - 1] : '');
+              } catch (e) {
+                console.log('');
+              }
+            ")
+
+            echo "Latest published beta: $LATEST_BETA"
+
+            if [[ -n "$LATEST_BETA" ]]; then
+              # Extract base version and beta number
+              BASE_VERSION=$(echo $LATEST_BETA | cut -d'-' -f1)
+              BETA_NUM=$(echo $LATEST_BETA | cut -d'.' -f4)
+              NEXT_BETA=$((BETA_NUM + 1))
+              NEXT_VERSION="${BASE_VERSION}-beta.${NEXT_BETA}"
+            else
+              # No existing beta, start from current version
+              if [[ $CURRENT_VERSION == *"-beta."* ]]; then
+                BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'-' -f1)
+              else
+                # Install semver if not available
+                npm install -g semver
+                BASE_VERSION=$(semver -i patch ${CURRENT_VERSION})
+              fi
+              NEXT_VERSION="${BASE_VERSION}-beta.1"
+            fi
+          else
+            echo "IS_BETA=false" >> $GITHUB_OUTPUT
+            echo "TAG_NAME=latest" >> $GITHUB_OUTPUT
+
+            # Find latest non-beta version
+            LATEST_VERSION=$(echo "$ALL_VERSIONS" | node -e "
+              try {
+                const versions = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+                const releases = versions.filter(v => !v.includes('-beta.'));
+                console.log(releases.length > 0 ? releases[releases.length - 1] : '');
+              } catch (e) {
+                console.log('');
+              }
+            ")
+
+            echo "Latest published version: $LATEST_VERSION"
+
+            # Install semver if not available
+            npm install -g semver
+
+            if [[ -n "$LATEST_VERSION" ]]; then
+              NEXT_VERSION=$(semver -i ${RELEASE_TYPE} ${LATEST_VERSION})
+            else
+              # No existing version, use current version as base
+              NEXT_VERSION=$(semver -i ${RELEASE_TYPE} ${CURRENT_VERSION})
+            fi
+          fi
+
+          echo "Will publish version: $NEXT_VERSION"
+          echo "VERSION=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+          # Update package.json with new version
+          npm version $NEXT_VERSION --no-git-tag-version --allow-same-version
+          git add package.json
+          git commit -m "chore: bump afrimomo-mcp to $NEXT_VERSION" || true
+
+      - name: Build MCP Server
+        run: |
+          cd packages/afrimomo-mcp
+          npm run build
+
+      - name: Update Changelog
+        if: success()
+        run: |
+          cd packages/afrimomo-mcp
+          VERSION=${{ steps.setup.outputs.VERSION }}
+          IS_BETA=${{ steps.setup.outputs.IS_BETA }}
+
+          # Backup existing changelog
+          if [ -f CHANGELOG.md ]; then
+            cp CHANGELOG.md CHANGELOG.md.backup
+          fi
+
+          # Prepare new changelog entry
+          DATE=$(date +%Y-%m-%d)
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+
+          # Create temporary changelog entry
+          cat > CHANGELOG_NEW.md << EOF
+          # Changelog
+
+          All notable changes to the Afrimomo MCP Server will be documented in this file.
+
+          The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+          and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+          ## [${VERSION}] - ${DATE}
+
+          ### Changed
+
+          - ${RELEASE_TYPE^} release
+
+          EOF
+
+          # Append old changelog content (skip header)
+          if [ -f CHANGELOG.md ]; then
+            sed '1,7d' CHANGELOG.md >> CHANGELOG_NEW.md
+          fi
+
+          # Replace changelog
+          mv CHANGELOG_NEW.md CHANGELOG.md
+
+          # Commit if there are changes
+          if [[ -n "$(git status --porcelain CHANGELOG.md)" ]]; then
+            git add CHANGELOG.md
+            git commit -m "docs: update changelog for afrimomo-mcp version ${VERSION}"
+            git push origin ${{ github.ref_name }}
+          fi
+
+      - name: Setup npm
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm
+        run: |
+          cd packages/afrimomo-mcp
+          if [[ "${{ steps.setup.outputs.IS_BETA }}" == "true" ]]; then
+            npm publish --tag beta --access public
+          else
+            npm publish --tag latest --access public
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Tag and Release
+        if: success()
+        run: |
+          VERSION=${{ steps.setup.outputs.VERSION }}
+          git tag afrimomo-mcp-v${VERSION}
+          git push origin afrimomo-mcp-v${VERSION}
+
+          if [[ "${{ steps.setup.outputs.IS_BETA }}" == "true" ]]; then
+            gh release create afrimomo-mcp-v${VERSION} \
+              --prerelease \
+              --title "Afrimomo MCP v${VERSION}" \
+              --notes "$(cat packages/afrimomo-mcp/CHANGELOG.md | head -50)"
+          else
+            gh release create afrimomo-mcp-v${VERSION} \
+              --title "Afrimomo MCP v${VERSION}" \
+              --notes "$(cat packages/afrimomo-mcp/CHANGELOG.md | head -50)"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "✅ Successfully released afrimomo-mcp@${{ steps.setup.outputs.VERSION }}"
+          echo "📦 Package: https://www.npmjs.com/package/afrimomo-mcp/v/${{ steps.setup.outputs.VERSION }}"
+          echo "🏷️ Tag: afrimomo-mcp-v${{ steps.setup.outputs.VERSION }}"
