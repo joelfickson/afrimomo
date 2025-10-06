@@ -30,7 +30,7 @@ export function registerPawapayRefundTools(
       required: ["refundId", "depositId"],
     },
     async (args) => {
-      const { refundId, depositId } = args as PawapayToolArgs.CreateRefund;
+      const { refundId, depositId } = args as unknown as PawapayToolArgs.CreateRefund;
       return await pawapay.refunds.createRefundRequest({
         refundId,
         depositId,
@@ -53,7 +53,7 @@ export function registerPawapayRefundTools(
       required: ["refundId"],
     },
     async (args) => {
-      const { refundId } = args as PawapayToolArgs.GetRefundStatus;
+      const { refundId } = args as unknown as PawapayToolArgs.GetRefundStatus;
       return await pawapay.refunds.getRefundStatus(refundId);
     }
   );

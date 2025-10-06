@@ -65,7 +65,7 @@ export function registerPayChanguPayoutTools(
         first_name,
         last_name,
         transaction_status,
-      } = args as PayChanguToolArgs.MobileMoneyPayout;
+      } = args as unknown as PayChanguToolArgs.MobileMoneyPayout;
 
       return await paychangu.initializeMobileMoneyPayout(
         mobile,
@@ -97,7 +97,7 @@ export function registerPayChanguPayoutTools(
       required: ["charge_id"],
     },
     async (args) => {
-      const { charge_id } = args as PayChanguToolArgs.GetMobilePayoutDetails;
+      const { charge_id } = args as unknown as PayChanguToolArgs.GetMobilePayoutDetails;
       return await paychangu.getMobileMoneyPayoutDetails(charge_id);
     }
   );
@@ -146,7 +146,7 @@ export function registerPayChanguPayoutTools(
     },
     async (args) => {
       const { bank_uuid, account_name, account_number, amount, charge_id, email, first_name, last_name } =
-        args as PayChanguToolArgs.BankPayout;
+        args as unknown as PayChanguToolArgs.BankPayout;
 
       return await paychangu.initializeBankPayout(
         bank_uuid,
@@ -178,7 +178,7 @@ export function registerPayChanguPayoutTools(
       required: ["charge_id"],
     },
     async (args) => {
-      const { charge_id } = args as PayChanguToolArgs.GetBankPayoutDetails;
+      const { charge_id } = args as unknown as PayChanguToolArgs.GetBankPayoutDetails;
       return await paychangu.getBankPayoutDetails(charge_id);
     }
   );
@@ -201,7 +201,7 @@ export function registerPayChanguPayoutTools(
       },
     },
     async (args) => {
-      const { page, per_page } = args as PayChanguToolArgs.ListBankPayouts;
+      const { page, per_page } = args as unknown as PayChanguToolArgs.ListBankPayouts;
       return await paychangu.getAllBankPayouts(page, per_page);
     }
   );

@@ -55,8 +55,13 @@ export function registerPayChanguTools(
       required: ["amount", "tx_ref", "callback_url", "return_url", "email"],
     },
     async (args) => {
-      const paymentArgs = args as PayChanguToolArgs.InitiatePayment;
-      return await paychangu.initiatePayment(paymentArgs);
+      const paymentArgs = args as unknown as PayChanguToolArgs.InitiatePayment;
+      // Ensure currency has a default value if not provided
+      const paymentData = {
+        ...paymentArgs,
+        currency: paymentArgs.currency || "MWK",
+      };
+      return await paychangu.initiatePayment(paymentData);
     }
   );
 
@@ -75,7 +80,7 @@ export function registerPayChanguTools(
       required: ["tx_ref"],
     },
     async (args) => {
-      const { tx_ref } = args as PayChanguToolArgs.VerifyTransaction;
+      const { tx_ref } = args as unknown as PayChanguToolArgs.VerifyTransaction;
       return await paychangu.verifyTransactionDirect(tx_ref);
     }
   );
@@ -117,7 +122,7 @@ export function registerPayChanguTools(
     },
     async (args) => {
       const { amount, charge_id, currency, email, first_name, last_name } =
-        args as PayChanguToolArgs.InitiateDirectCharge;
+        args as unknown as PayChanguToolArgs.InitiateDirectCharge;
 
       const accountInfo = {
         email,
@@ -148,7 +153,7 @@ export function registerPayChanguTools(
       required: ["charge_id"],
     },
     async (args) => {
-      const { charge_id } = args as PayChanguToolArgs.GetTransactionDetails;
+      const { charge_id } = args as unknown as PayChanguToolArgs.GetTransactionDetails;
       return await paychangu.getDirectChargeTransactionDetails(charge_id);
     }
   );

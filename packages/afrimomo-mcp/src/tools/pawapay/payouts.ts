@@ -55,7 +55,7 @@ export function registerPawapayPayoutTools(
     },
     async (args) => {
       const { payoutId, amount, currency, correspondent, msisdn, statementDescription } =
-        args as PawapayToolArgs.SendPayout;
+        args as unknown as PawapayToolArgs.SendPayout;
 
       const transaction: PawaPayTypes.PayoutTransaction = {
         payoutId,
@@ -127,7 +127,7 @@ export function registerPawapayPayoutTools(
       required: ["payouts"],
     },
     async (args) => {
-      const { payouts } = args as PawapayToolArgs.SendBulkPayout;
+      const { payouts } = args as unknown as PawapayToolArgs.SendBulkPayout;
 
       const transactions: PawaPayTypes.PayoutTransaction[] = payouts.map((payout) => ({
         payoutId: payout.payoutId,
@@ -162,7 +162,7 @@ export function registerPawapayPayoutTools(
       required: ["payoutId"],
     },
     async (args) => {
-      const { payoutId } = args as PawapayToolArgs.GetPayout;
+      const { payoutId } = args as unknown as PawapayToolArgs.GetPayout;
       return await pawapay.payouts.getPayout(payoutId);
     }
   );

@@ -75,7 +75,7 @@ export function registerPayChanguTransferTools(
         email,
         first_name,
         last_name,
-      } = args as PayChanguToolArgs.ProcessBankTransfer;
+      } = args as unknown as PayChanguToolArgs.ProcessBankTransfer;
 
       return await paychangu.processBankTransfer(
         bank_uuid,
@@ -108,7 +108,7 @@ export function registerPayChanguTransferTools(
       },
     },
     async (args) => {
-      const { currency } = args as PayChanguToolArgs.GetSupportedBanks;
+      const { currency } = args as unknown as PayChanguToolArgs.GetSupportedBanks;
       return await paychangu.getSupportedBanks(currency || "MWK");
     }
   );

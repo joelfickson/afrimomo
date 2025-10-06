@@ -54,7 +54,7 @@ export function registerPawapayDepositTools(
     },
     async (args) => {
       const { depositId, amount, currency, correspondent, msisdn, statementDescription } =
-        args as PawapayToolArgs.RequestDeposit;
+        args as unknown as PawapayToolArgs.RequestDeposit;
 
       const transaction: PawaPayTypes.PayoutTransaction = {
         payoutId: depositId,
@@ -89,7 +89,7 @@ export function registerPawapayDepositTools(
       required: ["depositId"],
     },
     async (args) => {
-      const { depositId } = args as PawapayToolArgs.GetDeposit;
+      const { depositId } = args as unknown as PawapayToolArgs.GetDeposit;
       return await pawapay.deposits.getDeposit(depositId);
     }
   );
@@ -109,7 +109,7 @@ export function registerPawapayDepositTools(
       required: ["depositId"],
     },
     async (args) => {
-      const { depositId } = args as PawapayToolArgs.ResendDepositCallback;
+      const { depositId } = args as unknown as PawapayToolArgs.ResendDepositCallback;
       return await pawapay.deposits.resendCallback(depositId);
     }
   );

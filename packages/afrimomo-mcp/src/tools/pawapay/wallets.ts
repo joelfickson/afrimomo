@@ -39,7 +39,7 @@ export function registerPawapayWalletTools(
       required: ["country"],
     },
     async (args) => {
-      const { country } = args as PawapayToolArgs.GetCountryBalance;
+      const { country } = args as unknown as PawapayToolArgs.GetCountryBalance;
       return await pawapay.wallets.getCountryBalance(country);
     }
   );
