@@ -1,6 +1,6 @@
 {
   "name": "afrimomo-sdk",
-  "version": "0.0.1-beta.13",
+  "version": "0.1.0",
   "description": "A unified SDK for African payment providers",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -30,7 +30,10 @@
     "fintech",
     "pawapay",
     "paychangu",
-    "mobile-money"
+    "onekhusa",
+    "mobile-money",
+    "disbursement",
+    "collection"
   ],
   "author": "",
   "license": "MIT",
@@ -63,10 +66,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/afrimomo.git"
+    "url": "https://github.com/joelfickson/afrimomo.git",
+    "directory": "packages/sdk"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/afrimomo/issues"
+    "url": "https://github.com/joelfickson/afrimomo/issues"
   },
-  "homepage": "https://github.com/yourusername/afrimomo#readme"
+  "homepage": "https://github.com/joelfickson/afrimomo#readme"
 }

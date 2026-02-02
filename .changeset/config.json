@@ -3,17 +3,19 @@
     "changelog": [
         "@changesets/cli/changelog",
         {
-            "repo": "yourusername/afrimomo"
+            "repo": "joelfickson/afrimomo"
         }
     ],
     "commit": false,
     "fixed": [],
-    "linked": [],
-    "access": "restricted",
-    "baseBranch": "main",
+    "linked": [
+        ["afrimomo-sdk", "afrimomo-mcp"]
+    ],
+    "access": "public",
+    "baseBranch": "master",
     "updateInternalDependencies": "patch",
     "ignore": [
-        "@afrimomo/example-*"
+        "afrimomo-example-*"
     ],
     "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
         "onlyUpdatePeerDependentsWhenOutOfRange": true,

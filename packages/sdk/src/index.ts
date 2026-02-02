@@ -51,6 +51,10 @@ export type {
 export { PawaPayTypes } from "./services/pawapay/types";
 export type { default as PawaPayTypesDefault } from "./services/pawapay/types";
 
+// Export OneKhusa types namespace
+export { OneKhusaTypes } from "./services/onekhusa/types";
+export type { default as OneKhusaTypesDefault } from "./services/onekhusa/types";
+
 // Export environment constants
 export { Environment, ENVIRONMENTS, URLS } from "./config/constants";
 export type { ApiUrl } from "./config/constants";
@@ -68,6 +72,7 @@ export type {
 // Export services
 export { PawaPay } from "./services/pawapay";
 export { PayChangu } from "./services/paychangu";
+export { OneKhusa } from "./services/onekhusa";
 
 // Export PayChangu namespace types
 export type { PayChangu as PayChanguTypes } from "./services/paychangu/types";

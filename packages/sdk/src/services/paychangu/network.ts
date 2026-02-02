@@ -1,6 +1,6 @@
 /**
  * PayChangu Network
- * 
+ *
  * Manages network connections for the PayChangu payment service.
  */
 
@@ -13,7 +13,7 @@ const BASE_PAYCHANGU_URL = "https://api.paychangu.com";
 
 /**
  * PayChangu Network
- * 
+ *
  * Provides the Axios instance configured with the correct base URL and authentication
  * for making requests to the PayChangu API.
  */
@@ -25,7 +25,7 @@ export class PayChanguNetwork {
 
 	/**
 	 * Creates a new PayChangu Network instance
-	 * 
+	 *
 	 * @param secretKey - The API secret key for authentication with PayChangu
 	 */
 	constructor(secretKey: string) {
@@ -34,7 +34,7 @@ export class PayChanguNetwork {
 			headers: {
 				"Content-Type": "application/json",
 				Accept: "application/json",
-				Authorization: `Bearer ${secretKey}`
+				Authorization: `Bearer ${secretKey}`,
 			},
 		});
 
@@ -43,7 +43,7 @@ export class PayChanguNetwork {
 
 	/**
 	 * Handles API errors in a consistent way
-	 * 
+	 *
 	 * @param error - The error thrown during API request
 	 * @param context - Context about the operation for better error messages
 	 * @returns A standardized error response
@@ -63,7 +63,7 @@ export class PayChanguNetwork {
 					message?: string;
 					status?: string;
 				};
-				
+
 				errorMessage = data.message || errorMessage;
 				errorObject = JSON.stringify(data);
 			} catch {
@@ -87,7 +87,11 @@ export class PayChanguNetwork {
 	 * @param context - Context for error handling
 	 * @returns Promise resolving to the response data
 	 */
-	async get<T>(endpoint: string, config = {}, context = "GET request"): Promise<T> {
+	async get<T>(
+		endpoint: string,
+		config = {},
+		context = "GET request",
+	): Promise<T> {
 		try {
 			const response = await this.axiosInstance.get<T>(endpoint, config);
 			return response.data;
@@ -104,7 +108,12 @@ export class PayChanguNetwork {
 	 * @param context - Context for error handling
 	 * @returns Promise resolving to the response data
 	 */
-	async post<T>(endpoint: string, data: unknown, config = {}, context = "POST request"): Promise<T> {
+	async post<T>(
+		endpoint: string,
+		data: unknown,
+		config = {},
+		context = "POST request",
+	): Promise<T> {
 		try {
 			const response = await this.axiosInstance.post<T>(endpoint, data, config);
 			return response.data;
@@ -121,7 +130,12 @@ export class PayChanguNetwork {
 	 * @param context - Context for error handling
 	 * @returns Promise resolving to the response data
 	 */
-	async put<T>(endpoint: string, data: unknown, config = {}, context = "PUT request"): Promise<T> {
+	async put<T>(
+		endpoint: string,
+		data: unknown,
+		config = {},
+		context = "PUT request",
+	): Promise<T> {
 		try {
 			const response = await this.axiosInstance.put<T>(endpoint, data, config);
 			return response.data;
@@ -137,7 +151,11 @@ export class PayChanguNetwork {
 	 * @param context - Context for error handling
 	 * @returns Promise resolving to the response data
 	 */
-	async delete<T>(endpoint: string, config = {}, context = "DELETE request"): Promise<T> {
+	async delete<T>(
+		endpoint: string,
+		config = {},
+		context = "DELETE request",
+	): Promise<T> {
 		try {
 			const response = await this.axiosInstance.delete<T>(endpoint, config);
 			return response.data;
@@ -148,7 +166,7 @@ export class PayChanguNetwork {
 
 	/**
 	 * Sets up request and response interceptors for the Axios instance
-	 * 
+	 *
 	 * @private
 	 */
 	private setupInterceptors(): void {
@@ -165,7 +183,7 @@ export class PayChanguNetwork {
 			(error) => {
 				logger.error("PayChangu API Request Error:", error);
 				return Promise.reject(error);
-			}
+			},
 		);
 
 		// Response interceptor
@@ -184,7 +202,7 @@ export class PayChanguNetwork {
 					response: error.response?.data,
 				});
 				return Promise.reject(error);
-			}
+			},
 		);
 	}
 }

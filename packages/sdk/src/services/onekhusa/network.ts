@@ -1,24 +1,35 @@
 import axios, { AxiosInstance } from "axios";
-import type { Environment } from "../../config/constants";
 import { logger } from "../../utils/logger";
-import type { PawaPayNetworkResponse } from "../../types";
+import { OneKhusaTokenManager } from "./auth";
+import type {
+	OneKhusaEnvironment,
+	OneKhusaErrorResponse,
+} from "./types/common";
 
-/**
- * Network manager for PawaPay API calls
- */
-export class PawapayNetwork {
+export class OneKhusaNetwork {
 	public readonly axiosInstance: AxiosInstance;
+	private readonly tokenManager: OneKhusaTokenManager;
 
-	constructor(jwt: string, environment: Environment = "DEVELOPMENT") {
+	constructor(
+		apiKey: string,
+		apiSecret: string,
+		private readonly organisationId: string,
+		environment: OneKhusaEnvironment = "DEVELOPMENT",
+	) {
 		const baseUrl =
 			environment === "PRODUCTION"
-				? "https://api.pawapay.io/v1"
-				: "https://api.sandbox.pawapay.io/v1";
+				? "https://api.onekhusa.com/v1"
+				: "https://sandbox.api.onekhusa.com/v1";
+
+		this.tokenManager = new OneKhusaTokenManager(
+			apiKey,
+			apiSecret,
+			environment,
+		);
 
 		this.axiosInstance = axios.create({
 			baseURL: baseUrl,
 			headers: {
-				Authorization: `Bearer ${jwt}`,
 				"Content-Type": "application/json",
 				Accept: "application/json",
 			},
@@ -29,24 +40,32 @@ export class PawapayNetwork {
 
 	private setupInterceptors(): void {
 		this.axiosInstance.interceptors.request.use(
-			(config) => {
-				logger.debug("PawaPay API Request:", {
+			async (config) => {
+				const token = await this.tokenManager.getToken();
+				config.headers.Authorization = `Bearer ${token}`;
+				config.headers["Organisation-Id"] = this.organisationId;
+
+				logger.debug("OneKhusa API Request:", {
 					method: config.method,
 					url: config.url,
-					headers: config.headers,
+					headers: {
+						...config.headers,
+						Authorization: "Bearer [REDACTED]",
+					},
 					data: config.data,
 				});
+
 				return config;
 			},
 			(error) => {
-				logger.error("PawaPay API Request Error:", error);
+				logger.error("OneKhusa API Request Error:", error);
 				return Promise.reject(error);
 			},
 		);
 
 		this.axiosInstance.interceptors.response.use(
 			(response) => {
-				logger.debug("PawaPay API Response:", {
+				logger.debug("OneKhusa API Response:", {
 					status: response.status,
 					statusText: response.statusText,
 					data: response.data,
@@ -54,7 +73,7 @@ export class PawapayNetwork {
 				return response;
 			},
 			(error) => {
-				logger.error("PawaPay API Response Error:", {
+				logger.error("OneKhusa API Response Error:", {
 					message: error.message,
 					response: error.response?.data,
 				});
@@ -63,15 +82,8 @@ export class PawapayNetwork {
 		);
 	}
 
-	/**
-	 * Handles API errors in a consistent way
-	 *
-	 * @param error - The error thrown during API request
-	 * @param context - Context about the operation for better error messages
-	 * @returns A standardized error response
-	 */
-	handleApiError(error: unknown, context: string): PawaPayNetworkResponse {
-		logger.error(`PawaPay API Error - ${context}:`, error);
+	handleApiError(error: unknown, context: string): OneKhusaErrorResponse {
+		logger.error(`OneKhusa API Error - ${context}:`, error);
 
 		let errorMessage = `An error occurred during ${context}`;
 		let statusCode = 500;
@@ -102,12 +114,6 @@ export class PawapayNetwork {
 		};
 	}
 
-	/**
-	 * Make a GET request to the PawaPay API
-	 * @param endpoint - API endpoint
-	 * @param context - Context for error handling
-	 * @returns Promise resolving to the response data
-	 */
 	async get<T>(endpoint: string, context = "GET request"): Promise<T> {
 		try {
 			const response = await this.axiosInstance.get<T>(endpoint);
@@ -117,13 +123,6 @@ export class PawapayNetwork {
 		}
 	}
 
-	/**
-	 * Make a POST request to the PawaPay API
-	 * @param endpoint - API endpoint
-	 * @param data - Request payload
-	 * @param context - Context for error handling
-	 * @returns Promise resolving to the response data
-	 */
 	async post<T>(
 		endpoint: string,
 		data: unknown,
@@ -137,13 +136,6 @@ export class PawapayNetwork {
 		}
 	}
 
-	/**
-	 * Make a PUT request to the PawaPay API
-	 * @param endpoint - API endpoint
-	 * @param data - Request payload
-	 * @param context - Context for error handling
-	 * @returns Promise resolving to the response data
-	 */
 	async put<T>(
 		endpoint: string,
 		data: unknown,
@@ -157,12 +149,19 @@ export class PawapayNetwork {
 		}
 	}
 
-	/**
-	 * Make a DELETE request to the PawaPay API
-	 * @param endpoint - API endpoint
-	 * @param context - Context for error handling
-	 * @returns Promise resolving to the response data
-	 */
+	async patch<T>(
+		endpoint: string,
+		data?: unknown,
+		context = "PATCH request",
+	): Promise<T> {
+		try {
+			const response = await this.axiosInstance.patch<T>(endpoint, data);
+			return response.data;
+		} catch (error) {
+			throw this.handleApiError(error, context);
+		}
+	}
+
 	async delete<T>(endpoint: string, context = "DELETE request"): Promise<T> {
 		try {
 			const response = await this.axiosInstance.delete<T>(endpoint);
@@ -170,5 +169,9 @@ export class PawapayNetwork {
 		} catch (error) {
 			throw this.handleApiError(error, context);
 		}
+	}
+
+	clearTokenCache(): void {
+		this.tokenManager.clearToken();
 	}
 }

@@ -1,6 +1,6 @@
 {
   "name": "afrimomo-mcp",
-  "version": "0.0.2-beta.1",
+  "version": "0.1.0",
   "description": "Model Context Protocol server for Afrimomo SDK - enabling AI assistants to interact with African payment providers (PayChangu & PawaPay)",
   "main": "dist/index.js",
   "type": "module",
@@ -19,9 +19,12 @@
     "afrimomo",
     "paychangu",
     "pawapay",
+    "onekhusa",
     "payment",
     "africa",
     "mobile-money",
+    "disbursement",
+    "collection",
     "ai",
     "claude"
   ],
@@ -29,7 +32,7 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.19.1",
-    "afrimomo-sdk": "^0.0.1-beta.13"
+    "afrimomo-sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
@@ -48,5 +51,12 @@
     "type": "git",
     "url": "https://github.com/joelfickson/afrimomo.git",
     "directory": "packages/afrimomo-mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/joelfickson/afrimomo/issues"
+  },
+  "homepage": "https://github.com/joelfickson/afrimomo/tree/master/packages/afrimomo-mcp#readme",
+  "publishConfig": {
+    "access": "public"
   }
 }
