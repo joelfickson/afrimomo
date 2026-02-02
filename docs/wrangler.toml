@@ -1,5 +1,7 @@
-# Cloudflare Pages Configuration for Afrimomo Documentation
-name = "afrimomo-docs"
+# Cloudflare Workers Configuration for Afrimomo Documentation
+name = "afrimomo"
+main = "worker.ts"
+compatibility_date = "2026-02-02"
 
-# Pages configuration
-pages_build_output_dir = "build"
+[assets]
+directory = "build"
