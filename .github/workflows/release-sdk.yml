@@ -42,14 +42,9 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd packages/sdk
-          pnpm install --lockfile-only
-          pnpm install
-          git add pnpm-lock.yaml || true
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          cd ../..
-          git commit -m "chore: add sdk pnpm-lock.yaml" || true
+          pnpm install --frozen-lockfile
 
       - name: Setup Release Environment
         id: setup
