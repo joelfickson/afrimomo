@@ -1,10 +1,16 @@
 # Changelog
 
-## 0.1.0
+All notable changes to the Afrimomo MCP Server will be documented in this file.
 
-### Minor Changes
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-- feat: Add OneKhusa payment gateway integration
+## [0.2.0] - 2026-02-02
+
+### Changed
+
+- Minor release
+
 
   - Add OneKhusa service with OAuth 2.0 authentication and automatic token refresh
   - Implement Collections API: request-to-pay (TAN generation), transaction queries
