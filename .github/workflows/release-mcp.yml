@@ -60,7 +60,9 @@ jobs:
           git config --global user.name "github-actions[bot]"
 
       - name: Build SDK (dependency)
-        run: pnpm --filter afrimomo-sdk build
+        run: |
+          pnpm --filter afrimomo-sdk build
+          test -f packages/sdk/dist/index.d.ts || (echo "SDK build failed - dist/index.d.ts not found" && exit 1)
 
       - name: Setup Release Environment
         id: setup
@@ -154,6 +156,14 @@ jobs:
             git add "$DOC_FILE"
             git commit -m "docs: update mcp version badge to v${VERSION}" || true
           fi
+
+      - name: Verify SDK is built
+        run: |
+          if [ ! -f packages/sdk/dist/index.d.ts ]; then
+            echo "Error: SDK dist not found. Rebuilding..."
+            pnpm --filter afrimomo-sdk build
+          fi
+          ls -la packages/sdk/dist/index.d.ts
 
       - name: Build MCP Server
         run: pnpm --filter afrimomo-mcp build
