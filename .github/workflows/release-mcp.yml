@@ -59,6 +59,9 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
+      - name: Build SDK (dependency)
+        run: pnpm --filter afrimomo-sdk build
+
       - name: Setup Release Environment
         id: setup
         run: |
@@ -153,9 +156,7 @@ jobs:
           fi
 
       - name: Build MCP Server
-        run: |
-          cd packages/afrimomo-mcp
-          npm run build
+        run: pnpm --filter afrimomo-mcp build
 
       - name: Update Changelog
         if: success()
