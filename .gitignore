@@ -45,7 +45,6 @@ coverage/
 # Package manager files
 yarn.lock
 package-lock.json
-pnpm-lock.yaml
 
 # Optional npm cache directory
 .npm
