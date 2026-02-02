@@ -1,90 +1,68 @@
-import { BaseService } from "../../../utils/baseService";
 import { logger } from "../../../utils/logger";
 import type { PawaPayTypes } from "../types";
-import type { PawaPayNetworkResponse } from "../../../types";
-import { PawapayNetwork } from "../network";
+import type { HttpClient } from "../../../utils/httpClient";
+import {
+	wrapServiceCall,
+	type ServiceResult,
+} from "../../../utils/serviceWrapper";
 
-export class PawapayDeposits extends BaseService {
+export class PawapayDeposits {
 	private readonly baseEndpoint = "/deposits";
 
-	constructor(private readonly networkHandler: PawapayNetwork) {
-		super();
-	}
+	constructor(private readonly networkHandler: HttpClient) {}
 
-	/**
-	 * Asynchronously sends a payout transaction to a specified recipient using the PawaPay service.
-	 * @param transaction - Details of the payout transaction
-	 * @returns Promise resolving to the transaction result or error response
-	 */
 	async sendDeposit(
 		transaction: PawaPayTypes.PayoutTransaction,
-	): Promise<PawaPayTypes.PayoutTransaction | PawaPayNetworkResponse> {
-		try {
-			const phoneNumber = transaction.recipient.address.value;
+	): Promise<ServiceResult<PawaPayTypes.PayoutTransaction>> {
+		logger.info("PawaPay: Sending deposit", {
+			phone: transaction.recipient.address.value,
+			amount: transaction.amount,
+			payoutId: transaction.payoutId,
+			currency: transaction.currency,
+		});
 
-			logger.info(
-				"Sending payout to",
-				phoneNumber,
-				"the amount of",
-				transaction.amount,
-				"with payoutId",
-				transaction.payoutId,
-				"and currency",
-				transaction.currency,
-			);
-
-			const response = await this.networkHandler.post(
-				this.baseEndpoint,
-				transaction,
-			);
-
-			logger.info("Payout transaction successful:", response);
-			return response as PawaPayTypes.PayoutTransaction;
-		} catch (error: unknown) {
-			logger.error("Payout transaction failed:", error);
-			return this.networkHandler.handleApiError(error, "sendDeposit");
-		}
+		return wrapServiceCall(
+			() =>
+				this.networkHandler.post<PawaPayTypes.PayoutTransaction>(
+					this.baseEndpoint,
+					transaction,
+					"sending deposit",
+				),
+			this.networkHandler.handleApiError.bind(this.networkHandler),
+			"sending deposit",
+		);
 	}
 
-	/**
-	 * Retrieves details of a specific deposit transaction
-	 * @param depositId - The unique identifier for the deposit transaction
-	 * @returns Promise resolving to the transaction details or error response
-	 */
 	async getDeposit(
 		depositId: string,
-	): Promise<PawaPayTypes.PaymentTransaction[] | PawaPayNetworkResponse> {
-		try {
-			const endPoint = `${this.baseEndpoint}/${depositId}`;
-			const response = await this.networkHandler.get(endPoint);
+	): Promise<ServiceResult<PawaPayTypes.PaymentTransaction[]>> {
+		logger.info("PawaPay: Getting deposit", { depositId });
 
-			logger.info("Deposit details retrieved successfully:", response);
-			return response as PawaPayTypes.PaymentTransaction[];
-		} catch (error) {
-			logger.error("Get deposit failed:", error);
-			return this.networkHandler.handleApiError(error, "getDeposit");
-		}
+		return wrapServiceCall(
+			() =>
+				this.networkHandler.get<PawaPayTypes.PaymentTransaction[]>(
+					`${this.baseEndpoint}/${depositId}`,
+					"getting deposit",
+				),
+			this.networkHandler.handleApiError.bind(this.networkHandler),
+			"getting deposit",
+		);
 	}
 
-	/**
-	 * Requests a resend of a callback for a specific deposit transaction
-	 * @param depositId - The unique identifier of the deposit transaction
-	 * @returns Promise resolving to the resend response or error
-	 */
 	async resendCallback(
 		depositId: string,
-	): Promise<PawaPayTypes.ResendCallbackResponse | PawaPayNetworkResponse> {
-		try {
-			const response = await this.networkHandler.post(
-				`${this.baseEndpoint}/resend-callback`,
-				{ depositId },
-			);
+	): Promise<ServiceResult<PawaPayTypes.ResendCallbackResponse>> {
+		logger.info("PawaPay: Resending callback", { depositId });
 
-			logger.info("Callback resend successful:", response);
-			return response as PawaPayTypes.ResendCallbackResponse;
-		} catch (error: unknown) {
-			logger.error("Callback resend failed:", error);
-			return this.networkHandler.handleApiError(error, "resendCallback");
-		}
+		return wrapServiceCall(
+			() =>
+				this.networkHandler.post<PawaPayTypes.ResendCallbackResponse>(
+					`${this.baseEndpoint}/resend-callback`,
+					{ depositId },
+					"resending callback",
+				),
+			this.networkHandler.handleApiError.bind(this.networkHandler),
+			"resending callback",
+		);
 	}
 }

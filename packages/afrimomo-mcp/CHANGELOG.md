@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.1.0
+
+### Minor Changes
+
+- feat: Add OneKhusa payment gateway integration
+
+  - Add OneKhusa service with OAuth 2.0 authentication and automatic token refresh
+  - Implement Collections API: request-to-pay (TAN generation), transaction queries
+  - Implement Disbursements API: single disbursements with approval workflow, batch disbursements with full lifecycle management
+  - Add 18 MCP tools for OneKhusa operations:
+    - Collections: initiate_request_to_pay, get_collection_transactions, get_collection_transaction
+    - Single Disbursements: add, approve, review, reject, get
+    - Batch Disbursements: add, approve, review, reject, cancel, transfer_funds, get_batches, get_batch, get_batch_transactions
+    - Config: check_status
+  - Support for DEVELOPMENT and PRODUCTION environments
+  - New environment variables: ONEKHUSA_API_KEY, ONEKHUSA_API_SECRET, ONEKHUSA_ORGANISATION_ID, ONEKHUSA_ENVIRONMENT
+
+### Patch Changes
+
+- Updated dependencies
+  - afrimomo-sdk@0.1.0
+
 All notable changes to the Afrimomo MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -18,12 +40,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Initial Release
 
 - **MCP Server Implementation**
+
   - Model Context Protocol server for Afrimomo SDK
   - Support for stdio transport
   - Dynamic tool registration based on configured providers
   - Environment-based configuration (DEVELOPMENT/PRODUCTION)
 
 - **PayChangu Integration (11 Tools)**
+
   - `paychangu_initiate_payment` - Initiate hosted checkout payment
   - `paychangu_verify_transaction` - Verify transaction status by tx_ref
   - `paychangu_initiate_direct_charge` - Create virtual account for instant payment
@@ -38,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `paychangu_list_bank_payouts` - List all bank payouts (paginated)
 
 - **PawaPay Integration (12 Tools)**
+
   - `pawapay_request_deposit` - Request mobile money deposit
   - `pawapay_get_deposit` - Get deposit transaction details
   - `pawapay_resend_deposit_callback` - Resend deposit callback
@@ -52,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `pawapay_get_availability` - Get correspondent availability status
 
 - **Documentation**
+
   - Comprehensive README with usage examples
   - Detailed INSTALLATION guide
   - API credentials setup instructions

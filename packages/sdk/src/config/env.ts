@@ -13,6 +13,12 @@ export interface EnvConfig {
 	// PawaPay Configuration
 	PAWAPAY_JWT: string;
 	PAWAPAY_ENVIRONMENT?: Environment;
+
+	// OneKhusa Configuration
+	ONEKHUSA_API_KEY: string;
+	ONEKHUSA_API_SECRET: string;
+	ONEKHUSA_ORGANISATION_ID: string;
+	ONEKHUSA_ENVIRONMENT?: Environment;
 }
 
 /**
@@ -21,6 +27,7 @@ export interface EnvConfig {
 const DEFAULT_CONFIG: Partial<EnvConfig> = {
 	PAYCHANGU_ENVIRONMENT: "DEVELOPMENT",
 	PAWAPAY_ENVIRONMENT: "DEVELOPMENT",
+	ONEKHUSA_ENVIRONMENT: "DEVELOPMENT",
 };
 
 /**
@@ -88,6 +95,14 @@ export function loadEnvConfig(): EnvConfig {
 		(process.env.PAWAPAY_ENVIRONMENT as Environment) ||
 		DEFAULT_CONFIG.PAWAPAY_ENVIRONMENT;
 
+	// OneKhusa Configuration
+	config.ONEKHUSA_API_KEY = process.env.ONEKHUSA_API_KEY || "";
+	config.ONEKHUSA_API_SECRET = process.env.ONEKHUSA_API_SECRET || "";
+	config.ONEKHUSA_ORGANISATION_ID = process.env.ONEKHUSA_ORGANISATION_ID || "";
+	config.ONEKHUSA_ENVIRONMENT =
+		(process.env.ONEKHUSA_ENVIRONMENT as Environment) ||
+		DEFAULT_CONFIG.ONEKHUSA_ENVIRONMENT;
+
 	return config;
 }
 
@@ -97,7 +112,7 @@ export function loadEnvConfig(): EnvConfig {
 export interface PSPValidationResult {
 	isValid: boolean;
 	missingFields: string[];
-	service: "paychangu" | "pawapay";
+	service: "paychangu" | "pawapay" | "onekhusa";
 }
 
 /**
@@ -108,7 +123,7 @@ export interface PSPValidationResult {
  */
 export function validatePSPConfig(
 	config: EnvConfig,
-	psp: "paychangu" | "pawapay",
+	psp: "paychangu" | "pawapay" | "onekhusa",
 ): PSPValidationResult {
 	const result: PSPValidationResult = {
 		isValid: true,
@@ -125,6 +140,17 @@ export function validatePSPConfig(
 		case "pawapay":
 			if (!config.PAWAPAY_JWT) {
 				result.missingFields.push("PAWAPAY_JWT");
+			}
+			break;
+		case "onekhusa":
+			if (!config.ONEKHUSA_API_KEY) {
+				result.missingFields.push("ONEKHUSA_API_KEY");
+			}
+			if (!config.ONEKHUSA_API_SECRET) {
+				result.missingFields.push("ONEKHUSA_API_SECRET");
+			}
+			if (!config.ONEKHUSA_ORGANISATION_ID) {
+				result.missingFields.push("ONEKHUSA_ORGANISATION_ID");
 			}
 			break;
 		default:

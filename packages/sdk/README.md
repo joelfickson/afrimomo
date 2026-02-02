@@ -1,0 +1,258 @@
+# Afrimomo SDK
+
+A unified TypeScript SDK for seamless integration with African payment providers. Type-safe, reliable, and built for production.
+
+[![npm version](https://img.shields.io/npm/v/afrimomo-sdk.svg)](https://www.npmjs.com/package/afrimomo-sdk)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Features
+
+- **Multi-Provider Support** - PayChangu, PawaPay, and OneKhusa in one SDK
+- **Full TypeScript Support** - Comprehensive type definitions for all APIs
+- **Sandbox & Production** - Easy environment switching
+- **Comprehensive Error Handling** - Detailed error messages and types
+
+## Supported Providers
+
+| Provider | Region | Capabilities |
+|----------|--------|--------------|
+| PayChangu | Malawi | Payments, Mobile Money, Bank Transfers |
+| PawaPay | Sub-Saharan Africa | Deposits, Payouts, Refunds, Wallets |
+| OneKhusa | Malawi & Southern Africa | Collections, Disbursements, Batch Payouts |
+
+## Installation
+
+```bash
+npm install afrimomo-sdk
+# or
+pnpm add afrimomo-sdk
+# or
+yarn add afrimomo-sdk
+```
+
+## Quick Start
+
+```typescript
+import { AfromomoSDK } from "afrimomo-sdk";
+
+const sdk = new AfromomoSDK({
+  environment: "sandbox", // or "production"
+  pawapay: {
+    apiToken: "your-pawapay-token"
+  },
+  paychangu: {
+    secretKey: "your-paychangu-secret"
+  },
+  onekhusa: {
+    apiKey: "your-onekhusa-api-key",
+    apiSecret: "your-onekhusa-api-secret",
+    organisationId: "your-organisation-id"
+  }
+});
+```
+
+You only need to configure the providers you plan to use.
+
+## PawaPay
+
+Mobile money payments across Sub-Saharan Africa.
+
+### Request a Deposit
+
+```typescript
+const deposit = await sdk.pawapay.payments.initiate({
+  depositId: "order-123",
+  amount: "50.00",
+  msisdn: "260971234567",
+  country: "ZMB",
+  returnUrl: "https://your-app.com/callback",
+  statementDescription: "Payment for services",
+  language: "EN",
+  reason: "Service payment"
+});
+```
+
+### Send a Payout
+
+```typescript
+const payout = await sdk.pawapay.payouts.send({
+  payoutId: "payout-123",
+  amount: "50.00",
+  msisdn: "260701234567",
+  country: "ZMB",
+  statementDescription: "Withdrawal"
+});
+```
+
+### Check Wallet Balance
+
+```typescript
+const balances = await sdk.pawapay.wallets.getBalances();
+```
+
+## PayChangu
+
+Payment services in Malawi.
+
+### Initiate Payment
+
+```typescript
+const payment = await sdk.paychangu.initiatePayment({
+  amount: 1000,
+  currency: "MWK",
+  tx_ref: "order-456",
+  email: "customer@example.com",
+  first_name: "John",
+  last_name: "Doe",
+  callback_url: "https://your-app.com/webhook",
+  return_url: "https://your-app.com/success"
+});
+
+// Redirect customer to checkout
+console.log("Checkout URL:", payment.data.checkout_url);
+```
+
+### Verify Transaction
+
+```typescript
+const verification = await sdk.paychangu.verifyTransaction(tx_ref);
+```
+
+### Mobile Money Payout
+
+```typescript
+const payout = await sdk.paychangu.mobileMoneyPayout({
+  amount: 2000,
+  currency: "MWK",
+  recipient_phone: "265991234567",
+  operator_id: "operator-uuid",
+  reference: "payout-123"
+});
+```
+
+## OneKhusa
+
+Enterprise payment platform with collections and disbursements.
+
+### Request-to-Pay Collection
+
+```typescript
+const collection = await sdk.onekhusa.collections.initiateRequestToPay({
+  amount: 5000,
+  currency: "MWK",
+  phoneNumber: "265991234567",
+  reference: "order-789",
+  narration: "Payment for goods"
+});
+
+console.log("TAN:", collection.tan);
+```
+
+### Single Disbursement
+
+```typescript
+const disbursement = await sdk.onekhusa.disbursements.addSingle({
+  amount: 10000,
+  currency: "MWK",
+  paymentMethod: "MOBILE_MONEY",
+  recipient: {
+    name: "John Doe",
+    phone: "265991234567"
+  },
+  reference: "payout-001",
+  narration: "Salary payment"
+});
+
+// Approve the disbursement
+await sdk.onekhusa.disbursements.approveSingle(disbursement.id);
+```
+
+### Batch Disbursement
+
+```typescript
+const batch = await sdk.onekhusa.disbursements.addBatch({
+  name: "January Salaries",
+  currency: "MWK",
+  paymentMethod: "MOBILE_MONEY",
+  recipients: [
+    { name: "John Doe", phone: "265991234567", amount: 50000 },
+    { name: "Jane Smith", phone: "265999876543", amount: 45000 }
+  ]
+});
+
+// Approve and transfer funds
+await sdk.onekhusa.disbursements.approveBatch(batch.id);
+await sdk.onekhusa.disbursements.transferBatchFunds(batch.id);
+```
+
+## Configuration
+
+Use environment variables for secure credential management:
+
+```typescript
+import { AfromomoSDK, Environment } from "afrimomo-sdk";
+
+const sdk = new AfromomoSDK({
+  environment: Environment.SANDBOX, // or Environment.PRODUCTION
+  pawapay: {
+    apiToken: process.env.PAWAPAY_TOKEN
+  },
+  paychangu: {
+    secretKey: process.env.PAYCHANGU_SECRET
+  },
+  onekhusa: {
+    apiKey: process.env.ONEKHUSA_API_KEY,
+    apiSecret: process.env.ONEKHUSA_API_SECRET,
+    organisationId: process.env.ONEKHUSA_ORGANISATION_ID
+  }
+});
+```
+
+## Type Definitions
+
+All types are exported from the main package:
+
+```typescript
+import type {
+  PayChanguTypes,
+  PawaPayTypes,
+  OneKhusaTypes
+} from "afrimomo-sdk";
+```
+
+## Requirements
+
+- Node.js 18.0.0 or higher
+- TypeScript 5.0+ (optional, but recommended)
+
+## Getting API Credentials
+
+### PawaPay
+
+1. Visit [PawaPay](https://www.pawapay.io/) and create a developer account
+2. Complete onboarding and verification
+3. Get your API token from the dashboard
+
+### PayChangu
+
+1. Sign up at [PayChangu](https://in.paychangu.com/register)
+2. Complete business verification
+3. Get your secret key from the merchant dashboard
+
+### OneKhusa
+
+1. Contact [OneKhusa](https://onekhusa.com/) to create a business account
+2. Complete KYC verification
+3. Get your API Key, API Secret, and Organisation ID
+
+## Documentation
+
+For full documentation, visit [afrimomo.dev](https://afrimomo.dev) or see the [docs](https://github.com/joelfickson/afrimomo/tree/master/docs).
+
+## MCP Server
+
+For AI-powered payment operations with Claude, check out [afrimomo-mcp](https://www.npmjs.com/package/afrimomo-mcp).
+
+## License
+
+MIT

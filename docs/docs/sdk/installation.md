@@ -1,0 +1,54 @@
+---
+sidebar_position: 2
+title: Installation
+description: Install the Afrimomo SDK
+---
+
+# Installation
+
+Install the Afrimomo SDK using your preferred package manager.
+
+## npm
+
+```bash
+npm install afrimomo-sdk
+```
+
+## pnpm
+
+```bash
+pnpm add afrimomo-sdk
+```
+
+## yarn
+
+```bash
+yarn add afrimomo-sdk
+```
+
+## Requirements
+
+- Node.js 18.0.0 or higher
+- TypeScript 5.0+ (optional, but recommended)
+
+## Package Contents
+
+The SDK includes:
+
+- Full TypeScript type definitions
+- ESM and CommonJS builds
+- Runtime dependencies installed automatically by your package manager
+
+## Verify Installation
+
+```typescript
+import { AfromomoSDK } from "afrimomo-sdk";
+
+const sdk = AfromomoSDK.initialize();
+console.log("Afrimomo SDK initialized:", !!sdk);
+```
+
+## Next Steps
+
+- [Quick Start](/docs/sdk/quick-start) - Initialize the SDK
+- [Configuration](/docs/sdk/configuration) - Configure providers

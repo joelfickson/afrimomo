@@ -2,7 +2,7 @@
  * Type definitions for Afrimomo MCP Server
  */
 
-import type { PayChangu as PayChanguSDK, PawaPayTypes } from "afrimomo-sdk";
+import type { PayChangu as PayChanguSDK, PawaPayTypes, OneKhusaTypes } from "afrimomo-sdk";
 
 /**
  * JSON Schema type for tool input validation
@@ -189,6 +189,125 @@ export namespace PawapayToolArgs {
 }
 
 /**
+ * OneKhusa tool argument types
+ */
+export namespace OneKhusaToolArgs {
+  export interface InitiateRequestToPay {
+    amount: number;
+    currency: string;
+    phone: string;
+    paymentMethod: string;
+    reference?: string;
+    description?: string;
+    callbackUrl?: string;
+  }
+
+  export interface GetCollectionTransactions {
+    page?: number;
+    size?: number;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+  }
+
+  export interface GetCollectionTransaction {
+    transactionId: string;
+  }
+
+  export interface AddSingleDisbursement {
+    amount: number;
+    currency: string;
+    recipientName: string;
+    recipientPhone: string;
+    recipientEmail?: string;
+    paymentMethod: string;
+    reference?: string;
+    description?: string;
+    callbackUrl?: string;
+  }
+
+  export interface ApproveSingleDisbursement {
+    disbursementId: string;
+    comment?: string;
+  }
+
+  export interface ReviewSingleDisbursement {
+    disbursementId: string;
+    comment?: string;
+  }
+
+  export interface RejectSingleDisbursement {
+    disbursementId: string;
+    reason: string;
+  }
+
+  export interface GetSingleDisbursement {
+    disbursementId: string;
+  }
+
+  export interface BatchDisbursementItem {
+    amount: number;
+    currency: string;
+    recipientName: string;
+    recipientPhone: string;
+    paymentMethod: string;
+    reference?: string;
+    description?: string;
+  }
+
+  export interface AddBatchDisbursement {
+    name: string;
+    description?: string;
+    items: BatchDisbursementItem[];
+    callbackUrl?: string;
+  }
+
+  export interface ApproveBatch {
+    batchId: string;
+    comment?: string;
+  }
+
+  export interface ReviewBatch {
+    batchId: string;
+    comment?: string;
+  }
+
+  export interface RejectBatch {
+    batchId: string;
+    reason: string;
+  }
+
+  export interface CancelBatch {
+    batchId: string;
+    reason?: string;
+  }
+
+  export interface TransferBatchFunds {
+    batchId: string;
+    sourceAccount?: string;
+  }
+
+  export interface GetBatches {
+    page?: number;
+    size?: number;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+  }
+
+  export interface GetBatch {
+    batchId: string;
+  }
+
+  export interface GetBatchTransactions {
+    batchId: string;
+    page?: number;
+    size?: number;
+    status?: string;
+  }
+}
+
+/**
  * Re-export SDK types for convenience
  */
-export type { PayChanguSDK, PawaPayTypes };
+export type { PayChanguSDK, PawaPayTypes, OneKhusaTypes };

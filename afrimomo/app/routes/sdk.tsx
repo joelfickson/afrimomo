@@ -35,12 +35,12 @@ export default function SDK() {
             Afrimomo <span className="text-lime-400">SDK</span>
           </h1>
           <span className="bg-lime-400/10 text-lime-400 px-4 py-1 rounded-full text-sm font-semibold border border-lime-400/20">
-            v0.0.1-beta.13
+            v0.1.0
           </span>
         </div>
         <p className="text-xl text-gray-400 max-w-3xl">
           A unified TypeScript SDK for seamless integration with African payment providers.
-          Type-safe, reliable, and built for production.
+          Type-safe, reliable, and built for production. Now with PayChangu, PawaPay, and OneKhusa support.
         </p>
       </section>
 
@@ -81,11 +81,16 @@ const sdk = new AfromomoSDK({
   },
   paychangu: {
     secretKey: "your-paychangu-secret"
+  },
+  onekhusa: {
+    apiKey: "your-onekhusa-api-key",
+    apiSecret: "your-onekhusa-api-secret",
+    organisationId: "your-organisation-id"
   }
 });
 
 // Use PawaPay
-const payment = await sdk.pawapay.payments.initiate({
+const deposit = await sdk.pawapay.payments.initiate({
   depositId: "order-123",
   amount: "50.00",
   msisdn: "260971234567",
@@ -97,7 +102,16 @@ const payment = await sdk.pawapay.payments.initiate({
 });
 
 // Use PayChangu
-const operators = await sdk.paychangu.getMobileMoneyOperators();`}
+const operators = await sdk.paychangu.getMobileMoneyOperators();
+
+// Use OneKhusa
+const collection = await sdk.onekhusa.collections.initiateRequestToPay({
+  amount: 5000,
+  currency: "MWK",
+  phoneNumber: "265991234567",
+  reference: "order-456",
+  narration: "Payment for services"
+});`}
               </code>
             </pre>
           </div>
@@ -121,6 +135,11 @@ const sdk = new AfromomoSDK({
   },
   paychangu: {
     secretKey: process.env.PAYCHANGU_SECRET
+  },
+  onekhusa: {
+    apiKey: process.env.ONEKHUSA_API_KEY,
+    apiSecret: process.env.ONEKHUSA_API_SECRET,
+    organisationId: process.env.ONEKHUSA_ORGANISATION_ID
   }
 });`}
               </code>
@@ -322,6 +341,134 @@ const bankPayout = await sdk.paychangu.bankPayout({
           </div>
         </div>
 
+        {/* OneKhusa API */}
+        <div id="onekhusa" className="mb-16">
+          <h2 className="text-3xl font-bold mb-6 border-b border-white/10 pb-3">OneKhusa API</h2>
+
+          <div className="space-y-8">
+            {/* Collections */}
+            <div>
+              <h3 className="text-2xl font-semibold mb-4 text-lime-400">Collections</h3>
+              <p className="text-gray-400 mb-4">
+                Request payments from customers via mobile money or bank transfer.
+              </p>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-6 overflow-x-auto">
+                <pre className="text-sm">
+                  <code className="text-gray-300">
+{`// Initiate a request-to-pay collection
+const collection = await sdk.onekhusa.collections.initiateRequestToPay({
+  amount: 5000,
+  currency: "MWK",
+  phoneNumber: "265991234567",
+  reference: "order-123",
+  narration: "Payment for goods"
+});
+// Returns a TAN (Transaction Authentication Number) for customer authorization
+
+// Get collection transactions (paginated)
+const transactions = await sdk.onekhusa.collections.getTransactions({
+  page: 0,
+  size: 20,
+  status: "COMPLETED"
+});
+
+// Get specific transaction details
+const details = await sdk.onekhusa.collections.getTransaction(transactionId);`}
+                  </code>
+                </pre>
+              </div>
+            </div>
+
+            {/* Single Disbursements */}
+            <div>
+              <h3 className="text-2xl font-semibold mb-4 text-lime-400">Single Disbursements</h3>
+              <p className="text-gray-400 mb-4">
+                Send individual payouts to recipients with approval workflow support.
+              </p>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-6 overflow-x-auto">
+                <pre className="text-sm">
+                  <code className="text-gray-300">
+{`// Create a single disbursement
+const disbursement = await sdk.onekhusa.disbursements.addSingle({
+  amount: 10000,
+  currency: "MWK",
+  paymentMethod: "MOBILE_MONEY",
+  recipient: {
+    name: "John Doe",
+    phone: "265991234567"
+  },
+  reference: "payout-001",
+  narration: "Salary payment"
+});
+
+// Approve a pending disbursement
+await sdk.onekhusa.disbursements.approveSingle(disbursementId);
+
+// Review a disbursement
+await sdk.onekhusa.disbursements.reviewSingle(disbursementId);
+
+// Reject a disbursement
+await sdk.onekhusa.disbursements.rejectSingle(disbursementId, {
+  reason: "Incorrect recipient details"
+});
+
+// Get disbursement details
+const details = await sdk.onekhusa.disbursements.getSingle(disbursementId);`}
+                  </code>
+                </pre>
+              </div>
+            </div>
+
+            {/* Batch Disbursements */}
+            <div>
+              <h3 className="text-2xl font-semibold mb-4 text-lime-400">Batch Disbursements</h3>
+              <p className="text-gray-400 mb-4">
+                Process multiple payouts efficiently with batch operations.
+              </p>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-6 overflow-x-auto">
+                <pre className="text-sm">
+                  <code className="text-gray-300">
+{`// Create a batch disbursement
+const batch = await sdk.onekhusa.disbursements.addBatch({
+  name: "January Salaries",
+  currency: "MWK",
+  paymentMethod: "MOBILE_MONEY",
+  recipients: [
+    { name: "John Doe", phone: "265991234567", amount: 50000 },
+    { name: "Jane Smith", phone: "265999876543", amount: 45000 }
+  ]
+});
+
+// Approve batch
+await sdk.onekhusa.disbursements.approveBatch(batchId);
+
+// Review batch
+await sdk.onekhusa.disbursements.reviewBatch(batchId);
+
+// Transfer funds for approved batch
+await sdk.onekhusa.disbursements.transferBatchFunds(batchId);
+
+// Cancel batch
+await sdk.onekhusa.disbursements.cancelBatch(batchId);
+
+// Get all batches (paginated)
+const batches = await sdk.onekhusa.disbursements.getBatches({
+  page: 0,
+  size: 10
+});
+
+// Get batch details
+const batchDetails = await sdk.onekhusa.disbursements.getBatch(batchId);
+
+// Get transactions within a batch
+const batchTransactions = await sdk.onekhusa.disbursements.getBatchTransactions(batchId);`}
+                  </code>
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Type Imports */}
         <div id="types" className="mb-16">
           <h2 className="text-3xl font-bold mb-6 border-b border-white/10 pb-3">Type Definitions</h2>
@@ -336,7 +483,8 @@ import type {
   ActiveConfigResponse,
   PayChanguOperatorsResponse,
   PayChanguTypes,
-  PawaPayTypes
+  PawaPayTypes,
+  OneKhusaTypes
 } from "afrimomo-sdk";
 
 // ❌ Avoid deep imports
@@ -366,6 +514,15 @@ import type { ActiveConfigResponse } from "afrimomo-sdk/dist/...";`}
                 <li>Complete business verification</li>
                 <li>Get your secret key from the merchant dashboard</li>
                 <li>Use test credentials for sandbox environment</li>
+              </ol>
+            </div>
+            <div className="border border-white/10 rounded-lg p-6">
+              <h3 className="text-xl font-semibold mb-3 text-lime-400">OneKhusa</h3>
+              <ol className="list-decimal list-inside space-y-2 text-gray-300">
+                <li>Contact <a href="https://onekhusa.com/" target="_blank" rel="noopener noreferrer" className="text-lime-400 hover:underline">OneKhusa</a> to create a business account</li>
+                <li>Complete the KYC verification process</li>
+                <li>Get your API Key, API Secret, and Organisation ID from the dashboard</li>
+                <li>Use sandbox environment for testing</li>
               </ol>
             </div>
           </div>
@@ -398,6 +555,11 @@ import type { ActiveConfigResponse } from "afrimomo-sdk/dist/...";`}
             <li>
               <a href="https://docs.pawapay.io/" target="_blank" rel="noopener noreferrer" className="text-lime-400 hover:underline">
                 PawaPay API Documentation →
+              </a>
+            </li>
+            <li>
+              <a href="https://onekhusa.com/" target="_blank" rel="noopener noreferrer" className="text-lime-400 hover:underline">
+                OneKhusa →
               </a>
             </li>
             <li>

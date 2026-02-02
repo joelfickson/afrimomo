@@ -35,12 +35,12 @@ export default function MCP() {
             Afrimomo <span className="text-lime-400">MCP Server</span>
           </h1>
           <span className="bg-lime-400/10 text-lime-400 px-4 py-1 rounded-full text-sm font-semibold border border-lime-400/20">
-            v0.0.2-beta.1
+            v0.1.0
           </span>
         </div>
         <p className="text-xl text-gray-400 max-w-3xl">
           Model Context Protocol server enabling AI assistants like Claude to handle payment operations through natural language.
-          23 comprehensive tools for seamless payment management.
+          42 comprehensive tools for PayChangu, PawaPay, and OneKhusa.
         </p>
       </section>
 
@@ -96,6 +96,9 @@ npx afrimomo-mcp`}
       "env": {
         "PAYCHANGU_SECRET_KEY": "your-paychangu-secret-key",
         "PAWAPAY_JWT": "your-pawapay-jwt-token",
+        "ONEKHUSA_API_KEY": "your-onekhusa-api-key",
+        "ONEKHUSA_API_SECRET": "your-onekhusa-api-secret",
+        "ONEKHUSA_ORGANISATION_ID": "your-organisation-id",
         "ENVIRONMENT": "DEVELOPMENT"
       }
     }
@@ -113,12 +116,12 @@ npx afrimomo-mcp`}
 
         {/* Available Tools */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 border-b border-white/10 pb-3">Available Tools (23 Total)</h2>
+          <h2 className="text-3xl font-bold mb-6 border-b border-white/10 pb-3">Available Tools (42 Total)</h2>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
             {/* PayChangu Tools */}
             <div className="border border-white/10 rounded-lg p-6">
-              <h3 className="text-2xl font-semibold mb-4 text-lime-400">PayChangu Tools (11)</h3>
+              <h3 className="text-2xl font-semibold mb-4 text-lime-400">PayChangu Tools (12)</h3>
               <div className="space-y-4">
                 <div>
                   <h4 className="font-semibold mb-2">Payment & Transactions</h4>
@@ -188,6 +191,51 @@ npx afrimomo-mcp`}
               </div>
             </div>
           </div>
+
+          {/* OneKhusa Tools */}
+          <div className="border border-white/10 rounded-lg p-6">
+            <h3 className="text-2xl font-semibold mb-4 text-lime-400">OneKhusa Tools (18)</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div>
+                <h4 className="font-semibold mb-2">Collections (3)</h4>
+                <ul className="text-sm text-gray-300 space-y-1">
+                  <li>• Initiate request-to-pay</li>
+                  <li>• Get collection transactions</li>
+                  <li>• Get transaction details</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Single Disbursements (5)</h4>
+                <ul className="text-sm text-gray-300 space-y-1">
+                  <li>• Add single disbursement</li>
+                  <li>• Approve disbursement</li>
+                  <li>• Review disbursement</li>
+                  <li>• Reject disbursement</li>
+                  <li>• Get disbursement details</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Batch Disbursements (9)</h4>
+                <ul className="text-sm text-gray-300 space-y-1">
+                  <li>• Add batch disbursement</li>
+                  <li>• Approve batch</li>
+                  <li>• Review batch</li>
+                  <li>• Reject batch</li>
+                  <li>• Cancel batch</li>
+                  <li>• Transfer batch funds</li>
+                  <li>• Get all batches</li>
+                  <li>• Get batch details</li>
+                  <li>• Get batch transactions</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Config (1)</h4>
+                <ul className="text-sm text-gray-300 space-y-1">
+                  <li>• Check service status</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Usage Examples */}
@@ -227,6 +275,24 @@ npx afrimomo-mcp`}
               <p className="text-gray-300 italic mb-2">"Show me all supported mobile money operators for PayChangu"</p>
               <p className="text-sm text-gray-400">Lists all available mobile money operators</p>
             </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-3 text-lime-400">OneKhusa Collection</h3>
+              <p className="text-gray-300 italic mb-2">"Request a payment of 5000 MWK from phone number 265991234567 using OneKhusa"</p>
+              <p className="text-sm text-gray-400">Initiates a request-to-pay collection via OneKhusa</p>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-3 text-lime-400">OneKhusa Batch Disbursement</h3>
+              <p className="text-gray-300 italic mb-2">"Create a batch disbursement for January salaries with 3 recipients totaling 150,000 MWK"</p>
+              <p className="text-sm text-gray-400">Creates a batch disbursement with multiple recipients</p>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-3 text-lime-400">OneKhusa Batch Status</h3>
+              <p className="text-gray-300 italic mb-2">"Get all pending OneKhusa batches and their status"</p>
+              <p className="text-sm text-gray-400">Lists all batch disbursements with their current status</p>
+            </div>
           </div>
         </div>
 
@@ -250,6 +316,15 @@ npx afrimomo-mcp`}
                 <li>Complete business verification</li>
                 <li>Get your secret key from the merchant dashboard</li>
                 <li>Use test credentials for sandbox environment</li>
+              </ol>
+            </div>
+            <div className="border border-white/10 rounded-lg p-6">
+              <h3 className="text-xl font-semibold mb-3 text-lime-400">OneKhusa</h3>
+              <ol className="list-decimal list-inside space-y-2 text-gray-300">
+                <li>Contact <a href="https://onekhusa.com/" target="_blank" rel="noopener noreferrer" className="text-lime-400 hover:underline">OneKhusa</a> to create a business account</li>
+                <li>Complete KYC verification</li>
+                <li>Get your API Key, API Secret, and Organisation ID from the dashboard</li>
+                <li>Use sandbox environment for testing (set ENVIRONMENT to "DEVELOPMENT")</li>
               </ol>
             </div>
           </div>
@@ -332,6 +407,11 @@ npx afrimomo-mcp`}
             <li>
               <a href="https://docs.pawapay.io/" target="_blank" rel="noopener noreferrer" className="text-lime-400 hover:underline">
                 PawaPay Documentation →
+              </a>
+            </li>
+            <li>
+              <a href="https://onekhusa.com/" target="_blank" rel="noopener noreferrer" className="text-lime-400 hover:underline">
+                OneKhusa →
               </a>
             </li>
           </ul>

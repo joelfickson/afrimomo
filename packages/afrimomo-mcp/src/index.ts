@@ -25,10 +25,16 @@ import { registerPawapayPayoutTools } from "./tools/pawapay/payouts.js";
 import { registerPawapayRefundTools } from "./tools/pawapay/refunds.js";
 import { registerPawapayWalletTools } from "./tools/pawapay/wallets.js";
 import { registerPawapayConfigTools } from "./tools/pawapay/config.js";
+import { registerOneKhusaCollectionTools } from "./tools/onekhusa/collections.js";
+import { registerOneKhusaDisbursementTools } from "./tools/onekhusa/disbursements.js";
+import { registerOneKhusaConfigTools } from "./tools/onekhusa/config.js";
 
 // Environment configuration
 const PAYCHANGU_SECRET_KEY = process.env.PAYCHANGU_SECRET_KEY;
 const PAWAPAY_JWT = process.env.PAWAPAY_JWT;
+const ONEKHUSA_API_KEY = process.env.ONEKHUSA_API_KEY;
+const ONEKHUSA_API_SECRET = process.env.ONEKHUSA_API_SECRET;
+const ONEKHUSA_ORGANISATION_ID = process.env.ONEKHUSA_ORGANISATION_ID;
 const ENVIRONMENT = process.env.ENVIRONMENT || "DEVELOPMENT";
 
 // Initialize SDK
@@ -45,6 +51,14 @@ try {
 		pawapay: PAWAPAY_JWT
 			? {
 					jwt: PAWAPAY_JWT,
+					environment: ENVIRONMENT as any,
+			  }
+			: undefined,
+		onekhusa: ONEKHUSA_API_KEY && ONEKHUSA_API_SECRET && ONEKHUSA_ORGANISATION_ID
+			? {
+					apiKey: ONEKHUSA_API_KEY,
+					apiSecret: ONEKHUSA_API_SECRET,
+					organisationId: ONEKHUSA_ORGANISATION_ID,
 					environment: ENVIRONMENT as any,
 			  }
 			: undefined,
@@ -113,6 +127,13 @@ if (sdk) {
 		registerPawapayRefundTools(registerTool, sdk.pawapay);
 		registerPawapayWalletTools(registerTool, sdk.pawapay);
 		registerPawapayConfigTools(registerTool, sdk.pawapay);
+	}
+
+	// OneKhusa tools
+	if (sdk.isServiceConfigured("onekhusa")) {
+		registerOneKhusaCollectionTools(registerTool, sdk.onekhusa);
+		registerOneKhusaDisbursementTools(registerTool, sdk.onekhusa);
+		registerOneKhusaConfigTools(registerTool, sdk.onekhusa);
 	}
 }
 

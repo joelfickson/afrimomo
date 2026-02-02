@@ -77,7 +77,7 @@ export default function Home() {
             <div className="text-lime-400 text-4xl mb-4">🤖</div>
             <h4 className="text-xl font-bold mb-3">AI-Ready with MCP</h4>
             <p className="text-gray-400">
-              23 tools for AI assistants like Claude to handle payments through natural language.
+              42 tools for AI assistants like Claude to handle payments through natural language.
             </p>
           </div>
         </div>
@@ -94,16 +94,17 @@ export default function Home() {
 
 const sdk = new AfromomoSDK({
   environment: "sandbox",
-  pawapay: {
-    apiToken: "your-pawapay-token"
-  },
-  paychangu: {
-    secretKey: "your-paychangu-secret"
+  pawapay: { apiToken: "your-pawapay-token" },
+  paychangu: { secretKey: "your-paychangu-secret" },
+  onekhusa: {
+    apiKey: "your-api-key",
+    apiSecret: "your-api-secret",
+    organisationId: "your-org-id"
   }
 });
 
-// Request a mobile money deposit
-const payment = await sdk.pawapay.payments.initiate({
+// Request a mobile money deposit via PawaPay
+const deposit = await sdk.pawapay.payments.initiate({
   depositId: "order-123",
   amount: "50.00",
   msisdn: "260971234567",
@@ -118,7 +119,7 @@ const payment = await sdk.pawapay.payments.initiate({
       {/* Supported Providers */}
       <section className="container mx-auto px-4 py-20">
         <h3 className="text-3xl font-bold mb-12 text-center">Supported Providers</h3>
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <div className="border border-white/10 p-8 rounded-lg">
             <h4 className="text-2xl font-bold mb-3">PayChangu</h4>
             <p className="text-gray-400 mb-4">Payment services in Malawi</p>
@@ -137,6 +138,16 @@ const payment = await sdk.pawapay.payments.initiate({
               <li>• Bulk payouts</li>
               <li>• Refund management</li>
               <li>• Wallet & balance queries</li>
+            </ul>
+          </div>
+          <div className="border border-white/10 p-8 rounded-lg">
+            <h4 className="text-2xl font-bold mb-3">OneKhusa</h4>
+            <p className="text-gray-400 mb-4">Enterprise payments in Malawi</p>
+            <ul className="space-y-2 text-gray-300">
+              <li>• Request-to-pay collections</li>
+              <li>• Single disbursements</li>
+              <li>• Batch payouts</li>
+              <li>• Approval workflows</li>
             </ul>
           </div>
         </div>

@@ -1,0 +1,8 @@
+# Cloudflare Pages Configuration for Afrimomo Documentation
+name = "afrimomo-docs"
+
+# Pages configuration
+pages_build_output_dir = "build"
+
+[build]
+command = "pnpm build"

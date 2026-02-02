@@ -1,3 +1,5 @@
 packages:
   - 'packages/sdk'
+  - 'packages/afrimomo-mcp'
+  - 'docs'
   - 'examples/*' 
