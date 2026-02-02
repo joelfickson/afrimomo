@@ -1,3 +1,24 @@
+# [0.3.0](https://github.com/joelfickson/afrimomo/compare/v0.0.1-beta.13...v0.3.0) (2026-02-02)
+
+
+### Bug Fixes
+
+* **ci:** add SDK build verification to prevent MCP build failures ([34f9dc8](https://github.com/joelfickson/afrimomo/commit/34f9dc8af237a857e1ee679298932ea4ffef6c20))
+* **ci:** replace semver dependency with shell-based version incrementing ([d252f5a](https://github.com/joelfickson/afrimomo/commit/d252f5ac2ec82d4593a5eceb7fb2c5b307f43780))
+* docs release ([8921c6b](https://github.com/joelfickson/afrimomo/commit/8921c6b723113661d4d0d82940e8f526448b1933))
+
+
+### Features
+
+* Add Afrimomo MCP Server with PawaPay and PayChangu integration ([45123e3](https://github.com/joelfickson/afrimomo/commit/45123e3586391e54b543c3286ddac1e20079b7af))
+* add dark and light logos, implement welcome component, and configure project structure ([63a0222](https://github.com/joelfickson/afrimomo/commit/63a022289515975cde9a4432b38ade50a097f553))
+* add version labels to SDK and MCP sections for better visibility ([0c040a8](https://github.com/joelfickson/afrimomo/commit/0c040a8ffa899e910008a842bbb796bb72e0adf0))
+* Enhance tool registration with type definitions and refactor handlers for PawaPay and PayChangu integrations ([23522d9](https://github.com/joelfickson/afrimomo/commit/23522d90bdd73cf8a7a5467d29ce962fb0213c08))
+* **onekhusa:** add OneKhusa payment gateway integration ([f4d426a](https://github.com/joelfickson/afrimomo/commit/f4d426a64fe1a3080abf1819541fcfc50b53e663))
+* Update type assertions for PawaPay and PayChangu tools to use 'unknown' for improved type safety ([8d39041](https://github.com/joelfickson/afrimomo/commit/8d390419eeb10bdef02a57540ff15863f990b8b0))
+
+
+
 # [0.2.0](https://github.com/joelfickson/afrimomo/compare/v0.0.1-beta.13...v0.2.0) (2026-02-02)
 
 
