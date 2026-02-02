@@ -46,7 +46,7 @@ export default function Docs() {
             <div className="flex items-center gap-3 mb-4">
               <h2 className="text-3xl font-bold">Afrimomo SDK</h2>
               <span className="bg-lime-400/10 text-lime-400 px-3 py-1 rounded-full text-xs font-semibold border border-lime-400/20">
-                v0.0.1-beta.13
+                v0.1.0
               </span>
             </div>
             <p className="text-gray-400 mb-6">
@@ -59,7 +59,7 @@ export default function Docs() {
               </li>
               <li className="flex items-start">
                 <span className="text-lime-400 mr-2">✓</span>
-                Support for PayChangu and PawaPay
+                Support for PayChangu, PawaPay, and OneKhusa
               </li>
               <li className="flex items-start">
                 <span className="text-lime-400 mr-2">✓</span>
@@ -83,7 +83,7 @@ export default function Docs() {
             <div className="flex items-center gap-3 mb-4">
               <h2 className="text-3xl font-bold">Afrimomo MCP</h2>
               <span className="bg-lime-400/10 text-lime-400 px-3 py-1 rounded-full text-xs font-semibold border border-lime-400/20">
-                v0.0.2-beta.1
+                v0.1.0
               </span>
             </div>
             <p className="text-gray-400 mb-6">
@@ -92,7 +92,7 @@ export default function Docs() {
             <ul className="space-y-3 mb-8 text-gray-300">
               <li className="flex items-start">
                 <span className="text-lime-400 mr-2">✓</span>
-                23 comprehensive tools for payment operations
+                42 comprehensive tools for payment operations
               </li>
               <li className="flex items-start">
                 <span className="text-lime-400 mr-2">✓</span>
@@ -133,6 +133,7 @@ export default function Docs() {
               <ul className="space-y-2 text-gray-300">
                 <li><Link to="/sdk#pawapay" className="hover:text-lime-400">PawaPay API</Link></li>
                 <li><Link to="/sdk#paychangu" className="hover:text-lime-400">PayChangu API</Link></li>
+                <li><Link to="/sdk#onekhusa" className="hover:text-lime-400">OneKhusa API</Link></li>
                 <li><Link to="/sdk#types" className="hover:text-lime-400">Type Definitions</Link></li>
               </ul>
             </div>
@@ -141,6 +142,7 @@ export default function Docs() {
               <ul className="space-y-2 text-gray-300">
                 <li><a href="https://developer.paychangu.com/" target="_blank" rel="noopener noreferrer" className="hover:text-lime-400">PayChangu Docs</a></li>
                 <li><a href="https://docs.pawapay.io/" target="_blank" rel="noopener noreferrer" className="hover:text-lime-400">PawaPay Docs</a></li>
+                <li><a href="https://onekhusa.com/" target="_blank" rel="noopener noreferrer" className="hover:text-lime-400">OneKhusa</a></li>
                 <li><a href="https://github.com/joelfickson/afrimomo" target="_blank" rel="noopener noreferrer" className="hover:text-lime-400">GitHub Repository</a></li>
               </ul>
             </div>
@@ -181,6 +183,22 @@ export default function Docs() {
                 <span className="bg-white/5 px-3 py-1 rounded text-sm">Bulk Payouts</span>
                 <span className="bg-white/5 px-3 py-1 rounded text-sm">Refunds</span>
                 <span className="bg-white/5 px-3 py-1 rounded text-sm">Wallet Management</span>
+              </div>
+            </div>
+            <div className="border-t border-white/10 pt-6">
+              <h4 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                OneKhusa
+                <span className="text-sm text-gray-400 font-normal">Malawi & Southern Africa</span>
+              </h4>
+              <p className="text-gray-400 mb-3">
+                Enterprise payment platform with collections, single disbursements, and batch payouts with approval workflows.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="bg-white/5 px-3 py-1 rounded text-sm">Collections</span>
+                <span className="bg-white/5 px-3 py-1 rounded text-sm">Single Disbursements</span>
+                <span className="bg-white/5 px-3 py-1 rounded text-sm">Batch Disbursements</span>
+                <span className="bg-white/5 px-3 py-1 rounded text-sm">Approval Workflows</span>
+                <span className="bg-white/5 px-3 py-1 rounded text-sm">Mobile Money</span>
               </div>
             </div>
           </div>

@@ -1,0 +1,160 @@
+/**
+ * Afrimomo Landing Page Styles
+ */
+
+.heroBanner {
+  padding: 6rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .heroBanner {
+  background: linear-gradient(180deg, rgba(163, 230, 53, 0.05) 0%, transparent 100%);
+}
+
+.heroTitle {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.highlight {
+  color: var(--ifm-color-primary);
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  color: var(--ifm-color-emphasis-600);
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.buttons .button--outline {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme='dark'] .buttons .button--outline:hover {
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+}
+
+.features {
+  padding: 4rem 0;
+}
+
+.sectionTitle {
+  text-align: center;
+  margin-bottom: 3rem;
+  font-size: 2rem;
+}
+
+.featureCard {
+  padding: 2rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 0.5rem;
+  text-align: center;
+  height: 100%;
+  transition: border-color 0.2s ease;
+}
+
+[data-theme='dark'] .featureCard {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.featureCard:hover {
+  border-color: var(--ifm-color-primary);
+}
+
+.featureIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.providers {
+  padding: 4rem 0;
+  background: var(--ifm-color-emphasis-100);
+}
+
+[data-theme='dark'] .providers {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.providerCard {
+  padding: 2rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 0.5rem;
+  height: 100%;
+  background: var(--ifm-background-color);
+}
+
+[data-theme='dark'] .providerCard {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.providerRegion {
+  color: var(--ifm-color-emphasis-600);
+  margin-bottom: 1rem;
+}
+
+.providerCard ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.providerCard li {
+  padding: 0.25rem 0;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.providerCard li::before {
+  content: '• ';
+  color: var(--ifm-color-primary);
+}
+
+.cta {
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.cta h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.cta p {
+  font-size: 1.25rem;
+  color: var(--ifm-color-emphasis-600);
+  margin-bottom: 2rem;
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 3rem 1rem;
+  }
+
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+
+  .features,
+  .providers,
+  .cta {
+    padding: 2rem 0;
+  }
+}
