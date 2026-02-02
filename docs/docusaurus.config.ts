@@ -1,17 +1,17 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
+import { themes as prismThemes } from 'prism-react-renderer';
+import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'Afrimomo',
   tagline: 'Unified African Payment Integration',
-  favicon: 'img/logo.svg',
+  favicon: 'img/logo.png',
 
   future: {
     v4: true,
   },
 
-  url: 'https://afrimomo.dev',
+  url: 'https://afrimomo.fickson.com',
   baseUrl: '/',
 
   organizationName: 'joelfickson',
@@ -41,7 +41,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/logo-light.png',
+    image: 'img/logo.png',
     metadata: [
       {
         name: 'description',
@@ -53,16 +53,16 @@ const config: Config = {
         content:
           'Afrimomo, African payments, PayChangu, PawaPay, OneKhusa, SDK, MCP, TypeScript, mobile money, bank transfer',
       },
-      {property: 'og:site_name', content: 'Afrimomo'},
-      {property: 'og:type', content: 'website'},
-      {name: 'twitter:card', content: 'summary'},
-      {name: 'twitter:title', content: 'Afrimomo Documentation'},
+      { property: 'og:site_name', content: 'Afrimomo' },
+      { property: 'og:type', content: 'website' },
+      { name: 'twitter:card', content: 'summary' },
+      { name: 'twitter:title', content: 'Afrimomo Documentation' },
       {
         name: 'twitter:description',
         content:
           'Unified SDK + MCP server for African payment providers. Type-safe, production-ready, and built for developers.',
       },
-      {name: 'twitter:image', content: '/img/logo-light.png'},
+      { name: 'twitter:image', content: '/img/logo.png' },
     ],
     colorMode: {
       defaultMode: 'dark',
@@ -73,8 +73,8 @@ const config: Config = {
       title: 'Afrimomo',
       logo: {
         alt: 'Afrimomo Logo',
-        src: 'img/logo-light.png',
-        srcDark: 'img/logo-dark.png',
+        src: 'img/logo.png',
+        srcDark: 'img/logo.png',
       },
       items: [
         {
