@@ -10,60 +10,59 @@ The SDK supports flexible configuration for multiple payment providers.
 
 ## Environment Configuration
 
-Use environment variables to securely store your API credentials:
+By default, the SDK loads `.env` from your project root. You can override the path if needed:
 
 ```typescript
-import { AfromomoSDK, Environment } from "afrimomo-sdk";
+import { AfromomoSDK } from "afrimomo-sdk";
 
-const sdk = new AfromomoSDK({
-  environment: Environment.SANDBOX, // or Environment.PRODUCTION
-  pawapay: {
-    apiToken: process.env.PAWAPAY_TOKEN
-  },
-  paychangu: {
-    secretKey: process.env.PAYCHANGU_SECRET
-  },
-  onekhusa: {
-    apiKey: process.env.ONEKHUSA_API_KEY,
-    apiSecret: process.env.ONEKHUSA_API_SECRET,
-    organisationId: process.env.ONEKHUSA_ORGANISATION_ID
-  }
+const sdk = AfromomoSDK.initialize({
+  env: { envPath: ".env.local" }
 });
 ```
+
+Use environment variables to securely store your API credentials:
+
+```bash
+# PayChangu Configuration
+PAYCHANGU_SECRET_KEY=your-paychangu-secret
+PAYCHANGU_RETURN_URL=https://your-return-url.com
+PAYCHANGU_ENVIRONMENT=DEVELOPMENT
+
+# PawaPay Configuration
+PAWAPAY_JWT=your-pawapay-jwt
+PAWAPAY_ENVIRONMENT=DEVELOPMENT
+
+# OneKhusa Configuration
+ONEKHUSA_API_KEY=your-onekhusa-api-key
+ONEKHUSA_API_SECRET=your-onekhusa-api-secret
+ONEKHUSA_ORGANISATION_ID=your-organisation-id
+ONEKHUSA_ENVIRONMENT=DEVELOPMENT
+```
+
+:::tip
+Use `DEVELOPMENT` for sandbox endpoints and `PRODUCTION` for live endpoints. PawaPay and OneKhusa respect the environment setting. PayChangu uses a single base URL; sandbox vs live is controlled by your PayChangu credentials.
+:::
 
 ## Provider-Specific Configuration
 
-### PawaPay
+You can pass credentials directly to the SDK to override environment variables:
 
 ```typescript
-const sdk = new AfromomoSDK({
-  environment: "sandbox",
+import { AfromomoSDK, ENVIRONMENTS } from "afrimomo-sdk";
+
+const sdk = AfromomoSDK.initialize({
   pawapay: {
-    apiToken: "your-jwt-token" // JWT token from PawaPay dashboard
-  }
-});
-```
-
-### PayChangu
-
-```typescript
-const sdk = new AfromomoSDK({
-  environment: "sandbox",
+    jwt: "your-jwt-token",
+    environment: ENVIRONMENTS.DEVELOPMENT
+  },
   paychangu: {
-    secretKey: "your-secret-key" // Secret key from PayChangu dashboard
-  }
-});
-```
-
-### OneKhusa
-
-```typescript
-const sdk = new AfromomoSDK({
-  environment: "sandbox",
+    secretKey: "your-secret-key"
+  },
   onekhusa: {
     apiKey: "your-api-key",
     apiSecret: "your-api-secret",
-    organisationId: "your-organisation-id"
+    organisationId: "your-organisation-id",
+    environment: ENVIRONMENTS.DEVELOPMENT
   }
 });
 ```
@@ -73,25 +72,58 @@ const sdk = new AfromomoSDK({
 Only configure the providers you need:
 
 ```typescript
+import { AfromomoSDK, ENVIRONMENTS } from "afrimomo-sdk";
+
 // Only PawaPay
-const sdk = new AfromomoSDK({
-  environment: "production",
+const pawapayOnly = AfromomoSDK.initialize({
   pawapay: {
-    apiToken: process.env.PAWAPAY_TOKEN
+    jwt: process.env.PAWAPAY_JWT || "",
+    environment: ENVIRONMENTS.PRODUCTION
   }
 });
 
 // Only PayChangu and OneKhusa
-const sdk = new AfromomoSDK({
-  environment: "production",
+const multiProvider = AfromomoSDK.initialize({
   paychangu: {
-    secretKey: process.env.PAYCHANGU_SECRET
+    secretKey: process.env.PAYCHANGU_SECRET_KEY || ""
   },
   onekhusa: {
-    apiKey: process.env.ONEKHUSA_API_KEY,
-    apiSecret: process.env.ONEKHUSA_API_SECRET,
-    organisationId: process.env.ONEKHUSA_ORGANISATION_ID
+    apiKey: process.env.ONEKHUSA_API_KEY || "",
+    apiSecret: process.env.ONEKHUSA_API_SECRET || "",
+    organisationId: process.env.ONEKHUSA_ORGANISATION_ID || "",
+    environment: ENVIRONMENTS.PRODUCTION
   }
+});
+```
+
+## Custom Providers
+
+Bring your own PSP with the generic provider adapter:
+
+```typescript
+import { AfromomoSDK } from "afrimomo-sdk";
+
+const sdk = AfromomoSDK.initialize({
+  providers: {
+    acmePay: {
+      name: "acmePay",
+      baseUrl: "https://api.acmepay.com/v1",
+      authType: "bearer",
+      authToken: process.env.ACMEPAY_TOKEN,
+      endpoints: {
+        createPayment: "/payments",
+        getTransaction: "/payments/{id}",
+        getBalance: "/wallets/balance"
+      }
+    }
+  }
+});
+
+const acme = sdk.getProvider("acmePay");
+const payment = await acme.createPayment({
+  amount: "25.00",
+  currency: "USD",
+  reference: "order-001"
 });
 ```
 
@@ -99,12 +131,10 @@ const sdk = new AfromomoSDK({
 
 ```typescript
 if (sdk.isServiceConfigured("pawapay")) {
-  // PawaPay is configured and ready to use
-  const balances = await sdk.pawapay.wallets.getBalances();
+  const balances = await sdk.pawapay.wallets.getAllBalances();
 }
 
 if (sdk.isServiceConfigured("onekhusa")) {
-  // OneKhusa is configured
   const status = await sdk.onekhusa.checkStatus();
 }
 ```

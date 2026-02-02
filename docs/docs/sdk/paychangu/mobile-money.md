@@ -13,53 +13,53 @@ Send payouts via mobile money operators in Malawi.
 ```typescript
 const operators = await sdk.paychangu.getMobileMoneyOperators();
 
-operators.data.forEach(operator => {
-  console.log(`${operator.name}: ${operator.id}`);
-});
+if (operators.type === "success") {
+  operators.payload.Operators.forEach(operator => {
+    console.log(`${operator.name}: ${operator.ref_id}`);
+  });
+}
 ```
 
 ## Mobile Money Payout
 
 ```typescript
-const payout = await sdk.paychangu.mobileMoneyPayout({
-  amount: 2000,
-  currency: "MWK",
-  recipient_phone: "265991234567",
-  operator_id: "operator-uuid",
-  reference: "payout-123"
-});
+const payout = await sdk.paychangu.initializeMobileMoneyPayout(
+  "265991234567",
+  "operator-ref-id",
+  2000,
+  "charge-123",
+  {
+    email: "customer@example.com",
+    firstName: "John",
+    lastName: "Doe"
+  }
+);
 
-console.log("Payout ID:", payout.data.id);
-console.log("Status:", payout.data.status);
+if (payout.type === "success") {
+  console.log("Payout ID:", payout.payload.PayoutDetails.charge_id);
+  console.log("Status:", payout.payload.PayoutDetails.status);
+}
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `amount` | number | Yes | Amount to send |
-| `currency` | string | Yes | Currency code (MWK) |
-| `recipient_phone` | string | Yes | Recipient phone number |
-| `operator_id` | string | Yes | Mobile operator ID |
-| `reference` | string | Yes | Your unique reference |
+| `mobile` | string | Yes | Recipient phone number |
+| `operatorRefId` | string | Yes | Mobile operator reference ID |
+| `amount` | string \| number | Yes | Amount to send |
+| `chargeId` | string | Yes | Your unique charge reference |
+| `options` | object | No | Optional customer metadata |
 
 ## Get Payout Details
 
 ```typescript
-const details = await sdk.paychangu.getMobilePayoutDetails(reference);
+const details = await sdk.paychangu.getMobileMoneyPayoutDetails("charge-123");
 
-console.log("Status:", details.data.status);
-console.log("Completed:", details.data.completed_at);
-```
-
-## List All Payouts
-
-```typescript
-const payouts = await sdk.paychangu.listPayouts();
-
-payouts.data.forEach(payout => {
-  console.log(`${payout.reference}: ${payout.status}`);
-});
+if (details.type === "success") {
+  console.log("Status:", details.payload.PayoutDetails.status);
+  console.log("Completed:", details.payload.PayoutDetails.completed_at);
+}
 ```
 
 ## Supported Operators
@@ -72,8 +72,9 @@ The available mobile money operators can be retrieved using `getMobileMoneyOpera
 ## Response Types
 
 ```typescript
-import type { PayChanguTypes } from "afrimomo-sdk";
-
-type OperatorsResponse = PayChanguTypes.OperatorsResponse;
-type PayoutResponse = PayChanguTypes.PayoutResponse;
+import type {
+  PayChanguOperatorsResponse,
+  PayChanguPayoutResponse,
+  PayChanguPayoutDetailsResponse
+} from "afrimomo-sdk";
 ```

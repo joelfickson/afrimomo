@@ -24,8 +24,9 @@ const payment = await sdk.paychangu.initiatePayment({
   return_url: "https://your-app.com/success"
 });
 
-// Redirect customer to checkout
-console.log("Checkout URL:", payment.data.checkout_url);
+if (payment.status === "success" && payment.data) {
+  console.log("Checkout URL:", payment.data.checkout_url);
+}
 ```
 
 ### Parameters
@@ -46,31 +47,39 @@ console.log("Checkout URL:", payment.data.checkout_url);
 Charge customers directly without redirect:
 
 ```typescript
-const directCharge = await sdk.paychangu.initiateDirectChargePayment({
-  amount: 5000,
-  currency: "MWK",
-  chargeId: "charge-789",
-  accountInfo: {
+const directCharge = await sdk.paychangu.initializeDirectChargePayment(
+  5000,
+  "charge-789",
+  "MWK",
+  {
     email: "customer@example.com",
     first_name: "John",
     last_name: "Doe"
   }
-});
+);
+
+if (directCharge.type === "success") {
+  console.log("Account details:", directCharge.payload.PaymentAccountDetails);
+}
+```
+
+## Get Direct Charge Transaction Details
+
+```typescript
+const details = await sdk.paychangu.getDirectChargeTransactionDetails("charge-789");
+
+if (details.type === "success") {
+  console.log("Status:", details.payload.TransactionDetails.status);
+}
 ```
 
 ## Verify Transaction
 
 ```typescript
-const verification = await sdk.paychangu.verifyTransaction(tx_ref);
+const verification = await sdk.paychangu.verifyTransaction("order-456");
 
 console.log("Status:", verification.data.status);
 console.log("Amount:", verification.data.amount);
-```
-
-## Get Transaction Details
-
-```typescript
-const details = await sdk.paychangu.getTransactionDetails(tx_ref);
 ```
 
 ## Transaction Statuses
@@ -84,8 +93,10 @@ const details = await sdk.paychangu.getTransactionDetails(tx_ref);
 ## Response Types
 
 ```typescript
-import type { PayChanguTypes } from "afrimomo-sdk";
-
-type PaymentResponse = PayChanguTypes.PaymentResponse;
-type VerificationResponse = PayChanguTypes.VerificationResponse;
+import type {
+  PayChanguPaymentInitiationResponse,
+  PayChanguVerifyTransactionResponse,
+  PayChanguDirectChargePaymentResponse,
+  PayChanguTransactionDetailsResponse
+} from "afrimomo-sdk";
 ```

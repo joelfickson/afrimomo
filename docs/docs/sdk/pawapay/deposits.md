@@ -4,14 +4,22 @@ title: Deposits
 description: PawaPay deposit operations
 ---
 
+import DepositPlayground from "@site/src/components/DepositPlayground";
+
 # PawaPay Deposits
 
 Request mobile money deposits from customers across Sub-Saharan Africa.
 
-## Request a Deposit
+## Deposit Playground
+
+<DepositPlayground />
+
+## Create a Deposit Session
 
 ```typescript
-const deposit = await sdk.pawapay.payments.initiate({
+import { isServiceError } from "afrimomo-sdk";
+
+const deposit = await sdk.pawapay.payments.initiatePayment({
   depositId: "unique-deposit-id",
   amount: "100.00",
   msisdn: "260971234567",
@@ -21,6 +29,12 @@ const deposit = await sdk.pawapay.payments.initiate({
   language: "EN",
   reason: "Payment for goods"
 });
+
+if (isServiceError(deposit)) {
+  console.error(deposit.errorMessage);
+} else {
+  console.log("Redirect URL:", deposit.redirectUrl);
+}
 ```
 
 ### Parameters
@@ -39,10 +53,16 @@ const deposit = await sdk.pawapay.payments.initiate({
 ## Get Deposit Details
 
 ```typescript
-const details = await sdk.pawapay.payments.getDeposit(depositId);
+import { isServiceError } from "afrimomo-sdk";
 
-console.log("Status:", details.status);
-console.log("Amount:", details.amount);
+const details = await sdk.pawapay.deposits.getDeposit(depositId);
+
+if (!isServiceError(details)) {
+  const deposit = details[0];
+  console.log("Status:", deposit?.status);
+  console.log("Requested:", deposit?.requestedAmount);
+  console.log("Deposited:", deposit?.depositedAmount);
+}
 ```
 
 ## Resend Callback
@@ -50,7 +70,13 @@ console.log("Amount:", details.amount);
 If your webhook didn't receive the callback:
 
 ```typescript
-await sdk.pawapay.payments.resendCallback(depositId);
+import { isServiceError } from "afrimomo-sdk";
+
+const response = await sdk.pawapay.deposits.resendCallback(depositId);
+
+if (!isServiceError(response)) {
+  console.log("Resend status:", response.status);
+}
 ```
 
 ## Supported Countries
@@ -77,6 +103,12 @@ await sdk.pawapay.payments.resendCallback(depositId);
 ```typescript
 import type { PawaPayTypes } from "afrimomo-sdk";
 
-// Deposit response type
-type DepositResponse = PawaPayTypes.DepositResponse;
+// Deposit session request
+type DepositRequest = PawaPayTypes.PaymentData;
+
+// Deposit session response
+type DepositResponse = PawaPayTypes.InitiatePaymentResponse;
+
+// Deposit details
+type DepositDetails = PawaPayTypes.PaymentTransaction[];
 ```

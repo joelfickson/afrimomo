@@ -13,9 +13,9 @@ All types are exported from the main package. No deep imports needed.
 ```typescript
 // Correct way - import from main package
 import type {
-  ActiveConfigResponse,
+  PayChanguPaymentInitiationResponse,
+  PayChanguVerifyTransactionResponse,
   PayChanguOperatorsResponse,
-  PayChanguTypes,
   PawaPayTypes,
   OneKhusaTypes
 } from "afrimomo-sdk";
@@ -32,20 +32,21 @@ import type {
 import type { PawaPayTypes } from "afrimomo-sdk";
 
 // Access nested types
-type DepositRequest = PawaPayTypes.DepositRequest;
-type DepositResponse = PawaPayTypes.DepositResponse;
-type PayoutRequest = PawaPayTypes.PayoutRequest;
-type WalletBalance = PawaPayTypes.WalletBalance;
+type DepositRequest = PawaPayTypes.PaymentData;
+type DepositResponse = PawaPayTypes.InitiatePaymentResponse;
+type PayoutRequest = PawaPayTypes.PayoutTransaction;
+type WalletBalances = PawaPayTypes.WalletBalancesResponse;
 ```
 
 ### PayChangu Types
 
 ```typescript
-import type { PayChanguTypes } from "afrimomo-sdk";
-
-type PaymentRequest = PayChanguTypes.PaymentRequest;
-type PaymentResponse = PayChanguTypes.PaymentResponse;
-type BankTransferRequest = PayChanguTypes.BankTransferRequest;
+import type {
+  PayChanguPaymentInitiationResponse,
+  PayChanguVerifyTransactionResponse,
+  PayChanguOperatorsResponse,
+  PayChanguBankTransferPaymentResponse
+} from "afrimomo-sdk";
 ```
 
 ### OneKhusa Types
@@ -53,9 +54,10 @@ type BankTransferRequest = PayChanguTypes.BankTransferRequest;
 ```typescript
 import type { OneKhusaTypes } from "afrimomo-sdk";
 
-type CollectionRequest = OneKhusaTypes.CollectionRequest;
-type DisbursementRequest = OneKhusaTypes.DisbursementRequest;
-type BatchRequest = OneKhusaTypes.BatchRequest;
+type CollectionRequest = OneKhusaTypes.InitiateCollectionRequest;
+type CollectionResponse = OneKhusaTypes.CollectionResponse;
+type SingleDisbursementRequest = OneKhusaTypes.SingleDisbursementRequest;
+type BatchDisbursementRequest = OneKhusaTypes.AddBatchDisbursementRequest;
 type Recipient = OneKhusaTypes.Recipient;
 ```
 
@@ -64,10 +66,9 @@ type Recipient = OneKhusaTypes.Recipient;
 ### Environment
 
 ```typescript
-import { Environment } from "afrimomo-sdk";
+import { ENVIRONMENTS, type Environment } from "afrimomo-sdk";
 
-// Use enum values
-const env = Environment.SANDBOX; // or Environment.PRODUCTION
+const env: Environment = ENVIRONMENTS.DEVELOPMENT; // or ENVIRONMENTS.PRODUCTION
 ```
 
 ### SDK Configuration
@@ -76,13 +77,26 @@ const env = Environment.SANDBOX; // or Environment.PRODUCTION
 import type { SDKConfig } from "afrimomo-sdk";
 
 const config: SDKConfig = {
-  environment: "sandbox",
-  pawapay: { apiToken: "..." },
+  env: { envPath: ".env" },
+  pawapay: { jwt: "...", environment: "DEVELOPMENT" },
   paychangu: { secretKey: "..." },
   onekhusa: {
     apiKey: "...",
     apiSecret: "...",
-    organisationId: "..."
+    organisationId: "...",
+    environment: "DEVELOPMENT"
+  },
+  providers: {
+    customPay: {
+      name: "customPay",
+      baseUrl: "https://api.custompay.com",
+      authType: "bearer",
+      authToken: "...",
+      endpoints: {
+        createPayment: "/payments",
+        getTransaction: "/payments/{id}"
+      }
+    }
   }
 };
 ```
@@ -92,19 +106,22 @@ const config: SDKConfig = {
 The SDK provides full type safety:
 
 ```typescript
-import { AfromomoSDK } from "afrimomo-sdk";
+import { AfromomoSDK, isServiceError } from "afrimomo-sdk";
 
-const sdk = new AfromomoSDK({...});
+const sdk = AfromomoSDK.initialize({});
 
-// TypeScript will catch errors
-const deposit = await sdk.pawapay.payments.initiate({
+const deposit = await sdk.pawapay.payments.initiatePayment({
   depositId: "123",
   amount: "100.00",
   msisdn: "260971234567",
   country: "ZMB",
-  // TypeScript error if required fields are missing
+  returnUrl: "https://your-app.com/callback",
+  statementDescription: "Order #123",
+  language: "EN",
+  reason: "Payment"
 });
 
-// Response is fully typed
-console.log(deposit.status); // Autocomplete available
+if (!isServiceError(deposit)) {
+  console.log(deposit.redirectUrl); // Autocomplete available
+}
 ```

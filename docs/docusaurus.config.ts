@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Afrimomo',
   tagline: 'Unified African Payment Integration',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/logo.svg',
 
   future: {
     v4: true,
@@ -41,7 +41,29 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/afrimomo-social-card.jpg',
+    image: 'img/logo-light.png',
+    metadata: [
+      {
+        name: 'description',
+        content:
+          'Afrimomo documentation for the SDK and MCP server. Integrate PayChangu, PawaPay, and OneKhusa with a unified TypeScript SDK.',
+      },
+      {
+        name: 'keywords',
+        content:
+          'Afrimomo, African payments, PayChangu, PawaPay, OneKhusa, SDK, MCP, TypeScript, mobile money, bank transfer',
+      },
+      {property: 'og:site_name', content: 'Afrimomo'},
+      {property: 'og:type', content: 'website'},
+      {name: 'twitter:card', content: 'summary'},
+      {name: 'twitter:title', content: 'Afrimomo Documentation'},
+      {
+        name: 'twitter:description',
+        content:
+          'Unified SDK + MCP server for African payment providers. Type-safe, production-ready, and built for developers.',
+      },
+      {name: 'twitter:image', content: '/img/logo-light.png'},
+    ],
     colorMode: {
       defaultMode: 'dark',
       disableSwitch: false,

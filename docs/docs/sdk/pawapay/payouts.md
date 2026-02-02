@@ -11,13 +11,26 @@ Send money to customers via mobile money.
 ## Send a Single Payout
 
 ```typescript
-const payout = await sdk.pawapay.payouts.send({
+import { isServiceError } from "afrimomo-sdk";
+
+const payout = await sdk.pawapay.payouts.sendPayout({
   payoutId: "payout-123",
   amount: "50.00",
-  msisdn: "260701234567",
-  country: "ZMB",
+  currency: "ZMW",
+  correspondent: "AIRTEL_ZMB",
+  recipient: {
+    type: "MSISDN",
+    address: { value: "260701234567" }
+  },
+  customerTimestamp: new Date().toISOString(),
   statementDescription: "Withdrawal"
 });
+
+if (isServiceError(payout)) {
+  console.error(payout.errorMessage);
+} else {
+  console.log("Payout queued:", payout.payoutId);
+}
 ```
 
 ### Parameters
@@ -26,27 +39,35 @@ const payout = await sdk.pawapay.payouts.send({
 |-----------|------|----------|-------------|
 | `payoutId` | string | Yes | Unique identifier for the payout |
 | `amount` | string | Yes | Amount to send |
-| `msisdn` | string | Yes | Recipient phone number |
-| `country` | string | Yes | ISO 3166-1 alpha-3 country code |
-| `statementDescription` | string | No | Description on recipient statement |
+| `currency` | string | Yes | Currency code (e.g., ZMW) |
+| `correspondent` | string | Yes | PawaPay correspondent ID |
+| `recipient` | object | Yes | Recipient details (MSISDN) |
+| `customerTimestamp` | string | Yes | ISO timestamp for the request |
+| `statementDescription` | string | Yes | Description on recipient statement |
 
 ## Send Bulk Payouts
 
 Process multiple payouts in a single request:
 
 ```typescript
-const bulkPayout = await sdk.pawapay.payouts.sendBulk([
+const bulkPayout = await sdk.pawapay.payouts.sendBulkPayout([
   {
     payoutId: "payout-001",
     amount: "25.00",
-    msisdn: "260701234567",
-    country: "ZMB"
+    currency: "ZMW",
+    correspondent: "AIRTEL_ZMB",
+    recipient: { type: "MSISDN", address: { value: "260701234567" } },
+    customerTimestamp: new Date().toISOString(),
+    statementDescription: "Affiliate payout"
   },
   {
     payoutId: "payout-002",
     amount: "30.00",
-    msisdn: "260709876543",
-    country: "ZMB"
+    currency: "ZMW",
+    correspondent: "TNM_MWI",
+    recipient: { type: "MSISDN", address: { value: "265991234567" } },
+    customerTimestamp: new Date().toISOString(),
+    statementDescription: "Affiliate payout"
   }
 ]);
 ```
@@ -54,26 +75,30 @@ const bulkPayout = await sdk.pawapay.payouts.sendBulk([
 ## Get Payout Status
 
 ```typescript
-const status = await sdk.pawapay.payouts.getStatus(payoutId);
+import { isServiceError } from "afrimomo-sdk";
 
-console.log("Status:", status.status);
-console.log("Completed at:", status.completedAt);
+const status = await sdk.pawapay.payouts.getPayout(payoutId);
+
+if (!isServiceError(status)) {
+  console.log("Status:", status.status);
+  console.log("Currency:", status.currency);
+}
 ```
 
 ## Payout Statuses
 
 | Status | Description |
 |--------|-------------|
-| `PENDING` | Payout is being processed |
-| `COMPLETED` | Successfully sent to recipient |
-| `FAILED` | Payout failed |
-| `CANCELLED` | Payout was cancelled |
+| `ACCEPTED` | Payout accepted for processing |
+| `ENQUEUED` | Payout queued by PawaPay |
+| `REJECTED` | Payout rejected |
+| `DUPLICATE_IGNORED` | Duplicate payout ignored |
 
 ## Response Types
 
 ```typescript
 import type { PawaPayTypes } from "afrimomo-sdk";
 
-type PayoutResponse = PawaPayTypes.PayoutResponse;
+type PayoutTransaction = PawaPayTypes.PayoutTransaction;
 type BulkPayoutResponse = PawaPayTypes.BulkPayoutResponse;
 ```

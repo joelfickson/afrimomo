@@ -14,7 +14,8 @@ A unified TypeScript SDK for seamless integration with African payment providers
 
 - **Multi-Provider Support** - PayChangu, PawaPay, and OneKhusa in one SDK
 - **Full TypeScript Support** - Comprehensive type definitions for all APIs
-- **Sandbox & Production** - Easy environment switching for development and production
+- **Development & Production** - Environment switching for sandbox and live endpoints
+- **Custom Providers** - Bring your own PSP with the generic provider adapter
 - **Comprehensive Error Handling** - Detailed error messages and types
 
 ## Supported Providers
@@ -28,16 +29,16 @@ A unified TypeScript SDK for seamless integration with African payment providers
 ## Quick Example
 
 ```typescript
-import { AfromomoSDK } from "afrimomo-sdk";
+import { AfromomoSDK, ENVIRONMENTS } from "afrimomo-sdk";
 
-const sdk = new AfromomoSDK({
-  environment: "sandbox",
-  pawapay: { apiToken: "your-token" },
+const sdk = AfromomoSDK.initialize({
+  pawapay: { jwt: "your-token", environment: ENVIRONMENTS.DEVELOPMENT },
   paychangu: { secretKey: "your-secret" },
   onekhusa: {
     apiKey: "your-api-key",
     apiSecret: "your-api-secret",
-    organisationId: "your-org-id"
+    organisationId: "your-org-id",
+    environment: ENVIRONMENTS.DEVELOPMENT
   }
 });
 

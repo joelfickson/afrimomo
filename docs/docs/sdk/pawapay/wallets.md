@@ -11,20 +11,29 @@ Query wallet balances and manage your funds.
 ## Get All Balances
 
 ```typescript
-const balances = await sdk.pawapay.wallets.getBalances();
+import { isServiceError } from "afrimomo-sdk";
 
-balances.forEach(balance => {
-  console.log(`${balance.country}: ${balance.currency} ${balance.amount}`);
-});
+const balances = await sdk.pawapay.wallets.getAllBalances();
+
+if (!isServiceError(balances)) {
+  balances.balances.forEach(balance => {
+    console.log(`${balance.country}: ${balance.currency} ${balance.balance}`);
+  });
+}
 ```
 
 ## Get Country Balance
 
 ```typescript
+import { isServiceError } from "afrimomo-sdk";
+
 const zambiaBalance = await sdk.pawapay.wallets.getCountryBalance("ZMB");
 
-console.log("Available:", zambiaBalance.available);
-console.log("Currency:", zambiaBalance.currency);
+if (!isServiceError(zambiaBalance)) {
+  const balance = zambiaBalance.balances[0];
+  console.log("Balance:", balance?.balance);
+  console.log("Currency:", balance?.currency);
+}
 ```
 
 ## Balance Response
@@ -32,10 +41,9 @@ console.log("Currency:", zambiaBalance.currency);
 ```typescript
 interface WalletBalance {
   country: string;
+  balance: string;
   currency: string;
-  amount: string;
-  available: string;
-  reserved: string;
+  mno: string;
 }
 ```
 
@@ -44,5 +52,6 @@ interface WalletBalance {
 ```typescript
 import type { PawaPayTypes } from "afrimomo-sdk";
 
-type WalletBalanceResponse = PawaPayTypes.WalletBalanceResponse;
+type WalletBalancesResponse = PawaPayTypes.WalletBalancesResponse;
+type WalletBalance = PawaPayTypes.WalletBalance;
 ```

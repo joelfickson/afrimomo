@@ -37,14 +37,15 @@ The SDK includes:
 
 - Full TypeScript type definitions
 - ESM and CommonJS builds
-- Zero runtime dependencies for the core SDK
+- Runtime dependencies installed automatically by your package manager
 
 ## Verify Installation
 
 ```typescript
 import { AfromomoSDK } from "afrimomo-sdk";
 
-console.log("Afrimomo SDK installed successfully!");
+const sdk = AfromomoSDK.initialize();
+console.log("Afrimomo SDK initialized:", !!sdk);
 ```
 
 ## Next Steps

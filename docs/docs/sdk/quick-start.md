@@ -11,12 +11,12 @@ Get up and running with Afrimomo SDK in minutes.
 ## Initialize the SDK
 
 ```typescript
-import { AfromomoSDK } from "afrimomo-sdk";
+import { AfromomoSDK, ENVIRONMENTS } from "afrimomo-sdk";
 
-const sdk = new AfromomoSDK({
-  environment: "sandbox", // or "production"
+const sdk = AfromomoSDK.initialize({
   pawapay: {
-    apiToken: "your-pawapay-token"
+    jwt: "your-pawapay-jwt",
+    environment: ENVIRONMENTS.DEVELOPMENT
   },
   paychangu: {
     secretKey: "your-paychangu-secret"
@@ -24,7 +24,8 @@ const sdk = new AfromomoSDK({
   onekhusa: {
     apiKey: "your-onekhusa-api-key",
     apiSecret: "your-onekhusa-api-secret",
-    organisationId: "your-organisation-id"
+    organisationId: "your-organisation-id",
+    environment: ENVIRONMENTS.DEVELOPMENT
   }
 });
 ```
@@ -35,10 +36,12 @@ You only need to configure the providers you plan to use. Each provider is optio
 
 ## PawaPay Example
 
-Request a mobile money deposit:
+Request a mobile money deposit via the widget session API:
 
 ```typescript
-const deposit = await sdk.pawapay.payments.initiate({
+import { isServiceError } from "afrimomo-sdk";
+
+const deposit = await sdk.pawapay.payments.initiatePayment({
   depositId: "order-123",
   amount: "50.00",
   msisdn: "260971234567",
@@ -49,19 +52,16 @@ const deposit = await sdk.pawapay.payments.initiate({
   reason: "Service payment"
 });
 
-console.log("Deposit initiated:", deposit);
+if (isServiceError(deposit)) {
+  console.error(deposit.errorMessage);
+} else {
+  console.log("Redirect URL:", deposit.redirectUrl);
+}
 ```
 
 ## PayChangu Example
 
-Get mobile money operators:
-
-```typescript
-const operators = await sdk.paychangu.getMobileMoneyOperators();
-console.log("Available operators:", operators);
-```
-
-Initiate a payment:
+Initiate a hosted payment:
 
 ```typescript
 const payment = await sdk.paychangu.initiatePayment({
@@ -75,7 +75,9 @@ const payment = await sdk.paychangu.initiatePayment({
   return_url: "https://your-app.com/success"
 });
 
-console.log("Payment URL:", payment.data.checkout_url);
+if (payment.status === "success" && payment.data) {
+  console.log("Payment URL:", payment.data.checkout_url);
+}
 ```
 
 ## OneKhusa Example
