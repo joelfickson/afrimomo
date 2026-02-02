@@ -2,12 +2,12 @@ import { BaseService } from "../../../utils/baseService";
 import { logger } from "../../../utils/logger";
 import type { PawaPayTypes } from "../types";
 import type { PawaPayNetworkResponse } from "../../../types";
-import { PawapayNetwork } from "../network";
+import type { HttpClient } from "../../../utils/httpClient";
 
 export class PawapayDeposits extends BaseService {
 	private readonly baseEndpoint = "/deposits";
 
-	constructor(private readonly networkHandler: PawapayNetwork) {
+	constructor(private readonly networkHandler: HttpClient) {
 		super();
 	}
 

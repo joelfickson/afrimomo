@@ -81,3 +81,16 @@ export type { PayChangu as PayChanguTypes } from "./services/paychangu/types";
 export { NetworkManager } from "./utils/network";
 export { BaseService } from "./utils/baseService";
 export { logger } from "./utils/logger";
+export { HttpClient } from "./utils/httpClient";
+export type {
+	HttpClientConfig,
+	AuthStrategy,
+	RequestHook,
+	NetworkErrorResponse,
+} from "./utils/httpClient";
+export {
+	createPawapayClient,
+	createPaychanguClient,
+	createOnekhusaClient,
+} from "./utils/providerClients";
+export type { OneKhusaTokenProvider } from "./utils/providerClients";

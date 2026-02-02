@@ -1,5 +1,5 @@
 import type { PawaPayTypes } from "./types";
-import type { PawapayNetwork } from "./network";
+import type { HttpClient } from "../../utils/httpClient";
 import type { PawaPayNetworkResponse } from "../../types";
 import { logger } from "../../utils/logger";
 
@@ -7,7 +7,7 @@ import { logger } from "../../utils/logger";
  * Service for managing PawaPay wallet operations
  */
 export class PawapayWallets {
-	constructor(private readonly network: PawapayNetwork) {}
+	constructor(private readonly network: HttpClient) {}
 
 	/**
 	 * Get wallet balances for all countries

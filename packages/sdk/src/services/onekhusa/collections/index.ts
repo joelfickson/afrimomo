@@ -1,5 +1,5 @@
 import { logger } from "../../../utils/logger";
-import type { OneKhusaNetwork } from "../network";
+import type { HttpClient } from "../../../utils/httpClient";
 import type { OneKhusaErrorResponse } from "../types/common";
 import type {
 	InitiateCollectionRequest,
@@ -12,7 +12,7 @@ import type {
 type CollectionResult<T> = T | OneKhusaErrorResponse;
 
 export class OneKhusaCollections {
-	constructor(private readonly network: OneKhusaNetwork) {}
+	constructor(private readonly network: HttpClient) {}
 
 	async initiateRequestToPay(
 		request: InitiateCollectionRequest,

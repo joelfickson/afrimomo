@@ -4,7 +4,8 @@ import { PawapayPayouts } from "./payouts";
 import { PawapayRefunds } from "./refunds";
 import { PawapayWallets } from "./wallets";
 import type { Environment } from "../../config/constants";
-import { PawapayNetwork } from "./network";
+import { createPawapayClient } from "../../utils/providerClients";
+import { HttpClient } from "../../utils/httpClient";
 import type { PawaPayTypes } from "./types";
 import type { PawaPayNetworkResponse } from "../../types";
 import { logger } from "../../utils/logger";
@@ -12,7 +13,7 @@ import { logger } from "../../utils/logger";
 export * from "./types";
 
 export class PawaPay {
-	private readonly network: PawapayNetwork;
+	private readonly network: HttpClient;
 	private readonly _deposits: PawapayDeposits;
 	private readonly _payments: PawapayPayments;
 	private readonly _payouts: PawapayPayouts;
@@ -20,7 +21,7 @@ export class PawaPay {
 	private readonly _wallets: PawapayWallets;
 
 	constructor(jwt: string, environment: Environment = "DEVELOPMENT") {
-		this.network = new PawapayNetwork(jwt, environment);
+		this.network = createPawapayClient(jwt, environment);
 		this._deposits = new PawapayDeposits(this.network);
 		this._payments = new PawapayPayments(this.network);
 		this._payouts = new PawapayPayouts(this.network);

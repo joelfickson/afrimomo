@@ -1,6 +1,8 @@
 import { OneKhusaCollections } from "./collections";
 import { OneKhusaDisbursements } from "./disbursements";
-import { OneKhusaNetwork } from "./network";
+import { OneKhusaTokenManager } from "./auth";
+import { createOnekhusaClient } from "../../utils/providerClients";
+import type { HttpClient } from "../../utils/httpClient";
 import type {
 	OneKhusaEnvironment,
 	OneKhusaErrorResponse,
@@ -10,9 +12,11 @@ import { logger } from "../../utils/logger";
 export * from "./types";
 
 export class OneKhusa {
-	private readonly network: OneKhusaNetwork;
+	private readonly network: HttpClient;
+	private readonly tokenManager: OneKhusaTokenManager;
 	private readonly _collections: OneKhusaCollections;
 	private readonly _disbursements: OneKhusaDisbursements;
+	private readonly environment: OneKhusaEnvironment;
 
 	constructor(
 		apiKey: string,
@@ -20,9 +24,14 @@ export class OneKhusa {
 		organisationId: string,
 		environment: OneKhusaEnvironment = "DEVELOPMENT",
 	) {
-		this.network = new OneKhusaNetwork(
+		this.environment = environment;
+		this.tokenManager = new OneKhusaTokenManager(
 			apiKey,
 			apiSecret,
+			environment,
+		);
+		this.network = createOnekhusaClient(
+			this.tokenManager,
 			organisationId,
 			environment,
 		);
@@ -51,11 +60,7 @@ export class OneKhusa {
 
 			return {
 				available: result.status === "UP" || result.status === "OK",
-				environment: this.network.axiosInstance.defaults.baseURL?.includes(
-					"sandbox",
-				)
-					? "DEVELOPMENT"
-					: "PRODUCTION",
+				environment: this.environment,
 			};
 		} catch (error) {
 			if ((error as OneKhusaErrorResponse).errorMessage) {
@@ -66,6 +71,6 @@ export class OneKhusa {
 	}
 
 	clearTokenCache(): void {
-		this.network.clearTokenCache();
+		this.tokenManager.clearToken();
 	}
 }

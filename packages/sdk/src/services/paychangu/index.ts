@@ -10,7 +10,8 @@
 import axios from "axios";
 import { BaseService } from "../../utils/baseService";
 import { logger } from "../../utils/logger";
-import { PayChanguNetwork } from "./network";
+import { createPaychanguClient } from "../../utils/providerClients";
+import { HttpClient } from "../../utils/httpClient";
 import type { PayChanguAccountInfo } from "./types/account";
 import { PayChangu as PayChanguTypes } from "./types";
 import type {
@@ -61,7 +62,7 @@ export * from "./types";
  * - Bank payouts
  */
 export class PayChangu extends BaseService {
-	private readonly network: PayChanguNetwork;
+	private readonly network: HttpClient;
 
 	/**
 	 * Creates a new instance of the PayChangu service
@@ -70,7 +71,7 @@ export class PayChangu extends BaseService {
 	 */
 	constructor(secretKey: string) {
 		super();
-		this.network = new PayChanguNetwork(secretKey);
+		this.network = createPaychanguClient(secretKey);
 	}
 
 	/**
@@ -184,11 +185,6 @@ export class PayChangu extends BaseService {
 				await this.network.post<PayChanguPaymentInitiationResponse>(
 					"/payment",
 					data,
-					{
-						headers: {
-							Accept: "application/json",
-						},
-					},
 					"payment initiation",
 				);
 
@@ -230,11 +226,6 @@ export class PayChangu extends BaseService {
 			>(
 				"/direct-charge/payments/initialize",
 				data,
-				{
-					headers: {
-						Accept: "application/json",
-					},
-				},
 				"direct charge initialization",
 			);
 		} catch (error) {
@@ -264,11 +255,6 @@ export class PayChangu extends BaseService {
 
 			return await this.network.get<PayChanguSingleTransactionResponse>(
 				`/direct-charge/transactions/${chargeId}/details`,
-				{
-					headers: {
-						Accept: "application/json",
-					},
-				},
 				`transaction details retrieval for ${chargeId}`,
 			);
 		} catch (error) {
@@ -293,11 +279,6 @@ export class PayChangu extends BaseService {
 			return await this.network.post<PayChanguDirectChargeBankTransferResponse>(
 				"/direct-charge/payments/bank-transfer",
 				data,
-				{
-					headers: {
-						Accept: "application/json",
-					},
-				},
 				"bank transfer processing",
 			);
 		} catch (error) {
@@ -518,11 +499,6 @@ export class PayChangu extends BaseService {
 
 			return await this.network.get<PayChanguMobileMoneyOperatorsResponse>(
 				"/mobile-money",
-				{
-					headers: {
-						Accept: "application/json",
-					},
-				},
 				"mobile money operators retrieval",
 			);
 		} catch (error) {
@@ -545,11 +521,6 @@ export class PayChangu extends BaseService {
 			return await this.network.post<PayChanguMobileMoneyPayoutResponse>(
 				"/mobile-money/payouts/initialize",
 				data,
-				{
-					headers: {
-						Accept: "application/json",
-					},
-				},
 				"mobile money payout initialization",
 			);
 		} catch (error) {
@@ -571,11 +542,6 @@ export class PayChangu extends BaseService {
 
 			return await this.network.get<PayChanguSinglePayoutResponse>(
 				`/mobile-money/payments/${chargeId}/details`,
-				{
-					headers: {
-						Accept: "application/json",
-					},
-				},
 				`payout details retrieval for ${chargeId}`,
 			);
 		} catch (error) {
@@ -766,15 +732,8 @@ export class PayChangu extends BaseService {
 
 			return await this.network.get<PayChanguSupportedBanksResponse>(
 				"/direct-charge/payouts/supported-banks",
-				{
-					headers: {
-						Accept: "application/json",
-					},
-					params: {
-						currency,
-					},
-				},
 				`supported banks retrieval for ${currency}`,
+				{ params: { currency } },
 			);
 		} catch (error) {
 			return this.handleApiError(error, "supported banks retrieval");
@@ -796,11 +755,6 @@ export class PayChangu extends BaseService {
 			return await this.network.post<PayChanguBankPayoutResponse>(
 				"/direct-charge/payouts/initialize",
 				data,
-				{
-					headers: {
-						Accept: "application/json",
-					},
-				},
 				"bank payout initialization",
 			);
 		} catch (error) {
@@ -822,11 +776,6 @@ export class PayChangu extends BaseService {
 
 			return await this.network.get<PayChanguSingleBankPayoutResponse>(
 				`/direct-charge/payouts/${chargeId}/details`,
-				{
-					headers: {
-						Accept: "application/json",
-					},
-				},
 				`bank payout details retrieval for ${chargeId}`,
 			);
 		} catch (error) {
@@ -850,16 +799,13 @@ export class PayChangu extends BaseService {
 
 			return await this.network.get<PayChanguAllBankPayoutsResponse>(
 				"/direct-charge/payouts",
+				`all bank payouts retrieval (page ${page || 1})`,
 				{
-					headers: {
-						Accept: "application/json",
-					},
 					params: {
 						...(page && { page }),
 						...(perPage && { per_page: perPage }),
 					},
 				},
-				`all bank payouts retrieval (page ${page || 1})`,
 			);
 		} catch (error) {
 			return this.handleApiError(error, "bank payouts retrieval");
@@ -1145,11 +1091,6 @@ export class PayChangu extends BaseService {
 
 			return await this.network.get<PayChanguVerifyTransactionResponse>(
 				`/verify-payment/${txRef}`,
-				{
-					headers: {
-						Accept: "application/json",
-					},
-				},
 				`transaction verification for ${txRef}`,
 			);
 		} catch (error) {

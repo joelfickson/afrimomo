@@ -1,12 +1,12 @@
 import { logger } from "../../../utils/logger";
 import type { PawaPayNetworkResponse } from "../../../types";
-import type { PawapayNetwork } from "../network";
+import type { HttpClient } from "../../../utils/httpClient";
 import PawaPayTypes from "../types";
 
 export class PawapayPayments {
 	private readonly baseEndpoint = "widget/sessions";
 
-	constructor(private readonly network: PawapayNetwork) {}
+	constructor(private readonly network: HttpClient) {}
 
 	/**
 	 * Initiates a payment process by sending payment data to widget/sessions.
