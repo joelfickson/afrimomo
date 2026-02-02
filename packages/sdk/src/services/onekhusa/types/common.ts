@@ -34,11 +34,9 @@ export interface PaginatedResponse<T> {
 	empty: boolean;
 }
 
-export interface OneKhusaErrorResponse {
-	errorMessage: string;
-	statusCode: number;
-	errorObject?: string;
-}
+import type { ServiceError } from "../../../types";
+
+export type OneKhusaErrorResponse = ServiceError;
 
 export type DisbursementStatus =
 	| "PENDING"

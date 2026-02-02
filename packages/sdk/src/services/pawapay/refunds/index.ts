@@ -1,61 +1,47 @@
-import { BaseService } from "../../../utils/baseService";
 import { logger } from "../../../utils/logger";
-import type { PawaPayNetworkResponse } from "../../../types";
 import type { PawaPayTypes } from "../types";
 import type { HttpClient } from "../../../utils/httpClient";
+import {
+	wrapServiceCall,
+	type ServiceResult,
+} from "../../../utils/serviceWrapper";
 
-export class PawapayRefunds extends BaseService {
+export class PawapayRefunds {
 	private readonly baseEndpoint = "/refunds";
 
-	constructor(private readonly networkHandler: HttpClient) {
-		super();
-	}
+	constructor(private readonly networkHandler: HttpClient) {}
 
-	/**
-	 * Creates a refund request for a specific transaction
-	 * @param refundData - Object containing refundId and depositId
-	 * @returns Promise resolving to the refund response or error
-	 */
 	async createRefundRequest(refundData: {
 		refundId: string;
 		depositId: string;
-	}): Promise<PawaPayTypes.RefundResponse | PawaPayNetworkResponse> {
-		try {
-			const response = await this.networkHandler.post(this.baseEndpoint, {
-				refundId: refundData.refundId,
-				depositId: refundData.depositId,
-			});
+	}): Promise<ServiceResult<PawaPayTypes.RefundResponse>> {
+		logger.info("PawaPay: Creating refund request", refundData);
 
-			logger.info(
-				"Sending refund request for deposit:",
-				refundData.depositId,
-				"with refundId:",
-				refundData.refundId,
-			);
-			return response as PawaPayTypes.RefundResponse;
-		} catch (error: unknown) {
-			logger.error("Refund request failed:", error);
-			return this.networkHandler.handleApiError(error, "createRefundRequest");
-		}
+		return wrapServiceCall(
+			() =>
+				this.networkHandler.post<PawaPayTypes.RefundResponse>(
+					this.baseEndpoint,
+					refundData,
+					"creating refund request",
+				),
+			this.networkHandler.handleApiError.bind(this.networkHandler),
+			"creating refund request",
+		);
 	}
 
-	/**
-	 * Retrieves the status of a specific refund transaction
-	 * @param refundId - The unique identifier for the refund transaction
-	 * @returns Promise resolving to the refund transaction details or error
-	 */
 	async getRefundStatus(
 		refundId: string,
-	): Promise<PawaPayTypes.RefundTransaction | PawaPayNetworkResponse> {
-		try {
-			const endPoint = `${this.baseEndpoint}/${refundId}`;
-			const response = await this.networkHandler.get(endPoint);
+	): Promise<ServiceResult<PawaPayTypes.RefundTransaction>> {
+		logger.info("PawaPay: Getting refund status", { refundId });
 
-			logger.info("Refund details retrieved successfully:", response);
-			return response as PawaPayTypes.RefundTransaction;
-		} catch (error: unknown) {
-			logger.error("Get refund status failed:", error);
-			return this.networkHandler.handleApiError(error, "getRefundStatus");
-		}
+		return wrapServiceCall(
+			() =>
+				this.networkHandler.get<PawaPayTypes.RefundTransaction>(
+					`${this.baseEndpoint}/${refundId}`,
+					"getting refund status",
+				),
+			this.networkHandler.handleApiError.bind(this.networkHandler),
+			"getting refund status",
+		);
 	}
 }

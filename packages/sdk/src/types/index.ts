@@ -1,8 +1,10 @@
-export interface PawaPayNetworkResponse {
+export interface ServiceError {
 	errorMessage: string;
 	statusCode: number;
 	errorObject: string;
 }
+
+export type PawaPayNetworkResponse = ServiceError;
 
 /**
  * Response type for network errors

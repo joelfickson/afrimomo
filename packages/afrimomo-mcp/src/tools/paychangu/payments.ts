@@ -81,7 +81,7 @@ export function registerPayChanguTools(
     },
     async (args) => {
       const { tx_ref } = args as unknown as PayChanguToolArgs.VerifyTransaction;
-      return await paychangu.verifyTransactionDirect(tx_ref);
+      return await paychangu.verifyTransaction(tx_ref);
     }
   );
 

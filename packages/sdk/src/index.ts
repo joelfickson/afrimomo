@@ -64,6 +64,7 @@ export type { EnvConfig, EnvLoadOptions } from "./config/env";
 
 // Export shared types
 export type {
+	ServiceError,
 	NetworkResponse,
 	MoMoCurrency,
 	Correspondent,
@@ -94,3 +95,16 @@ export {
 	createOnekhusaClient,
 } from "./utils/providerClients";
 export type { OneKhusaTokenProvider } from "./utils/providerClients";
+export {
+	wrapServiceCall,
+	isServiceError,
+	type ServiceResult,
+} from "./utils/serviceWrapper";
+export { buildQueryString, appendQueryString } from "./utils/queryBuilder";
+export { PaymentProviderAdapter } from "./services/generic/paymentProvider";
+export type {
+	GenericTransaction,
+	GenericPaymentRequest,
+	GenericPaymentResponse,
+	PaymentProviderConfig,
+} from "./services/generic/paymentProvider";
