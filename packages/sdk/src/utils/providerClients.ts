@@ -16,8 +16,12 @@ const PROVIDER_URLS = {
 		sandbox: "https://api.paychangu.com",
 	},
 	onekhusa: {
-		production: "https://api.onekhusa.com/v1",
+		production: "https://api.onekhusa.com/live/v1",
 		sandbox: "https://api.onekhusa.com/sandbox/v1",
+		tokenUrl: {
+			production: "https://api.onekhusa.com/live/oauth/token",
+			sandbox: "https://api.onekhusa.com/sandbox/oauth/token",
+		},
 	},
 } as const;
 
@@ -76,6 +80,21 @@ export function createPaychanguClient(
 export interface OneKhusaTokenProvider {
 	getToken(): Promise<string>;
 	clearToken(): void;
+}
+
+export function getOneKhusaTokenUrl(
+	environment: Environment,
+	customSandboxUrl?: string,
+	customProductionUrl?: string,
+): string {
+	if (environment === "PRODUCTION") {
+		return customProductionUrl
+			? `${customProductionUrl}/oauth/token`
+			: PROVIDER_URLS.onekhusa.tokenUrl.production;
+	}
+	return customSandboxUrl
+		? `${customSandboxUrl}/oauth/token`
+		: PROVIDER_URLS.onekhusa.tokenUrl.sandbox;
 }
 
 export function createOnekhusaClient(

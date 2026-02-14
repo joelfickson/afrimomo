@@ -1,5 +1,6 @@
 import axios from "axios";
 import { logger } from "../../utils/logger";
+import { getOneKhusaTokenUrl } from "../../utils/providerClients";
 import type { CachedToken, TokenResponse } from "./types/auth";
 import type { OneKhusaEnvironment } from "./types/common";
 
@@ -17,16 +18,7 @@ export class OneKhusaTokenManager {
 		sandboxUrl?: string,
 		productionUrl?: string,
 	) {
-		// For token URL, if custom URL is provided, append /oauth/token
-		if (environment === "PRODUCTION") {
-			this.tokenUrl = productionUrl
-				? `${productionUrl}/oauth/token`
-				: "https://api.onekhusa.com/oauth/token";
-		} else {
-			this.tokenUrl = sandboxUrl
-				? `${sandboxUrl}/oauth/token`
-				: "https://sandbox.api.onekhusa.com/oauth/token";
-		}
+		this.tokenUrl = getOneKhusaTokenUrl(environment, sandboxUrl, productionUrl);
 	}
 
 	async getToken(): Promise<string> {
