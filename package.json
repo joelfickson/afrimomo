@@ -20,8 +20,23 @@
     "publish:release": "pnpm build && changeset publish --tag latest"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.1",
-    "@biomejs/biome": "1.5.3",
-    "conventional-changelog-cli": "^4.1.0"
+    "@biomejs/biome": "2.3.15",
+    "@changesets/cli": "^2.29.8",
+    "conventional-changelog-cli": "^5.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@conventional-changelog/git-client": ">=2.0.0",
+      "axios": ">=1.7.9",
+      "form-data": ">=4.0.1",
+      "glob": ">=11.0.0",
+      "qs": ">=6.13.1",
+      "js-yaml": ">=4.1.0",
+      "diff": ">=7.0.0",
+      "tmp": ">=0.2.3",
+      "on-headers": ">=1.0.3",
+      "brace-expansion": ">=2.0.1",
+      "@modelcontextprotocol/sdk": ">=1.0.7"
+    }
   }
 }
