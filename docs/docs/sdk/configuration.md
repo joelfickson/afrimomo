@@ -67,6 +67,48 @@ const sdk = AfromomoSDK.initialize({
 });
 ```
 
+## Custom API URLs
+
+Override the default provider API URLs with custom endpoints. This is useful for:
+- Testing with mock servers
+- Using proxy servers
+- Connecting to self-hosted or regional endpoints
+
+```typescript
+import { AfromomoSDK, ENVIRONMENTS } from "afrimomo-sdk";
+
+const sdk = AfromomoSDK.initialize({
+  pawapay: {
+    jwt: "your-jwt-token",
+    environment: ENVIRONMENTS.DEVELOPMENT,
+    sandboxUrl: "https://custom-sandbox.pawapay.io/v1",
+    productionUrl: "https://custom-prod.pawapay.io/v1"
+  },
+  paychangu: {
+    secretKey: "your-secret-key",
+    environment: ENVIRONMENTS.PRODUCTION,
+    sandboxUrl: "https://custom-sandbox.paychangu.com",
+    productionUrl: "https://custom-prod.paychangu.com"
+  },
+  onekhusa: {
+    apiKey: "your-api-key",
+    apiSecret: "your-api-secret",
+    organisationId: "your-organisation-id",
+    environment: ENVIRONMENTS.DEVELOPMENT,
+    sandboxUrl: "https://custom-sandbox.onekhusa.com/v1",
+    productionUrl: "https://custom-prod.onekhusa.com/v1"
+  }
+});
+```
+
+:::tip
+Both `sandboxUrl` and `productionUrl` are optional. If not provided, the SDK uses the default provider URLs. The URL used depends on the `environment` setting.
+:::
+
+:::note OneKhusa OAuth
+For OneKhusa, the SDK automatically appends `/oauth/token` to custom URLs for authentication endpoints.
+:::
+
 ## Selective Provider Configuration
 
 Only configure the providers you need:

@@ -23,17 +23,23 @@ export class OneKhusa {
 		apiSecret: string,
 		organisationId: string,
 		environment: OneKhusaEnvironment = "DEVELOPMENT",
+		sandboxUrl?: string,
+		productionUrl?: string,
 	) {
 		this.environment = environment;
 		this.tokenManager = new OneKhusaTokenManager(
 			apiKey,
 			apiSecret,
 			environment,
+			sandboxUrl,
+			productionUrl,
 		);
 		this.network = createOnekhusaClient(
 			this.tokenManager,
 			organisationId,
 			environment,
+			sandboxUrl,
+			productionUrl,
 		);
 		this._collections = new OneKhusaCollections(this.network);
 		this._disbursements = new OneKhusaDisbursements(this.network);

@@ -14,11 +14,19 @@ export class OneKhusaTokenManager {
 		private readonly apiKey: string,
 		private readonly apiSecret: string,
 		environment: OneKhusaEnvironment = "DEVELOPMENT",
+		sandboxUrl?: string,
+		productionUrl?: string,
 	) {
-		this.tokenUrl =
-			environment === "PRODUCTION"
-				? "https://api.onekhusa.com/oauth/token"
+		// For token URL, if custom URL is provided, append /oauth/token
+		if (environment === "PRODUCTION") {
+			this.tokenUrl = productionUrl
+				? `${productionUrl}/oauth/token`
+				: "https://api.onekhusa.com/oauth/token";
+		} else {
+			this.tokenUrl = sandboxUrl
+				? `${sandboxUrl}/oauth/token`
 				: "https://sandbox.api.onekhusa.com/oauth/token";
+		}
 	}
 
 	async getToken(): Promise<string> {
