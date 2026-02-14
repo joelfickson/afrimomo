@@ -17,25 +17,30 @@ const PROVIDER_URLS = {
 	},
 	onekhusa: {
 		production: "https://api.onekhusa.com/v1",
-		sandbox: "https://sandbox.api.onekhusa.com/v1",
+		sandbox: "https://api.onekhusa.com/sandbox/v1",
 	},
 } as const;
 
 function getBaseUrl(
 	provider: keyof typeof PROVIDER_URLS,
 	environment: Environment,
+	customSandboxUrl?: string,
+	customProductionUrl?: string,
 ): string {
-	return environment === "PRODUCTION"
-		? PROVIDER_URLS[provider].production
-		: PROVIDER_URLS[provider].sandbox;
+	if (environment === "PRODUCTION") {
+		return customProductionUrl || PROVIDER_URLS[provider].production;
+	}
+	return customSandboxUrl || PROVIDER_URLS[provider].sandbox;
 }
 
 export function createPawapayClient(
 	jwt: string,
 	environment: Environment = "DEVELOPMENT",
+	sandboxUrl?: string,
+	productionUrl?: string,
 ): HttpClient {
 	const config: HttpClientConfig = {
-		baseUrl: getBaseUrl("pawapay", environment),
+		baseUrl: getBaseUrl("pawapay", environment, sandboxUrl, productionUrl),
 		serviceName: "PawaPay",
 		timeoutMs: 30000,
 	};
@@ -48,9 +53,14 @@ export function createPawapayClient(
 	return new HttpClient(config, auth);
 }
 
-export function createPaychanguClient(secretKey: string): HttpClient {
+export function createPaychanguClient(
+	secretKey: string,
+	environment: Environment = "DEVELOPMENT",
+	sandboxUrl?: string,
+	productionUrl?: string,
+): HttpClient {
 	const config: HttpClientConfig = {
-		baseUrl: PROVIDER_URLS.paychangu.production,
+		baseUrl: getBaseUrl("paychangu", environment, sandboxUrl, productionUrl),
 		serviceName: "PayChangu",
 		timeoutMs: 30000,
 	};
@@ -72,9 +82,11 @@ export function createOnekhusaClient(
 	tokenProvider: OneKhusaTokenProvider,
 	organisationId: string,
 	environment: Environment = "DEVELOPMENT",
+	sandboxUrl?: string,
+	productionUrl?: string,
 ): HttpClient {
 	const config: HttpClientConfig = {
-		baseUrl: getBaseUrl("onekhusa", environment),
+		baseUrl: getBaseUrl("onekhusa", environment, sandboxUrl, productionUrl),
 		serviceName: "OneKhusa",
 		timeoutMs: 30000,
 	};

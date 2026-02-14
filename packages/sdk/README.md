@@ -208,6 +208,33 @@ const sdk = new AfromomoSDK({
 });
 ```
 
+### Custom API URLs
+
+Override default provider endpoints for testing or regional deployments:
+
+```typescript
+const sdk = new AfromomoSDK({
+  pawapay: {
+    apiToken: "your-token",
+    environment: "sandbox",
+    sandboxUrl: "https://custom-sandbox.pawapay.io/v1",
+    productionUrl: "https://custom-prod.pawapay.io/v1"
+  },
+  paychangu: {
+    secretKey: "your-secret",
+    sandboxUrl: "https://custom.paychangu.com"
+  },
+  onekhusa: {
+    apiKey: "your-key",
+    apiSecret: "your-secret",
+    organisationId: "your-org-id",
+    sandboxUrl: "https://custom-sandbox.onekhusa.com/v1"
+  }
+});
+```
+
+Both `sandboxUrl` and `productionUrl` are optional. The URL used depends on the `environment` setting.
+
 ## Type Definitions
 
 All types are exported from the main package:

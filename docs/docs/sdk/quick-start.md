@@ -114,6 +114,22 @@ const disbursement = await sdk.onekhusa.disbursements.addSingle({
 console.log("Disbursement created:", disbursement.id);
 ```
 
+## Using Custom API URLs
+
+For testing or when working with custom endpoints:
+
+```typescript
+const sdk = AfromomoSDK.initialize({
+  pawapay: {
+    jwt: "your-pawapay-jwt",
+    environment: ENVIRONMENTS.DEVELOPMENT,
+    sandboxUrl: "https://test-api.pawapay.io/v1" // Custom test URL
+  }
+});
+```
+
+See the [Configuration](/docs/sdk/configuration#custom-api-urls) guide for more details on custom URLs.
+
 ## Next Steps
 
 - [Configuration](/docs/sdk/configuration) - Advanced configuration options

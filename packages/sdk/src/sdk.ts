@@ -30,6 +30,10 @@ export interface SDKConfig {
 		returnUrl?: string;
 		/** Optional environment setting (defaults to DEVELOPMENT) */
 		environment?: Environment;
+		/** Optional custom base URL for sandbox environment */
+		sandboxUrl?: string;
+		/** Optional custom base URL for production environment */
+		productionUrl?: string;
 	};
 
 	/**
@@ -40,6 +44,10 @@ export interface SDKConfig {
 		jwt: string;
 		/** Optional environment setting (defaults to DEVELOPMENT) */
 		environment?: Environment;
+		/** Optional custom base URL for sandbox environment */
+		sandboxUrl?: string;
+		/** Optional custom base URL for production environment */
+		productionUrl?: string;
 	};
 
 	/**
@@ -54,6 +62,10 @@ export interface SDKConfig {
 		organisationId: string;
 		/** Optional environment setting (defaults to DEVELOPMENT) */
 		environment?: Environment;
+		/** Optional custom base URL for sandbox environment */
+		sandboxUrl?: string;
+		/** Optional custom base URL for production environment */
+		productionUrl?: string;
 	};
 
 	/**
@@ -284,11 +296,21 @@ export class AfromomoSDK {
 	private initializeFromConfig(): void {
 		// Override with direct configuration if provided
 		if (this.config.paychangu?.secretKey) {
-			this._paychangu = new PayChangu(this.config.paychangu.secretKey);
+			this._paychangu = new PayChangu(
+				this.config.paychangu.secretKey,
+				this.config.paychangu.environment,
+				this.config.paychangu.sandboxUrl,
+				this.config.paychangu.productionUrl,
+			);
 		}
 
 		if (this.config.pawapay?.jwt) {
-			this._pawapay = new PawaPay(this.config.pawapay.jwt);
+			this._pawapay = new PawaPay(
+				this.config.pawapay.jwt,
+				this.config.pawapay.environment,
+				this.config.pawapay.sandboxUrl,
+				this.config.pawapay.productionUrl,
+			);
 		}
 
 		if (
@@ -301,6 +323,8 @@ export class AfromomoSDK {
 				this.config.onekhusa.apiSecret,
 				this.config.onekhusa.organisationId,
 				this.config.onekhusa.environment,
+				this.config.onekhusa.sandboxUrl,
+				this.config.onekhusa.productionUrl,
 			);
 		}
 	}

@@ -160,7 +160,7 @@ export class PaymentProviderAdapter {
 				? this.config.responseTransformer<{
 						balance: string;
 						currency: string;
-				  }>(response)
+					}>(response)
 				: (response as { balance: string; currency: string });
 		} catch (error) {
 			logger.error(`${this.config.name}: Failed to get balance`, error);

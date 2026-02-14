@@ -20,8 +20,18 @@ export class PawaPay {
 	private readonly _refunds: PawapayRefunds;
 	private readonly _wallets: PawapayWallets;
 
-	constructor(jwt: string, environment: Environment = "DEVELOPMENT") {
-		this.network = createPawapayClient(jwt, environment);
+	constructor(
+		jwt: string,
+		environment: Environment = "DEVELOPMENT",
+		sandboxUrl?: string,
+		productionUrl?: string,
+	) {
+		this.network = createPawapayClient(
+			jwt,
+			environment,
+			sandboxUrl,
+			productionUrl,
+		);
 		this._deposits = new PawapayDeposits(this.network);
 		this._payments = new PawapayPayments(this.network);
 		this._payouts = new PawapayPayouts(this.network);

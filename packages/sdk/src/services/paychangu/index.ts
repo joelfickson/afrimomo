@@ -12,6 +12,7 @@ import { BaseService } from "../../utils/baseService";
 import { logger } from "../../utils/logger";
 import { createPaychanguClient } from "../../utils/providerClients";
 import { HttpClient } from "../../utils/httpClient";
+import type { Environment } from "../../config/constants";
 import type { PayChanguAccountInfo } from "./types/account";
 import { PayChangu as PayChanguTypes } from "./types";
 import type {
@@ -68,10 +69,23 @@ export class PayChangu extends BaseService {
 	 * Creates a new instance of the PayChangu service
 	 *
 	 * @param secretKey - The API secret key for authentication with PayChangu
+	 * @param environment - Optional environment setting (defaults to DEVELOPMENT)
+	 * @param sandboxUrl - Optional custom base URL for sandbox environment
+	 * @param productionUrl - Optional custom base URL for production environment
 	 */
-	constructor(secretKey: string) {
+	constructor(
+		secretKey: string,
+		environment: Environment = "DEVELOPMENT",
+		sandboxUrl?: string,
+		productionUrl?: string,
+	) {
 		super();
-		this.network = createPaychanguClient(secretKey);
+		this.network = createPaychanguClient(
+			secretKey,
+			environment,
+			sandboxUrl,
+			productionUrl,
+		);
 	}
 
 	private handleApiError(
