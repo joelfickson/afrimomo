@@ -1,3 +1,13 @@
+## [0.3.1](https://github.com/joelfickson/afrimomo/compare/v0.3.0...v0.3.1) (2026-02-14)
+
+
+### Bug Fixes
+
+* resolve 17 security vulnerabilities via dependency updates ([7d73059](https://github.com/joelfickson/afrimomo/commit/7d73059a0ccbfa602bbbfe8399ba4cf156ce1667))
+* resolve 17 security vulnerabilities via dependency updates ([2130b7f](https://github.com/joelfickson/afrimomo/commit/2130b7f9a886d573ca8dee64005bfaff4765b1ba))
+
+
+
 # [0.3.0](https://github.com/joelfickson/afrimomo/compare/v0.0.1-beta.13...v0.3.0) (2026-02-02)
 
 
