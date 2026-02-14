@@ -6,7 +6,7 @@ description: A unified TypeScript SDK for African payment providers
 
 # Afrimomo SDK
 
-<span className="version-badge">v0.3.1</span>
+<span className="version-badge">v0.3.2</span>
 
 A unified TypeScript SDK for seamless integration with African payment providers. Type-safe, reliable, and built for production.
 
